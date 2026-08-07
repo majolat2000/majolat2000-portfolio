@@ -145,7 +145,7 @@ export function Hero() {
               >
                 <Download className="h-4 w-4" />
                 Resume
-                <span className="rounded-full bg-indigo-100/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">
+                <span className="rounded-full bg-amber-100/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
                   Soon
                 </span>
               </span>
