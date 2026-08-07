@@ -1,0 +1,167 @@
+import {
+  Award,
+  BrainCircuit,
+  Download,
+  Linkedin,
+  Mail,
+  Palette,
+  Phone,
+  Target,
+} from "lucide-react";
+import { portfolio } from "@/lib/portfolio";
+import { Reveal } from "./Reveal";
+import { Section } from "./Section";
+
+const traitIcons = [Target, Palette, BrainCircuit, Download];
+
+export function About() {
+  return (
+    <Section
+      id="about"
+      eyebrow="About me"
+      title={
+        <>
+          Curious, structured, and{" "}
+          <span className="text-gradient italic">a little creative</span>
+        </>
+      }
+      description="The story behind the pixels — who I am, how I think, and what drives me."
+    >
+      <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14">
+        {/* Story */}
+        <Reveal>
+          <div className="glass relative overflow-hidden rounded-3xl p-8 sm:p-10">
+            <div className="absolute -right-14 -top-14 h-40 w-40 rounded-full bg-sky-200/50 blur-2xl" />
+            <div className="relative">
+              <p className="text-lg leading-relaxed text-foreground/85 sm:text-xl">
+                {portfolio.about}
+              </p>
+              <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                {portfolio.traits.map((trait, i) => {
+                  const Icon = traitIcons[i % traitIcons.length];
+                  return (
+                    <div
+                      key={trait.label}
+                      className="glass-chip flex items-start gap-3 rounded-2xl p-4"
+                    >
+                      <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white/80 text-primary shadow-sm">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <div>
+                        <p className="text-sm font-bold text-foreground">
+                          {trait.label}
+                        </p>
+                        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                          {trait.description}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </Reveal>
+
+        {/* Quick facts */}
+        <Reveal delay={0.12}>
+          <div className="glass-deep rounded-3xl p-8 sm:p-10">
+            <h3 className="font-display text-xl font-semibold text-foreground">
+              Quick facts
+            </h3>
+            <ul className="mt-6 space-y-5">
+              <li className="flex items-start justify-between gap-4 border-b border-indigo-100/70 pb-4">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Name
+                </span>
+                <span className="text-right text-sm font-semibold text-foreground">
+                  {portfolio.name}
+                </span>
+              </li>
+              <li className="flex items-start justify-between gap-4 border-b border-indigo-100/70 pb-4">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Focus
+                </span>
+                <span className="text-right text-sm font-semibold text-foreground">
+                  {portfolio.roles.join(" · ")}
+                </span>
+              </li>
+              <li className="flex items-start justify-between gap-4 border-b border-indigo-100/70 pb-4">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Email
+                </span>
+                <a
+                  href={`mailto:${portfolio.email}`}
+                  className="break-all text-right text-sm font-semibold text-primary transition-colors hover:text-primary/75"
+                >
+                  {portfolio.email}
+                </a>
+              </li>
+              <li className="flex items-start justify-between gap-4 border-b border-indigo-100/70 pb-4">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Phone
+                </span>
+                <a
+                  href={`tel:${portfolio.phoneTel}`}
+                  className="text-right text-sm font-semibold text-primary transition-colors hover:text-primary/75"
+                >
+                  {portfolio.phoneDisplay}
+                </a>
+              </li>
+              <li className="flex items-start justify-between gap-4 border-b border-indigo-100/70 pb-4">
+                <span className="text-sm font-medium text-muted-foreground">
+                  LinkedIn
+                </span>
+                <a
+                  href={portfolio.linkedinUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-right text-sm font-semibold text-primary transition-colors hover:text-primary/75"
+                >
+                  {portfolio.linkedinHandle}
+                </a>
+              </li>
+              <li className="flex items-start justify-between gap-4">
+                <span className="text-sm font-medium text-muted-foreground">
+                  Resume
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-100/80 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-primary">
+                  Coming soon
+                </span>
+              </li>
+            </ul>
+            <div className="mt-8 flex flex-wrap gap-2.5">
+              <a
+                href={`mailto:${portfolio.email}`}
+                className="glass-chip inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-foreground/80 transition-all hover:-translate-y-0.5 hover:text-foreground hover:shadow-lg"
+              >
+                <Mail className="h-3.5 w-3.5 text-primary" />
+                Email me
+              </a>
+              <a
+                href={`tel:${portfolio.phoneTel}`}
+                className="glass-chip inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-foreground/80 transition-all hover:-translate-y-0.5 hover:text-foreground hover:shadow-lg"
+              >
+                <Phone className="h-3.5 w-3.5 text-primary" />
+                Call me
+              </a>
+              <a
+                href={portfolio.linkedinUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="glass-chip inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-foreground/80 transition-all hover:-translate-y-0.5 hover:text-foreground hover:shadow-lg"
+              >
+                <Linkedin className="h-3.5 w-3.5 text-primary" />
+                LinkedIn
+              </a>
+              <span className="glass-chip inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-foreground/55">
+                <Award className="h-3.5 w-3.5" />
+                Resume link soon
+              </span>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </Section>
+  );
+}
