@@ -9,8 +9,12 @@ export function Footer() {
       <div className="mx-auto w-full max-w-6xl px-6 py-12 lg:px-8">
         <div className="flex flex-col items-start justify-between gap-10 md:flex-row md:items-center">
           <div className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-400 font-display text-base font-semibold text-white shadow-md shadow-indigo-500/25">
-              {portfolio.initials}
+            <span className="grid h-11 w-11 place-items-center overflow-hidden rounded-xl bg-white/70 shadow-md shadow-indigo-500/25 ring-1 ring-white/80">
+              <img
+                src={portfolio.photo}
+                alt={portfolio.name}
+                className="h-full w-full object-cover"
+              />
             </span>
             <div>
               <p className="font-display text-base font-semibold text-foreground">
