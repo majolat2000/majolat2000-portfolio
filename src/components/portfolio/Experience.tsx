@@ -47,7 +47,7 @@ export function Experience() {
                     <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
                       {item.role}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200/70 bg-white/70 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-foreground/70">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200/70 bg-amber-50/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700">
                       <Clock className="h-3 w-3" />
                       {item.tag}
                     </span>

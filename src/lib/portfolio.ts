@@ -3,8 +3,18 @@
  *
  * To update later, just edit this one file:
  *  - resumeUrl:  paste the download link to your resume when it's ready.
- *  - projects / certificates / experience: fill the "coming soon" sections.
+ *  - catalog:    add real certificates, internships and volunteering
+ *                entries — they automatically appear in the searchable
+ *                Catalog section.
  */
+
+export interface CatalogItem {
+  id: string;
+  type: "certificate" | "experience" | "volunteering";
+  title: string;
+  description: string;
+  status: string;
+}
 
 export const portfolio = {
   name: "Majesty Olatimilehin",
@@ -31,7 +41,7 @@ export const portfolio = {
     { label: "About", href: "#about" },
     { label: "Skills", href: "#skills" },
     { label: "Experience", href: "#experience" },
-    { label: "Certificates", href: "#certificates" },
+    { label: "Catalog", href: "#catalog" },
     { label: "Contact", href: "#contact" },
   ],
 
@@ -93,10 +103,64 @@ export const portfolio = {
     },
   },
 
-  /** Coming-soon placeholders — fill these in as you collect your achievements. */
-  certificates: {
-    note: "This space is reserved — my certificates and achievements are on the way.",
-  },
+  /**
+   * The browsable, searchable catalog.
+   * Add real entries here as you earn them — they flow straight into the
+   * Catalog section with search and filters already wired up.
+   */
+  catalog: [
+    {
+      id: "academic-achievements",
+      type: "certificate",
+      title: "Academic achievements",
+      description:
+        "Certificates and course completions from my Computer Science journey — the first entries will land here soon.",
+      status: "Adding soon",
+    },
+    {
+      id: "professional-training",
+      type: "certificate",
+      title: "Professional skills training",
+      description:
+        "Credentials earned to sharpen my toolkit, from technical coursework to productivity and communication.",
+      status: "Adding soon",
+    },
+    {
+      id: "internships",
+      type: "experience",
+      title: "Internship experience",
+      description:
+        "Hands-on professional training in real-world settings, where I've put classroom ideas into practice.",
+      status: "Adding soon",
+    },
+    {
+      id: "community-work",
+      type: "volunteering",
+      title: "Volunteering & community work",
+      description:
+        "The causes I give my time to, and the contributions I've made along the way.",
+      status: "Adding soon",
+    },
+    {
+      id: "personal-projects",
+      type: "experience",
+      title: "Projects & experiments",
+      description:
+        "Ideas I've built for the love of learning — small experiments that became something bigger.",
+      status: "Coming soon",
+    },
+    {
+      id: "recognition",
+      type: "certificate",
+      title: "Awards & recognition",
+      description:
+        "Mentions, honours and moments I'm proud of — collected here as they happen.",
+      status: "Coming soon",
+    },
+  ] satisfies CatalogItem[],
+
+  catalogNote:
+    "Every certificate, role and cause I've collected so far — searchable, filterable, and growing every day.",
 };
 
 export type SkillGroup = (typeof portfolio.skills)[keyof typeof portfolio.skills];

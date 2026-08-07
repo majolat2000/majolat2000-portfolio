@@ -14,7 +14,7 @@ export function Footer() {
             </span>
             <div>
               <p className="font-display text-base font-semibold text-foreground">
-                {portfolio.name}
+                {portfolio.brand}
               </p>
               <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
                 {portfolio.roles.join(" · ")}
@@ -61,7 +61,7 @@ export function Footer() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-indigo-100/70 pt-6 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {year} {portfolio.name}. All rights reserved.
+            © {year} {portfolio.brand}. All rights reserved.
           </p>
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             Crafted with care — {portfolio.firstName}

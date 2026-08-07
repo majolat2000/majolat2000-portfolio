@@ -30,7 +30,7 @@ export function Navbar() {
           </span>
           <span className="hidden sm:block">
             <span className="block font-display text-[15px] font-semibold leading-none text-foreground">
-              {portfolio.name}
+              {portfolio.brand}
             </span>
             <span className="mt-1 block text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
               {portfolio.roles.join(" · ")}
