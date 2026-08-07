@@ -184,8 +184,12 @@ export function Hero() {
             <div className="absolute -bottom-20 -left-16 h-52 w-52 rounded-full bg-indigo-300/30 blur-2xl" />
 
             <div className="relative">
-              <div className="mx-auto grid h-28 w-28 place-items-center rounded-full bg-gradient-to-br from-indigo-500 via-indigo-400 to-sky-400 font-display text-4xl font-semibold text-white shadow-xl shadow-indigo-500/30 ring-4 ring-white/70">
-                {portfolio.initials}
+              <div className="group/avatar mx-auto h-28 w-28 overflow-hidden rounded-full bg-white/60 shadow-xl shadow-indigo-500/30 ring-4 ring-white/70 transition-transform duration-500 hover:scale-105">
+                <img
+                  src={portfolio.photo}
+                  alt={portfolio.name}
+                  className="h-full w-full object-cover"
+                />
               </div>
               <h3 className="mt-6 text-center font-display text-2xl font-semibold text-foreground">
                 {portfolio.name}

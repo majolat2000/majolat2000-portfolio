@@ -23,6 +23,9 @@ export const portfolio = {
   roles: ["Computer Scientist", "Virtual Assistant"],
   initials: "MO",
 
+  /** Profile photo — replace /majesty.jpg with your own image if you prefer. */
+  photo: "/majesty.jpg",
+
   tagline:
     "Turning ideas into practical digital solutions — blending the structure of computer science with a creative, artist's eye for detail.",
 

@@ -25,8 +25,12 @@ export function Navbar() {
         )}
       >
         <a href="#home" className="group flex items-center gap-3" onClick={close}>
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-400 font-display text-base font-semibold text-white shadow-md shadow-indigo-500/25 transition-transform duration-300 group-hover:scale-105">
-            {portfolio.initials}
+          <span className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-xl bg-white/70 shadow-md shadow-indigo-500/25 ring-1 ring-white/80 transition-transform duration-300 group-hover:scale-105">
+            <img
+              src={portfolio.photo}
+              alt={portfolio.name}
+              className="h-full w-full object-cover"
+            />
           </span>
           <span className="hidden sm:block">
             <span className="block font-display text-[15px] font-semibold leading-none text-foreground">
