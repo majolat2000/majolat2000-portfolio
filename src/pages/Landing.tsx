@@ -4,6 +4,7 @@ import { Hero } from "@/components/portfolio/Hero";
 import { About } from "@/components/portfolio/About";
 import { Skills } from "@/components/portfolio/Skills";
 import { Experience } from "@/components/portfolio/Experience";
+import { Education } from "@/components/portfolio/Education";
 import { Catalog } from "@/components/portfolio/Catalog";
 import { Contact } from "@/components/portfolio/Contact";
 import { Footer } from "@/components/portfolio/Footer";
@@ -18,6 +19,7 @@ export default function Landing() {
         <About />
         <Skills />
         <Experience />
+        <Education />
         <Catalog />
         <Contact />
       </main>

@@ -16,6 +16,33 @@ export interface CatalogItem {
   status: string;
 }
 
+export interface ExperienceItem {
+  id: string;
+  role: string;
+  company: string;
+  location?: string;
+  jobType?: string;
+  period: string;
+  skills?: string[];
+}
+
+export interface VolunteeringItem {
+  id: string;
+  role: string;
+  organization: string;
+  cause: string;
+  period: string;
+}
+
+export interface EducationItem {
+  id: string;
+  school: string;
+  degree: string;
+  period: string;
+  detail: string;
+  honors: string;
+}
+
 export const portfolio = {
   name: "Majesty Olatimilehin",
   firstName: "Majesty",
@@ -44,6 +71,7 @@ export const portfolio = {
     { label: "About", href: "#about" },
     { label: "Skills", href: "#skills" },
     { label: "Experience", href: "#experience" },
+    { label: "Education", href: "#education" },
     { label: "Catalog", href: "#catalog" },
     { label: "Contact", href: "#contact" },
   ],
@@ -133,16 +161,16 @@ export const portfolio = {
       type: "experience",
       title: "Internship experience",
       description:
-        "Hands-on professional training in real-world settings, where I've put classroom ideas into practice.",
-      status: "Adding soon",
+        "Internships in IT, AI engineering, social media and fintech — from Reeltech to FlyRank AI, Crawford University and Cowrywise.",
+      status: "In progress",
     },
     {
       id: "community-work",
       type: "volunteering",
       title: "Volunteering & community work",
       description:
-        "The causes I give my time to, and the contributions I've made along the way.",
-      status: "Adding soon",
+        "Giving my time to causes that matter — children's welfare with the Betty Ann Moore Foundation and economic empowerment with AdeOrin's Kitchen.",
+      status: "Completed",
     },
     {
       id: "personal-projects",
@@ -164,6 +192,94 @@ export const portfolio = {
 
   catalogNote:
     "Every certificate, role and cause I've collected so far — searchable, filterable, and growing every day.",
+
+  /** Professional roles & internships, most recent first. */
+  experience: [
+    {
+      id: "reeltech-it",
+      role: "Information Technology Intern",
+      company: "Reeltech Business Solutions Limited",
+      location: "Lagos, Nigeria",
+      jobType: "Hybrid",
+      period: "Jul 2026 – Present",
+      skills: ["ERP", "MRP", "Microsoft Dynamics 365 Business Central"],
+    },
+    {
+      id: "flyrank-ai",
+      role: "Front-end AI Engineering Intern",
+      company: "FlyRank AI",
+      jobType: "Remote",
+      period: "Jul 2026 – Present",
+    },
+    {
+      id: "crawford-smm",
+      role: "Social Media Management Intern",
+      company: "Crawford University",
+      location: "Ogun State, Nigeria",
+      jobType: "Hybrid",
+      period: "May 2026 – Present",
+      skills: [
+        "Social media management",
+        "Verification & validation (V&V)",
+        "Clear communication",
+      ],
+    },
+    {
+      id: "cowrywise-ambassador",
+      role: "Ambassador",
+      company: "Cowrywise",
+      location: "Lagos State, Nigeria",
+      jobType: "Hybrid",
+      period: "Dec 2025 – Present",
+      skills: ["Financial literacy", "FLT"],
+    },
+    {
+      id: "maka-content",
+      role: "Content Creator",
+      company: "MAKA",
+      location: "Lagos, Nigeria",
+      jobType: "Hybrid",
+      period: "Jan 2023 – Jun 2024",
+      skills: [
+        "Video editing",
+        "Paid content",
+        "Product marketing",
+        "Content marketing",
+        "Content creation",
+      ],
+    },
+  ] satisfies ExperienceItem[],
+
+  /** Volunteering & community work. */
+  volunteering: [
+    {
+      id: "betty-ann-moore",
+      role: "Social Media Specialist",
+      organization: "Betty Ann Moore Foundation",
+      cause: "Children",
+      period: "Mar 2026 – Jul 2026",
+    },
+    {
+      id: "adeorins-kitchen",
+      role: "Sales and Marketing Specialist",
+      organization: "AdeOrin's Kitchen",
+      cause: "Economic Empowerment",
+      period: "May 2026",
+    },
+  ] satisfies VolunteeringItem[],
+
+  /** Education. */
+  education: [
+    {
+      id: "crawford-university",
+      school: "Crawford University",
+      degree: "BSc Computer Science",
+      period: "Oct 2024 – Sep 2028",
+      detail:
+        "Full-time undergraduate degree with an expected graduation in September 2028.",
+      honors: "First Class",
+    },
+  ] satisfies EducationItem[],
 };
 
 export type SkillGroup = (typeof portfolio.skills)[keyof typeof portfolio.skills];
