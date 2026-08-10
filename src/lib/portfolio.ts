@@ -66,8 +66,14 @@ export const portfolio = {
   roles: ["Computer Scientist", "Virtual Assistant"],
   initials: "MO",
 
-  /** Profile photo — replace /majesty.jpg with your own image if you prefer. */
+  /** Full-size profile photo. */
   photo: "/majesty.jpg",
+
+  /**
+   * Cropped, face-focused square avatar used for circular logos and profile
+   * pictures. Pre-cropped so it always fits a circle perfectly.
+   */
+  avatar: "/majesty-avatar.jpg",
 
   tagline:
     "Turning ideas into practical digital solutions — blending the structure of computer science with a creative, artist's eye for detail.",
