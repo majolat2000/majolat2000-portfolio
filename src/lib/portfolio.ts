@@ -43,6 +43,22 @@ export interface EducationItem {
   honors: string;
 }
 
+export interface CertificateItem {
+  id: string;
+  title: string;
+  issuer?: string;
+  date?: string;
+  description: string;
+  status: string;
+}
+
+export interface AchievementItem {
+  id: string;
+  title: string;
+  description: string;
+  meta?: string;
+}
+
 export const portfolio = {
   name: "Majesty Olatimilehin",
   firstName: "Majesty",
@@ -281,6 +297,56 @@ export const portfolio = {
       honors: "First Class",
     },
   ] satisfies EducationItem[],
+
+  /**
+   * Certificates — add real ones here and they automatically appear on the
+   * Certificates & Achievements page (/credentials).
+   */
+  certificates: [
+    {
+      id: "academic-certificates",
+      title: "Academic achievements",
+      issuer: "Crawford University",
+      date: "2024 – 2028",
+      description:
+        "Course completions and academic milestones from my Computer Science journey — transcripts, workshops and more.",
+      status: "Adding soon",
+    },
+    {
+      id: "professional-certificates",
+      title: "Professional skills training",
+      issuer: "Courses & workshops",
+      date: "Ongoing",
+      description:
+        "Credentials earned to sharpen my toolkit — technical coursework, productivity, communication and more.",
+      status: "Adding soon",
+    },
+  ] satisfies CertificateItem[],
+
+  /** Achievements & honours — milestones worth celebrating. */
+  achievements: [
+    {
+      id: "first-class",
+      title: "First Class academic standing",
+      description:
+        "Currently holding a First Class standing in my BSc Computer Science degree at Crawford University.",
+      meta: "Oct 2024 – Sep 2028",
+    },
+    {
+      id: "parallel-roles",
+      title: "Five roles running in parallel",
+      description:
+        "Balancing IT, front-end AI engineering, social media, fintech ambassadorship and content creation — across Reeltech, FlyRank AI, Crawford University, Cowrywise and MAKA.",
+      meta: "Since 2023",
+    },
+    {
+      id: "community-impact",
+      title: "Giving back through volunteering",
+      description:
+        "Social media support for children's welfare with the Betty Ann Moore Foundation, plus sales & marketing for economic empowerment at AdeOrin's Kitchen.",
+      meta: "2025 – 2026",
+    },
+  ] satisfies AchievementItem[],
 };
 
 export type SkillGroup = (typeof portfolio.skills)[keyof typeof portfolio.skills];
