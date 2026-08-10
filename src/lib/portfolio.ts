@@ -80,9 +80,8 @@ export const portfolio = {
   linkedinUrl: "https://www.linkedin.com/in/majesty-olatimilehin",
   linkedinHandle: "majesty-olatimilehin",
 
-  /** Resume — exports the Google Doc as a PDF download. */
-  resumeUrl:
-    "https://docs.google.com/document/d/1pXHt8mSOz6YBjgafrG-TPbIh-gEJ-S34/export?format=pdf",
+  /** Resume — viewers open the Google Doc directly. */
+  resumeUrl: "https://docs.google.com/document/d/1pXHt8mSOz6YBjgafrG-TPbIh-gEJ-S34/",
 
   nav: [
     { label: "About", href: "#about" },

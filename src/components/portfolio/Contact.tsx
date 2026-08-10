@@ -100,11 +100,12 @@ export function Contact() {
               </a>
               <a
                 href={portfolio.resumeUrl}
-                download
+                target="_blank"
+                rel="noopener noreferrer"
                 className="glass inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-foreground transition-all hover:-translate-y-0.5 hover:shadow-xl"
               >
                 <Download className="h-4 w-4 text-primary" />
-                Download resume
+                View resume
               </a>
             </div>
 
