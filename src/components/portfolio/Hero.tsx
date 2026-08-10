@@ -131,8 +131,7 @@ export function Hero() {
             {portfolio.resumeUrl ? (
               <a
                 href={portfolio.resumeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                download
                 className="glass-chip inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-foreground/80 transition-all hover:-translate-y-0.5 hover:text-foreground hover:shadow-lg"
               >
                 <Download className="h-4 w-4 text-primary" />
