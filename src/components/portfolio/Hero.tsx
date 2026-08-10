@@ -186,7 +186,7 @@ export function Hero() {
             <div className="relative">
               <div className="group/avatar mx-auto h-28 w-28 overflow-hidden rounded-full bg-white/60 shadow-xl shadow-indigo-500/30 ring-4 ring-white/70 transition-transform duration-500 hover:scale-105">
                 <img
-                  src={portfolio.photo}
+                  src={portfolio.avatar}
                   alt={portfolio.name}
                   className="h-full w-full object-cover"
                 />

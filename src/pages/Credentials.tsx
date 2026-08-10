@@ -35,9 +35,9 @@ function Header() {
     <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6">
       <nav className="glass mx-auto flex max-w-6xl items-center justify-between gap-4 rounded-2xl px-4 py-3 shadow-lg shadow-indigo-500/10 sm:px-5">
         <Link to="/" className="group flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-xl bg-white/70 shadow-md shadow-indigo-500/25 ring-1 ring-white/80 transition-transform duration-300 group-hover:scale-105">
+          <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-white/70 shadow-md shadow-indigo-500/25 ring-1 ring-white/80 transition-transform duration-300 group-hover:scale-105">
             <img
-              src={portfolio.photo}
+              src={portfolio.avatar}
               alt={portfolio.name}
               className="h-full w-full object-cover"
             />

@@ -35,11 +35,11 @@ export function LogoDropdown() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-10 w-10">
           <img
-            src={portfolio.photo}
+            src={portfolio.avatar}
             alt={portfolio.name}
             width={32}
             height={32}
-            className="h-full w-full rounded-lg object-cover"
+            className="h-full w-full rounded-full object-cover"
           />
         </Button>
       </DropdownMenuTrigger>
