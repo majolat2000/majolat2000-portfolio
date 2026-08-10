@@ -1,5 +1,6 @@
 import {
   ArrowUpRight,
+  Download,
   Linkedin,
   Mail,
   Phone,
@@ -97,10 +98,18 @@ export function Contact() {
                 <Linkedin className="h-4 w-4 text-primary" />
                 Connect on LinkedIn
               </a>
+              <a
+                href={portfolio.resumeUrl}
+                download
+                className="glass inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-foreground transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              >
+                <Download className="h-4 w-4 text-primary" />
+                Download resume
+              </a>
             </div>
 
             <p className="mt-8 text-xs text-muted-foreground">
-              Resume download link coming soon.
+              Prefer email? I usually reply within a day.
             </p>
           </div>
         </div>
