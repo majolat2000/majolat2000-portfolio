@@ -1,5 +1,5 @@
 import {
-  Award,
+  ArrowUpRight,
   BrainCircuit,
   Download,
   Linkedin,
@@ -125,9 +125,15 @@ export function About() {
                 <span className="text-sm font-medium text-muted-foreground">
                   Resume
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100/90 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700">
-                  Coming soon
-                </span>
+                <a
+                  href={portfolio.resumeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-right text-sm font-semibold text-primary transition-colors hover:text-primary/75"
+                >
+                  View resume
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </a>
               </li>
             </ul>
             <div className="mt-8 flex flex-wrap gap-2.5">
@@ -154,10 +160,15 @@ export function About() {
                 <Linkedin className="h-3.5 w-3.5 text-primary" />
                 LinkedIn
               </a>
-              <span className="inline-flex items-center gap-2 rounded-full bg-amber-100/90 px-4 py-2 text-xs font-semibold text-amber-700">
-                <Award className="h-3.5 w-3.5" />
-                Resume link soon
-              </span>
+              <a
+                href={portfolio.resumeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="glass-chip inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-foreground/80 transition-all hover:-translate-y-0.5 hover:text-foreground hover:shadow-lg"
+              >
+                <ArrowUpRight className="h-3.5 w-3.5 text-primary" />
+                Resume
+              </a>
             </div>
           </div>
         </Reveal>
