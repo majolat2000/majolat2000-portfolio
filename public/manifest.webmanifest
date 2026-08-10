@@ -1,17 +1,17 @@
 {
-  "name": "freebuff.com application",
-  "short_name": "freebuff.com",
-  "description": "freebuff.com application",
+  "name": "Majesty's Portfolio",
+  "short_name": "Majesty",
+  "description": "Majesty Olatimilehin — Computer Scientist & Virtual Assistant. Turning ideas into practical digital solutions.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "background_color": "#f6f8ff",
+  "theme_color": "#f6f8ff",
   "icons": [
     {
-      "src": "/logo.png",
+      "src": "/majesty.jpg",
       "sizes": "any",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/jpeg",
+      "purpose": "any"
     }
   ]
 }

@@ -1,5 +1,6 @@
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, Award, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 import { portfolio } from "@/lib/portfolio";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +53,13 @@ export function Navbar() {
               {item.label}
             </a>
           ))}
+          <Link
+            to="/credentials"
+            className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-white/70"
+          >
+            <Award className="h-4 w-4" />
+            Certificates
+          </Link>
         </div>
 
         <div className="flex items-center gap-2">
@@ -87,6 +95,14 @@ export function Navbar() {
                 {item.label}
               </a>
             ))}
+            <Link
+              to="/credentials"
+              onClick={close}
+              className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-white/70"
+            >
+              <Award className="h-4 w-4" />
+              Certificates &amp; achievements
+            </Link>
             <a
               href={`mailto:${portfolio.email}`}
               onClick={close}

@@ -1,4 +1,5 @@
 import {
+  ArrowUpRight,
   Award,
   Briefcase,
   HeartHandshake,
@@ -8,6 +9,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Link } from "react-router";
 import { portfolio, type CatalogItem } from "@/lib/portfolio";
 import { cn } from "@/lib/utils";
 import { Reveal } from "./Reveal";
@@ -195,7 +197,20 @@ export function Catalog() {
       )}
 
       <Reveal delay={0.15}>
-        <p className="mt-10 text-center text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        <div className="mt-12 flex justify-center">
+          <Link
+            to="/credentials"
+            className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-sky-400 px-7 py-3.5 text-sm font-semibold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
+          >
+            <Award className="h-4 w-4" />
+            View all certificates &amp; achievements
+            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </Link>
+        </div>
+      </Reveal>
+
+      <Reveal delay={0.2}>
+        <p className="mt-8 text-center text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
           {filtered.length} {filtered.length === 1 ? "item" : "items"} in the
           catalog
         </p>
