@@ -2,8 +2,6 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft,
   ArrowUpRight,
-  Award,
-  BadgeCheck,
   BookOpenCheck,
   CalendarDays,
   GraduationCap,
@@ -13,15 +11,11 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 import { Background } from "@/components/portfolio/Background";
+import { CertificateSlideshow } from "@/components/portfolio/CertificateSlideshow";
 import { Footer } from "@/components/portfolio/Footer";
 import { Reveal } from "@/components/portfolio/Reveal";
 import { Section } from "@/components/portfolio/Section";
-import {
-  portfolio,
-  type AchievementItem,
-  type CertificateItem,
-} from "@/lib/portfolio";
-import { cn } from "@/lib/utils";
+import { portfolio, type AchievementItem } from "@/lib/portfolio";
 
 const NAV_LINKS = [
   { label: "About", href: "/#about" },
@@ -136,52 +130,6 @@ function Hero() {
   );
 }
 
-function CertificateCard({ item, index }: { item: CertificateItem; index: number }) {
-  const ready = item.status.toLowerCase() === "verified";
-  return (
-    <Reveal delay={Math.min(index, 3) * 0.07} className="h-full">
-      <div className="glass group relative h-full overflow-hidden rounded-3xl p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10">
-        <div className="absolute -right-10 -top-10 h-28 w-28 rounded-full bg-indigo-200/30 blur-2xl" />
-        <div className="relative">
-          <div className="flex items-start justify-between gap-3">
-            <span className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-400 text-white shadow-md transition-transform duration-300 group-hover:scale-110">
-              <Award className="h-5 w-5" />
-            </span>
-            <span
-              className={cn(
-                "rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide",
-                ready
-                  ? "bg-emerald-100/80 text-emerald-700"
-                  : "bg-amber-100/80 text-amber-700",
-              )}
-            >
-              {item.status}
-            </span>
-          </div>
-          <h3 className="mt-5 font-display text-lg font-semibold text-foreground">
-            {item.title}
-          </h3>
-          {item.issuer && (
-            <p className="mt-1.5 flex items-center gap-1.5 text-sm font-medium text-primary">
-              <BadgeCheck className="h-4 w-4" />
-              {item.issuer}
-            </p>
-          )}
-          {item.date && (
-            <p className="mt-1 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-              <CalendarDays className="h-3.5 w-3.5" />
-              {item.date}
-            </p>
-          )}
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            {item.description}
-          </p>
-        </div>
-      </div>
-    </Reveal>
-  );
-}
-
 function CertificatesSection() {
   return (
     <Section
@@ -192,13 +140,9 @@ function CertificatesSection() {
           Proof of <span className="text-gradient italic">learning</span>
         </>
       }
-      description="Certificates and course completions I've earned — from academia to professional skills training."
+      description="Certificates and course completions I've earned — from academia to professional skills training. Swipe to browse, or let it play."
     >
-      <div className="grid gap-6 sm:grid-cols-2">
-        {portfolio.certificates.map((item, i) => (
-          <CertificateCard key={item.id} item={item} index={i} />
-        ))}
-      </div>
+      <CertificateSlideshow items={portfolio.certificates} />
     </Section>
   );
 }
