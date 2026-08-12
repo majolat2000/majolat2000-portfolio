@@ -687,6 +687,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQEAYL_4oMh7UQ/profile-treasury-image-shrink_1920_1920/B4EZ0MJYPMGwAc-/0/1774025279684?e=1787184000&v=beta&t=EIYyEmzvubOXGkY2lwMBm5ff26nuS9WPYanmyCU1HMU",
     },
+    {
+      id: "codesignal-oop-java",
+      title: "Object-Oriented Java",
+      issuer: "CodeSignal",
+      date: "April 2026",
+      description:
+        "A CodeSignal course on object-oriented programming in Java — classes, objects, encapsulation and the design patterns that structure real applications.",
+      skills: ["Java", "Object-Oriented Programming (OOP)"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/2169",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4E2DAQEtQK9fPEF_CA/profile-treasury-image-shrink_1920_1920/B4EZ1Pv7QcIQAc-/0/1775159458771?e=1787184000&v=beta&t=ecqi1csBJxEsrIxeY6sWMNBDCGvhOKR0gW7sxTcMK-c",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
