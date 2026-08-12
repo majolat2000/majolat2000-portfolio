@@ -596,6 +596,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQEkvXUzCXb1XQ/profile-treasury-image-shrink_1280_1280/B4EZwZxBIMJ8AY-/0/1769958807851?e=1787184000&v=beta&t=tD-OYrkAP2e27Ynl8-dBncTklWlAMI4lDlB90hduizY",
     },
+    {
+      id: "codesignal-intro-web-dev",
+      title: "Introduction to Web Development",
+      issuer: "CodeSignal",
+      date: "February 2026",
+      description:
+        "A CodeSignal introduction to web development — covering the full stack of front-end building blocks, from HTML, CSS and JavaScript to HTTP, APIs and JSON.",
+      skills: ["HTML", "CSS", "JavaScript", "HTTP", "API", "JSON"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/course-paths/324",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D562DAQFNIyUsAAH2ng/profile-treasury-image-shrink_1920_1920/B56ZwfE5SZJwAk-/0/1770047904296?e=1787184000&v=beta&t=6ljRz1HmwnfqgcgX-gYUldsN3Y12AJcY80qCuzMWSyg",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
