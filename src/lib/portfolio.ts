@@ -328,6 +328,27 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQFwIrWvve-bzA/profile-treasury-image-shrink_1280_1280/B4EZrpJMiOGoAQ-/0/1764848103333?e=1787184000&v=beta&t=9f5pF_FKIc3yDOeb7EVxFCDozZLwru5STGrM15rdkAs",
     },
+    {
+      id: "vsavvy-virtual-assistance",
+      title: "Virtual Assistance",
+      issuer: "VSavvy Academy",
+      date: "December 2025",
+      description:
+        "A practical virtual assistance programme covering the day-to-day skills needed to support clients remotely — from customer service and email marketing to social media management and data entry.",
+      skills: [
+        "Customer Service",
+        "Email Marketing",
+        "General Virtual Assistance",
+        "Social Media Management",
+        "Social Media Marketing",
+        "Data Entry",
+      ],
+      credentialId: "VSA-DEC25-C8R21",
+      credentialUrl: "https://vsavvyacademy.com/verify/?cert_id=VSA-DEC25-C8R21",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4E2DAQG4Vt1mSygWMQ/profile-treasury-image-shrink_1280_1280/B4EZr.Xeo7HgAQ-/0/1765204165296?e=1787184000&v=beta&t=2aIK1fGWU0mpnaLpKMLRqdcDUue7d3EWPm2SxWy2hp0",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
