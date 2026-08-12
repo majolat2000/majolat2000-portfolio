@@ -373,6 +373,20 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQEMCaEQzKbXLQ/profile-treasury-image-shrink_1280_1280/B4EZtC1tkYGUAQ-/0/1766352936633?e=1787184000&v=beta&t=UpdGFrRJu0ez1vEYrDw4c44NHQ_yGY2YHK1gC8irp1E",
     },
+    {
+      id: "google-gmail",
+      title: "Gmail",
+      issuer: "Google Cloud Training",
+      date: "January 2026",
+      description:
+        "Hands-on training in Gmail as part of Google Workspace — getting comfortable with the inbox tools that power everyday virtual assistance work.",
+      skills: ["Google Workspace"],
+      credentialId: "D9MV8TE18MX9",
+      credentialUrl: "https://www.coursera.org/account/accomplishments/records/D9MV8TE18MX9",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4E2DAQGF46UFc83qqA/profile-treasury-image-shrink_1280_1280/B4EZu4UnG_KAAQ-/0/1768323970965?e=1787184000&v=beta&t=ewId3iJQkmMdNvQe_hxLxtDJGvolZrblMyxtfAWa0LY",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
