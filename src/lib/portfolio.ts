@@ -570,6 +570,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQFy6euHOZP8vQ/profile-treasury-image-shrink_1280_1280/B4EZwL0x7VG0AQ-/0/1769724913103?e=1787184000&v=beta&t=uv2DzWpy40gxbmjQaiwmn2Hb6c_gjP8_Jjr8AsB5rgA",
     },
+    {
+      id: "codesignal-javascript",
+      title: "JavaScript: Making Web Pages Interactive",
+      issuer: "CodeSignal",
+      date: "January 2026",
+      description:
+        "A focused CodeSignal course on JavaScript — bringing web pages to life with interactivity, logic and dynamic content.",
+      skills: ["JavaScript"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1395",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4E2DAQEcMC6kpo-81Q/profile-treasury-image-shrink_1920_1920/B4EZwVdKYtH4Ac-/0/1769886493312?e=1787184000&v=beta&t=3kPrm8Of8SEN6viPGvls0QhFRWTTrG13x9PEEQyGeLE",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
