@@ -622,6 +622,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4D2DAQG6paFE8IVJcg/profile-treasury-image-shrink_1280_1280/B4DZxCiSXuHMAQ-/0/1770642811815?e=1787184000&v=beta&t=wOP_tnh7mqPZkbxlIOsX9QqbSdISVucN5XKQgoJnYYg",
     },
+    {
+      id: "codesignal-js-data-variables",
+      title: "JavaScript's Building Blocks: Data & Variables",
+      issuer: "CodeSignal",
+      date: "February 2026",
+      description:
+        "A CodeSignal course on JavaScript's core building blocks — working with data types, variables and the foundations of clean code.",
+      skills: ["JavaScript"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1465",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQFft8z3o8g07A/profile-treasury-image-shrink_1280_1280/B4DZxrGhsEJkAQ-/0/1771323400490?e=1787184000&v=beta&t=bFj2JXwHiqlb7FRolSNA_SwFh529Xz7FH0TR-RQICaM",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
