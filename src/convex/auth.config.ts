@@ -8,6 +8,11 @@ import type { AuthConfig } from "convex/server";
 const freebuffIssuer =
   process.env.VLY_CONVEX_AUTH_ISSUER ?? "https://freebuff.com";
 
+// The deployment's site URL, e.g. https://<deployment>.convex.site.
+// Read from the explicitly-set SITE_URL deployment env var (this is what
+// the Freebuff dev deployments configure) rather than the system-injected
+// CONVEX_SITE_URL, which is not reliably available during push-time
+// auth-config validation and can evaluate to "" on fresh deployments.
 export default {
   providers: [
     // Standard Convex Auth provider for this project's own sign-in ("Get
@@ -19,7 +24,7 @@ export default {
     // `kid` header, so sign-in would silently never confirm and RequireAuth
     // would loop back to /auth forever.
     {
-      domain: process.env.CONVEX_SITE_URL!,
+      domain: process.env.SITE_URL!,
       applicationID: "convex",
     },
     {
