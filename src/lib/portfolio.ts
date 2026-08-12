@@ -674,6 +674,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQG8nfN3_SH1xQ/profile-treasury-image-shrink_1280_1280/B4EZzPUir8GoAQ-/0/1773004795838?e=1787184000&v=beta&t=4AA_Dy1Alxk3TaMTmH1_in9fIo7XVbv68VD50T_Qw-4",
     },
+    {
+      id: "codesignal-java-fundamentals",
+      title: "Java Fundamentals",
+      issuer: "CodeSignal",
+      date: "March 2026",
+      description:
+        "A CodeSignal course on Java fundamentals — learning the syntax, structure and core concepts of one of the most widely used programming languages.",
+      skills: ["Java"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/2168",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4E2DAQEAYL_4oMh7UQ/profile-treasury-image-shrink_1920_1920/B4EZ0MJYPMGwAc-/0/1774025279684?e=1787184000&v=beta&t=EIYyEmzvubOXGkY2lwMBm5ff26nuS9WPYanmyCU1HMU",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
