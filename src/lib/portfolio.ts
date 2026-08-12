@@ -448,6 +448,20 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4D2DAQFid65WkKO2BA/profile-treasury-image-shrink_1280_1280/B4DZvXQGNSJkAQ-/0/1768842881674?e=1787184000&v=beta&t=rZN4Yy8DbASpSjzduj6Q85kLVfGlQKjKmqK-KwU-EA0",
     },
+    {
+      id: "google-docs",
+      title: "Google Docs",
+      issuer: "Google Cloud Training",
+      date: "January 2026",
+      description:
+        "Hands-on training in Google Docs as part of Google Workspace — creating, formatting and collaborating on documents with confidence.",
+      skills: ["Google Workspace"],
+      credentialId: "4NF411FNPO6F",
+      credentialUrl: "https://www.coursera.org/account/accomplishments/records/4NF411FNPO6F",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQGrG7h-XM7SqQ/profile-treasury-image-shrink_1280_1280/B4DZvZoqDNJoAQ-/0/1768882873938?e=1787184000&v=beta&t=9B3iSrtS0xW2_spWGCbns3x4IStDAOWodo3TWxLHvdc",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
