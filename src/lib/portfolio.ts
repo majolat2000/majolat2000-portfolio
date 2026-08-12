@@ -48,8 +48,16 @@ export interface CertificateItem {
   title: string;
   issuer?: string;
   date?: string;
-  description: string;
-  status: string;
+  description?: string;
+  status?: string;
+  /** Skills covered by the certification. */
+  skills?: string[];
+  /** Credential ID issued by the organisation, if any. */
+  credentialId?: string;
+  /** Public credential verification URL, if any. */
+  credentialUrl?: string;
+  /** Optional certificate image (e.g. "/certificates/upskill-crawford.jpg"). */
+  image?: string;
 }
 
 export interface AchievementItem {
@@ -167,8 +175,8 @@ export const portfolio = {
       type: "certificate",
       title: "Academic achievements",
       description:
-        "Certificates and course completions from my Computer Science journey — the first entries will land here soon.",
-      status: "Adding soon",
+        "Certificates and course completions from my Computer Science journey — the full list lives on the Certificates & Achievements page.",
+      status: "Live",
     },
     {
       id: "professional-training",
@@ -176,7 +184,7 @@ export const portfolio = {
       title: "Professional skills training",
       description:
         "Credentials earned to sharpen my toolkit, from technical coursework to productivity and communication.",
-      status: "Adding soon",
+      status: "Live",
     },
     {
       id: "internships",
@@ -304,27 +312,19 @@ export const portfolio = {
   ] satisfies EducationItem[],
 
   /**
-   * Certificates — add real ones here and they automatically appear on the
-   * Certificates & Achievements page (/credentials).
+   * Certificates — add real ones here and they automatically appear in the
+   * slideshow on the Certificates & Achievements page (/credentials).
    */
   certificates: [
     {
-      id: "academic-certificates",
-      title: "Academic achievements",
+      id: "upskill-crawford",
+      title: "Upskill Crawford",
       issuer: "Crawford University",
-      date: "2024 – 2028",
+      date: "April 2025",
       description:
-        "Course completions and academic milestones from my Computer Science journey — transcripts, workshops and more.",
-      status: "Adding soon",
-    },
-    {
-      id: "professional-certificates",
-      title: "Professional skills training",
-      issuer: "Courses & workshops",
-      date: "Ongoing",
-      description:
-        "Credentials earned to sharpen my toolkit — technical coursework, productivity, communication and more.",
-      status: "Adding soon",
+        "Financial literacy and foreign exchange (FX) trading training delivered through Crawford University's Upskill programme.",
+      skills: ["Financial Literacy", "FX Trading"],
+      status: "Verified",
     },
   ] satisfies CertificateItem[],
 
