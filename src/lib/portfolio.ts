@@ -557,6 +557,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQHp_1Ke16oXeQ/profile-treasury-image-shrink_1280_1280/B4EZwETVDDGoAc-/0/1769598703839?e=1787184000&v=beta&t=bHvvPecrfAGLa_RPQaugqshKXZqtchYVclbJWE8DqYo",
     },
+    {
+      id: "codesignal-css",
+      title: "CSS: Styling the Web",
+      issuer: "CodeSignal",
+      date: "January 2026",
+      description:
+        "A focused CodeSignal course on CSS — styling the web with layout, colour, typography and responsive design.",
+      skills: ["Cascading Style Sheets (CSS)"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1394",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4E2DAQFy6euHOZP8vQ/profile-treasury-image-shrink_1280_1280/B4EZwL0x7VG0AQ-/0/1769724913103?e=1787184000&v=beta&t=uv2DzWpy40gxbmjQaiwmn2Hb6c_gjP8_Jjr8AsB5rgA",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
