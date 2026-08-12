@@ -476,6 +476,20 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4D2DAQGvN2zIQWtShg/profile-treasury-image-shrink_1280_1280/B4DZvayfyPKQAQ-/0/1768902231122?e=1787184000&v=beta&t=on6DfFOSBxPvto4pyNmo78eKzBlP2jnn4UcqfeGga20",
     },
+    {
+      id: "coursera-powerpoint",
+      title: "Getting Started with Microsoft PowerPoint",
+      issuer: "Coursera",
+      date: "January 2026",
+      description:
+        "A hands-on introduction to Microsoft PowerPoint — designing clear, polished and professional presentations.",
+      skills: ["Microsoft Office"],
+      credentialId: "3NR1VW62S27K",
+      credentialUrl: "https://www.coursera.org/account/accomplishments/records/3NR1VW62S27K",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQHl1WvRdt0BJw/profile-treasury-image-shrink_1280_1280/B4DZvbkGd3HgAQ-/0/1768915233562?e=1787184000&v=beta&t=MNmHfjPv2YMVNb5yBcXEz4r9Q7DFbSAm2cYCRvRpPp0",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
