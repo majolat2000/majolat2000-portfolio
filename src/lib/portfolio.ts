@@ -425,6 +425,29 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4D2DAQHOUYqyavCG_Q/profile-treasury-image-shrink_1920_1920/B4DZvCsywCKYAc-/0/1768498081731?e=1787184000&v=beta&t=wC4JFcS5ATR7_mjSGJDHvY2iH_PCRGq6_fecWeNwtgI",
     },
+    {
+      id: "suny-basic-information-literacy",
+      title: "Basic Information Literacy",
+      issuer: "The State University of New York",
+      date: "January 2026",
+      description:
+        "A foundational course on information literacy from The State University of New York — finding, evaluating and managing information effectively and responsibly.",
+      skills: [
+        "Data Ethics",
+        "Digital Literacy",
+        "Research Skills",
+        "Information Management",
+        "Literacy",
+        "Critical Thinking",
+        "Investigation",
+        "Planning",
+      ],
+      credentialId: "V8GGNKUU44P1",
+      credentialUrl: "https://www.coursera.org/account/accomplishments/records/V8GGNKUU44P1",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQFid65WkKO2BA/profile-treasury-image-shrink_1280_1280/B4DZvXQGNSJkAQ-/0/1768842881674?e=1787184000&v=beta&t=rZN4Yy8DbASpSjzduj6Q85kLVfGlQKjKmqK-KwU-EA0",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
