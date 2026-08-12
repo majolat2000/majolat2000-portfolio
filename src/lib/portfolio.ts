@@ -713,6 +713,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQEfjorMA3-MrA/profile-treasury-image-shrink_1280_1280/B4EZ1443zNJwAQ-/0/1775849672018?e=1787184000&v=beta&t=U0d4-uQjcEv9KHBeQ9XtGzY_BHDP3Yo10n1uYfXIeD4",
     },
+    {
+      id: "codesignal-functional-java",
+      title: "Functional Java Mastery",
+      issuer: "CodeSignal",
+      date: "April 2026",
+      description:
+        "A CodeSignal course on functional programming in Java — lambdas, streams and writing cleaner, more expressive code.",
+      skills: ["Java"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/2171",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4E2DAQGXrFQ3WQj1lA/profile-treasury-image-shrink_1920_1920/B4EZ3OvT3RKAAk-/0/1777290003206?e=1787184000&v=beta&t=jPkF-R66wkuFG7YwUFDINCWE3dVpLkOhdXVbkf1oV5I",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
