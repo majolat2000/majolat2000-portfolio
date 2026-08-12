@@ -349,6 +349,30 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQG4Vt1mSygWMQ/profile-treasury-image-shrink_1280_1280/B4EZr.Xeo7HgAQ-/0/1765204165296?e=1787184000&v=beta&t=2aIK1fGWU0mpnaLpKMLRqdcDUue7d3EWPm2SxWy2hp0",
     },
+    {
+      id: "edinburgh-code-yourself",
+      title: "Code Yourself! An Introduction to Programming",
+      issuer: "The University of Edinburgh",
+      date: "December 2025",
+      description:
+        "An introductory programming course from the University of Edinburgh (via Coursera), learning to design, write and test programs — from pseudocode and flow charts to algorithms and concurrent programming.",
+      skills: [
+        "Python (Basics)",
+        "Pseudocode",
+        "Data Analysis",
+        "Flow Charts",
+        "Scratch",
+        "Concurrent Programming",
+        "Algorithms",
+        "Data Entry",
+        "Iterative Design",
+      ],
+      credentialId: "MRKYK7FP76MY",
+      credentialUrl: "https://www.coursera.org/account/accomplishments/verify/MRKYK7FP76MY",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4E2DAQEMCaEQzKbXLQ/profile-treasury-image-shrink_1280_1280/B4EZtC1tkYGUAQ-/0/1766352936633?e=1787184000&v=beta&t=UpdGFrRJu0ez1vEYrDw4c44NHQ_yGY2YHK1gC8irp1E",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
