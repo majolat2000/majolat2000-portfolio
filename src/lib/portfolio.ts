@@ -609,6 +609,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D562DAQFNIyUsAAH2ng/profile-treasury-image-shrink_1920_1920/B56ZwfE5SZJwAk-/0/1770047904296?e=1787184000&v=beta&t=6ljRz1HmwnfqgcgX-gYUldsN3Y12AJcY80qCuzMWSyg",
     },
+    {
+      id: "codesignal-hello-javascript",
+      title: "Hello, JavaScript! Your First Steps",
+      issuer: "CodeSignal",
+      date: "February 2026",
+      description:
+        "A beginner-friendly CodeSignal course taking the first steps with JavaScript — variables, logic and your first programs.",
+      skills: ["JavaScript"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1464",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQG6paFE8IVJcg/profile-treasury-image-shrink_1280_1280/B4DZxCiSXuHMAQ-/0/1770642811815?e=1787184000&v=beta&t=wOP_tnh7mqPZkbxlIOsX9QqbSdISVucN5XKQgoJnYYg",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
