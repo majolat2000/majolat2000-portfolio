@@ -387,6 +387,20 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQGF46UFc83qqA/profile-treasury-image-shrink_1280_1280/B4EZu4UnG_KAAQ-/0/1768323970965?e=1787184000&v=beta&t=ewId3iJQkmMdNvQe_hxLxtDJGvolZrblMyxtfAWa0LY",
     },
+    {
+      id: "google-drive",
+      title: "Google Drive",
+      issuer: "Google Cloud Training",
+      date: "January 2026",
+      description:
+        "Hands-on training in Google Drive as part of Google Workspace — organising, sharing and collaborating on files with ease.",
+      skills: ["Google Workspace"],
+      credentialId: "BRIOK36VUTAF",
+      credentialUrl: "https://www.coursera.org/account/accomplishments/records/BRIOK36VUTAF",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQFodfQrvL9tbA/profile-treasury-image-shrink_1280_1280/B4DZvChHMAJkAc-/0/1768495020278?e=1787184000&v=beta&t=ScPJ_Hshji2AOKJAXWi4yWPrMu2m_H9ft8fFWRGUUFc",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
