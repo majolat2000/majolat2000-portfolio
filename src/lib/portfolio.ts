@@ -509,6 +509,28 @@ export const portfolio = {
       credentialUrl: "https://borderlessskills.com/tutor-certificate?cert_hash=506cb08e4881a161",
       status: "Verified",
     },
+    {
+      id: "coursera-powerpoint-design",
+      title: "Designing and Formatting a Presentation in PowerPoint",
+      issuer: "Coursera",
+      date: "January 2026",
+      description:
+        "A deeper look at PowerPoint from Coursera — designing and formatting presentations that communicate clearly, from layout and visuals to editing and data visualisation.",
+      skills: [
+        "Graphic Design",
+        "Microsoft PowerPoint",
+        "Presentations",
+        "Microsoft Office",
+        "Data Visualisation",
+        "Editing",
+        "Writing",
+      ],
+      credentialId: "75IMDSZWVTL2",
+      credentialUrl: "https://www.coursera.org/account/accomplishments/records/75IMDSZWVTL2",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQGUVmsWPMmgJA/profile-treasury-image-shrink_1280_1280/B4DZvbrbnbKUAQ-/0/1768917155794?e=1787184000&v=beta&t=5KQpcfAFVvSTwZg5UNNygYLhaJkSD5PIt59AybBYMo4",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
