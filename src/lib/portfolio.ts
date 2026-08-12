@@ -739,6 +739,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4D2DAQGIVXjUM5tBbg/profile-treasury-image-shrink_1920_1920/B4DZ43wiclI4Ag-/0/1779051931652?e=1787184000&v=beta&t=WJrSlFUBbnz8vfhtfuXBjWYjHrcMhYUcSQU6NDJkkYU",
     },
+    {
+      id: "codesignal-java-interview-prep",
+      title: "Java Interview Prep for Interns",
+      issuer: "CodeSignal",
+      date: "May 2026",
+      description:
+        "A CodeSignal learning path preparing for Java internships — consolidating object-oriented programming, multithreading and interview-style problem solving.",
+      skills: ["Java", "Multithreading", "Object-Oriented Programming (OOP)"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/course-paths/514",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQEyqrdi1m405A/profile-treasury-image-shrink_1280_1280/B4DZ515sUGJEAY-/0/1780094518892?e=1787184000&v=beta&t=viuYTQ2Z0Y8UFYQU2kWeDBaJYL5AUf7Lt4FptwI34VQ",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
