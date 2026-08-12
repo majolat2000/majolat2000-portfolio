@@ -648,6 +648,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4D2DAQEQ2hx4aJeV_g/profile-treasury-image-shrink_1280_1280/B4DZyK3JShG0AY-/0/1771856239232?e=1787184000&v=beta&t=BACc-E9sCn0KuQEsfx28yazND7akguoX5ndCrLEE0cY",
     },
+    {
+      id: "codesignal-mastering-loops",
+      title: "JavaScript's Auto-Pilot: Mastering Loops",
+      issuer: "CodeSignal",
+      date: "March 2026",
+      description:
+        "A CodeSignal course on loops in JavaScript — repeating work efficiently and combining them with boolean logic to solve real problems.",
+      skills: ["JavaScript and Boolean Logic"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1467",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQHcfyEIieeVVw/profile-treasury-image-shrink_8192_8192/B4DZyo3mLWHIAg-/0/1772359673769?e=1787184000&v=beta&t=LwaknQUH9kTjWQN91gx6MyPFJEvvMH1HggUFoy3nUr8",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
