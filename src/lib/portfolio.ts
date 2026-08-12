@@ -490,6 +490,25 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4D2DAQHl1WvRdt0BJw/profile-treasury-image-shrink_1280_1280/B4DZvbkGd3HgAQ-/0/1768915233562?e=1787184000&v=beta&t=MNmHfjPv2YMVNb5yBcXEz4r9Q7DFbSAm2cYCRvRpPp0",
     },
+    {
+      id: "borderless-frontend",
+      title: "Complete Frontend Web Development Course",
+      issuer: "Borderless Skills",
+      date: "February 2026",
+      description:
+        "A complete frontend web development course from Borderless Skills — building modern, responsive websites with HTML, CSS, JavaScript and Bootstrap.",
+      skills: [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "Bootstrap (Framework)",
+        "Web Development",
+        "Web Design",
+      ],
+      credentialId: "506cb08e4881a161",
+      credentialUrl: "https://borderlessskills.com/tutor-certificate?cert_hash=506cb08e4881a161",
+      status: "Verified",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
