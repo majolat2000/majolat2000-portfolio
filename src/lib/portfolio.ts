@@ -544,6 +544,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4D2DAQEV-hLaE35Gxw/profile-treasury-image-shrink_1280_1280/B4DZvq3w0sIQAQ-/0/1769172046314?e=1787184000&v=beta&t=IKTHXXi4N1sCiq0WQrhoe-ZDaTjuf_HEw8OgxSYwg8U",
     },
+    {
+      id: "codesignal-html",
+      title: "HTML: The Structure of the Web",
+      issuer: "CodeSignal",
+      date: "January 2026",
+      description:
+        "A focused CodeSignal course on HTML — learning how web pages are structured with semantic, accessible markup.",
+      skills: ["HTML"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1393",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4E2DAQHp_1Ke16oXeQ/profile-treasury-image-shrink_1280_1280/B4EZwETVDDGoAc-/0/1769598703839?e=1787184000&v=beta&t=bHvvPecrfAGLa_RPQaugqshKXZqtchYVclbJWE8DqYo",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
