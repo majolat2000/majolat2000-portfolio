@@ -583,6 +583,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQEcMC6kpo-81Q/profile-treasury-image-shrink_1920_1920/B4EZwVdKYtH4Ac-/0/1769886493312?e=1787184000&v=beta&t=3kPrm8Of8SEN6viPGvls0QhFRWTTrG13x9PEEQyGeLE",
     },
+    {
+      id: "codesignal-javascript-dom",
+      title: "JavaScript and the DOM: Connecting Code to Web Pages",
+      issuer: "CodeSignal",
+      date: "February 2026",
+      description:
+        "A CodeSignal course on the Document Object Model — connecting JavaScript code to web pages to manipulate elements and respond to users.",
+      skills: ["JavaScript"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1396",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4E2DAQEkvXUzCXb1XQ/profile-treasury-image-shrink_1280_1280/B4EZwZxBIMJ8AY-/0/1769958807851?e=1787184000&v=beta&t=tD-OYrkAP2e27Ynl8-dBncTklWlAMI4lDlB90hduizY",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
