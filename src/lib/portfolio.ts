@@ -401,6 +401,30 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4D2DAQFodfQrvL9tbA/profile-treasury-image-shrink_1280_1280/B4DZvChHMAJkAc-/0/1768495020278?e=1787184000&v=beta&t=ScPJ_Hshji2AOKJAXWi4yWPrMu2m_H9ft8fFWRGUUFc",
     },
+    {
+      id: "copenhagen-data-literacy",
+      title: "Data Literacy — What is it and why does it matter?",
+      issuer: "University of Copenhagen (Københavns Universitet)",
+      date: "January 2026",
+      description:
+        "An introduction to data literacy from the University of Copenhagen — what data is, why it matters, and how to handle it responsibly, from collection and sharing to security and ethics.",
+      skills: [
+        "Data Literacy",
+        "Journalism",
+        "Algorithms",
+        "Data Security",
+        "Data Ethics",
+        "Artificial Intelligence",
+        "Machine Learning",
+        "Data Collection",
+        "Data Sharing",
+        "Information Privacy",
+        "Personally Identifiable Information",
+      ],
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQHOUYqyavCG_Q/profile-treasury-image-shrink_1920_1920/B4DZvCsywCKYAc-/0/1768498081731?e=1787184000&v=beta&t=wC4JFcS5ATR7_mjSGJDHvY2iH_PCRGq6_fecWeNwtgI",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
