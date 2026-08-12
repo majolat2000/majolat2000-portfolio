@@ -531,6 +531,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4D2DAQGUVmsWPMmgJA/profile-treasury-image-shrink_1280_1280/B4DZvbrbnbKUAQ-/0/1768917155794?e=1787184000&v=beta&t=5KQpcfAFVvSTwZg5UNNygYLhaJkSD5PIt59AybBYMo4",
     },
+    {
+      id: "codesignal-web-dev",
+      title: "Web Development with HTML, CSS, and JavaScript",
+      issuer: "CodeSignal",
+      date: "January 2026",
+      description:
+        "A hands-on CodeSignal course on web development — building interactive, well-structured web pages with HTML, CSS and JavaScript.",
+      skills: ["HTML", "CSS", "JavaScript", "Web Development"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/60",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQEV-hLaE35Gxw/profile-treasury-image-shrink_1280_1280/B4DZvq3w0sIQAQ-/0/1769172046314?e=1787184000&v=beta&t=IKTHXXi4N1sCiq0WQrhoe-ZDaTjuf_HEw8OgxSYwg8U",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
