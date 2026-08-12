@@ -325,6 +325,8 @@ export const portfolio = {
         "Financial literacy and foreign exchange (FX) trading training delivered through Crawford University's Upskill programme.",
       skills: ["Financial Literacy", "FX Trading"],
       status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4E2DAQFwIrWvve-bzA/profile-treasury-image-shrink_1280_1280/B4EZrpJMiOGoAQ-/0/1764848103333?e=1787184000&v=beta&t=9f5pF_FKIc3yDOeb7EVxFCDozZLwru5STGrM15rdkAs",
     },
   ] satisfies CertificateItem[],
 
