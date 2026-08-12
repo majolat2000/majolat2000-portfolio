@@ -462,6 +462,20 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4D2DAQGrG7h-XM7SqQ/profile-treasury-image-shrink_1280_1280/B4DZvZoqDNJoAQ-/0/1768882873938?e=1787184000&v=beta&t=9B3iSrtS0xW2_spWGCbns3x4IStDAOWodo3TWxLHvdc",
     },
+    {
+      id: "google-sheets",
+      title: "Google Sheets",
+      issuer: "Google Cloud Training",
+      date: "January 2026",
+      description:
+        "Hands-on training in Google Sheets as part of Google Workspace — building, organising and analysing data in spreadsheets.",
+      skills: ["Google Workspace"],
+      credentialId: "UNY4XLTR8YIU",
+      credentialUrl: "https://www.coursera.org/account/accomplishments/records/UNY4XLTR8YIU",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQGvN2zIQWtShg/profile-treasury-image-shrink_1280_1280/B4DZvayfyPKQAQ-/0/1768902231122?e=1787184000&v=beta&t=on6DfFOSBxPvto4pyNmo78eKzBlP2jnn4UcqfeGga20",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
