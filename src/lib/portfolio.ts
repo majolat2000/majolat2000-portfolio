@@ -726,6 +726,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQGXrFQ3WQj1lA/profile-treasury-image-shrink_1920_1920/B4EZ3OvT3RKAAk-/0/1777290003206?e=1787184000&v=beta&t=jPkF-R66wkuFG7YwUFDINCWE3dVpLkOhdXVbkf1oV5I",
     },
+    {
+      id: "codesignal-multithreading",
+      title: "Multithreading Essentials",
+      issuer: "CodeSignal",
+      date: "May 2026",
+      description:
+        "A CodeSignal course on multithreading in Java — running concurrent tasks, managing threads and building responsive programs.",
+      skills: ["Multithreading", "Java"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/2172",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQGIVXjUM5tBbg/profile-treasury-image-shrink_1920_1920/B4DZ43wiclI4Ag-/0/1779051931652?e=1787184000&v=beta&t=WJrSlFUBbnz8vfhtfuXBjWYjHrcMhYUcSQU6NDJkkYU",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
