@@ -635,6 +635,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4D2DAQFft8z3o8g07A/profile-treasury-image-shrink_1280_1280/B4DZxrGhsEJkAQ-/0/1771323400490?e=1787184000&v=beta&t=bFj2JXwHiqlb7FRolSNA_SwFh529Xz7FH0TR-RQICaM",
     },
+    {
+      id: "codesignal-crossroads-of-code",
+      title: "The Crossroads of Code: Making Decisions",
+      issuer: "CodeSignal",
+      date: "February 2026",
+      description:
+        "A CodeSignal course on decision-making in JavaScript — using boolean logic and conditionals to steer program flow.",
+      skills: ["Boolean Logic and JavaScript"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1466",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4D2DAQEQ2hx4aJeV_g/profile-treasury-image-shrink_1280_1280/B4DZyK3JShG0AY-/0/1771856239232?e=1787184000&v=beta&t=BACc-E9sCn0KuQEsfx28yazND7akguoX5ndCrLEE0cY",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
