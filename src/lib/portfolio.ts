@@ -700,6 +700,19 @@ export const portfolio = {
       image:
         "https://media.licdn.com/dms/image/v2/D4E2DAQEtQK9fPEF_CA/profile-treasury-image-shrink_1920_1920/B4EZ1Pv7QcIQAc-/0/1775159458771?e=1787184000&v=beta&t=ecqi1csBJxEsrIxeY6sWMNBDCGvhOKR0gW7sxTcMK-c",
     },
+    {
+      id: "codesignal-java-collections",
+      title: "Java Collections Essentials",
+      issuer: "CodeSignal",
+      date: "April 2026",
+      description:
+        "A CodeSignal course on Java collections — working with lists, sets and maps to store, organise and manage data efficiently.",
+      skills: ["Java"],
+      credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/2170",
+      status: "Verified",
+      image:
+        "https://media.licdn.com/dms/image/v2/D4E2DAQEfjorMA3-MrA/profile-treasury-image-shrink_1280_1280/B4EZ1443zNJwAQ-/0/1775849672018?e=1787184000&v=beta&t=U0d4-uQjcEv9KHBeQ9XtGzY_BHDP3Yo10n1uYfXIeD4",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
