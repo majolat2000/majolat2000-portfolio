@@ -325,8 +325,7 @@ export const portfolio = {
         "Financial literacy and foreign exchange (FX) trading training delivered through Crawford University's Upskill programme.",
       skills: ["Financial Literacy", "FX Trading"],
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQFwIrWvve-bzA/profile-treasury-image-shrink_1280_1280/B4EZrpJMiOGoAQ-/0/1764848103333?e=1787184000&v=beta&t=9f5pF_FKIc3yDOeb7EVxFCDozZLwru5STGrM15rdkAs",
+      image: "/certificates/upskill-crawford.jpg",
     },
     {
       id: "vsavvy-virtual-assistance",
@@ -346,8 +345,7 @@ export const portfolio = {
       credentialId: "VSA-DEC25-C8R21",
       credentialUrl: "https://vsavvyacademy.com/verify/?cert_id=VSA-DEC25-C8R21",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQG4Vt1mSygWMQ/profile-treasury-image-shrink_1280_1280/B4EZr.Xeo7HgAQ-/0/1765204165296?e=1787184000&v=beta&t=2aIK1fGWU0mpnaLpKMLRqdcDUue7d3EWPm2SxWy2hp0",
+      image: "/certificates/vsavvy-virtual-assistance.jpg",
     },
     {
       id: "edinburgh-code-yourself",
@@ -370,8 +368,7 @@ export const portfolio = {
       credentialId: "MRKYK7FP76MY",
       credentialUrl: "https://www.coursera.org/account/accomplishments/verify/MRKYK7FP76MY",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQEMCaEQzKbXLQ/profile-treasury-image-shrink_1280_1280/B4EZtC1tkYGUAQ-/0/1766352936633?e=1787184000&v=beta&t=UpdGFrRJu0ez1vEYrDw4c44NHQ_yGY2YHK1gC8irp1E",
+      image: "/certificates/edinburgh-code-yourself.jpg",
     },
     {
       id: "google-gmail",
@@ -384,8 +381,7 @@ export const portfolio = {
       credentialId: "D9MV8TE18MX9",
       credentialUrl: "https://www.coursera.org/account/accomplishments/records/D9MV8TE18MX9",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQGF46UFc83qqA/profile-treasury-image-shrink_1280_1280/B4EZu4UnG_KAAQ-/0/1768323970965?e=1787184000&v=beta&t=ewId3iJQkmMdNvQe_hxLxtDJGvolZrblMyxtfAWa0LY",
+      image: "/certificates/google-gmail.jpg",
     },
     {
       id: "google-drive",
@@ -398,8 +394,7 @@ export const portfolio = {
       credentialId: "BRIOK36VUTAF",
       credentialUrl: "https://www.coursera.org/account/accomplishments/records/BRIOK36VUTAF",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQFodfQrvL9tbA/profile-treasury-image-shrink_1280_1280/B4DZvChHMAJkAc-/0/1768495020278?e=1787184000&v=beta&t=ScPJ_Hshji2AOKJAXWi4yWPrMu2m_H9ft8fFWRGUUFc",
+      image: "/certificates/google-drive.jpg",
     },
     {
       id: "copenhagen-data-literacy",
@@ -422,8 +417,7 @@ export const portfolio = {
         "Personally Identifiable Information",
       ],
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQHOUYqyavCG_Q/profile-treasury-image-shrink_1920_1920/B4DZvCsywCKYAc-/0/1768498081731?e=1787184000&v=beta&t=wC4JFcS5ATR7_mjSGJDHvY2iH_PCRGq6_fecWeNwtgI",
+      image: "/certificates/copenhagen-data-literacy.jpg",
     },
     {
       id: "suny-basic-information-literacy",
@@ -445,8 +439,7 @@ export const portfolio = {
       credentialId: "V8GGNKUU44P1",
       credentialUrl: "https://www.coursera.org/account/accomplishments/records/V8GGNKUU44P1",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQFid65WkKO2BA/profile-treasury-image-shrink_1280_1280/B4DZvXQGNSJkAQ-/0/1768842881674?e=1787184000&v=beta&t=rZN4Yy8DbASpSjzduj6Q85kLVfGlQKjKmqK-KwU-EA0",
+      image: "/certificates/suny-basic-information-literacy.jpg",
     },
     {
       id: "google-docs",
@@ -459,8 +452,7 @@ export const portfolio = {
       credentialId: "4NF411FNPO6F",
       credentialUrl: "https://www.coursera.org/account/accomplishments/records/4NF411FNPO6F",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQGrG7h-XM7SqQ/profile-treasury-image-shrink_1280_1280/B4DZvZoqDNJoAQ-/0/1768882873938?e=1787184000&v=beta&t=9B3iSrtS0xW2_spWGCbns3x4IStDAOWodo3TWxLHvdc",
+      image: "/certificates/google-docs.jpg",
     },
     {
       id: "google-sheets",
@@ -473,8 +465,7 @@ export const portfolio = {
       credentialId: "UNY4XLTR8YIU",
       credentialUrl: "https://www.coursera.org/account/accomplishments/records/UNY4XLTR8YIU",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQGvN2zIQWtShg/profile-treasury-image-shrink_1280_1280/B4DZvayfyPKQAQ-/0/1768902231122?e=1787184000&v=beta&t=on6DfFOSBxPvto4pyNmo78eKzBlP2jnn4UcqfeGga20",
+      image: "/certificates/google-sheets.jpg",
     },
     {
       id: "coursera-powerpoint",
@@ -487,8 +478,7 @@ export const portfolio = {
       credentialId: "3NR1VW62S27K",
       credentialUrl: "https://www.coursera.org/account/accomplishments/records/3NR1VW62S27K",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQHl1WvRdt0BJw/profile-treasury-image-shrink_1280_1280/B4DZvbkGd3HgAQ-/0/1768915233562?e=1787184000&v=beta&t=MNmHfjPv2YMVNb5yBcXEz4r9Q7DFbSAm2cYCRvRpPp0",
+      image: "/certificates/coursera-powerpoint.jpg",
     },
     {
       id: "borderless-frontend",
@@ -528,8 +518,7 @@ export const portfolio = {
       credentialId: "75IMDSZWVTL2",
       credentialUrl: "https://www.coursera.org/account/accomplishments/records/75IMDSZWVTL2",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQGUVmsWPMmgJA/profile-treasury-image-shrink_1280_1280/B4DZvbrbnbKUAQ-/0/1768917155794?e=1787184000&v=beta&t=5KQpcfAFVvSTwZg5UNNygYLhaJkSD5PIt59AybBYMo4",
+      image: "/certificates/coursera-powerpoint-design.jpg",
     },
     {
       id: "codesignal-web-dev",
@@ -541,8 +530,7 @@ export const portfolio = {
       skills: ["HTML", "CSS", "JavaScript", "Web Development"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/60",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQEV-hLaE35Gxw/profile-treasury-image-shrink_1280_1280/B4DZvq3w0sIQAQ-/0/1769172046314?e=1787184000&v=beta&t=IKTHXXi4N1sCiq0WQrhoe-ZDaTjuf_HEw8OgxSYwg8U",
+      image: "/certificates/codesignal-web-dev.jpg",
     },
     {
       id: "codesignal-html",
@@ -554,8 +542,7 @@ export const portfolio = {
       skills: ["HTML"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1393",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQHp_1Ke16oXeQ/profile-treasury-image-shrink_1280_1280/B4EZwETVDDGoAc-/0/1769598703839?e=1787184000&v=beta&t=bHvvPecrfAGLa_RPQaugqshKXZqtchYVclbJWE8DqYo",
+      image: "/certificates/codesignal-html.jpg",
     },
     {
       id: "codesignal-css",
@@ -567,8 +554,7 @@ export const portfolio = {
       skills: ["Cascading Style Sheets (CSS)"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1394",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQFy6euHOZP8vQ/profile-treasury-image-shrink_1280_1280/B4EZwL0x7VG0AQ-/0/1769724913103?e=1787184000&v=beta&t=uv2DzWpy40gxbmjQaiwmn2Hb6c_gjP8_Jjr8AsB5rgA",
+      image: "/certificates/codesignal-css.jpg",
     },
     {
       id: "codesignal-javascript",
@@ -580,8 +566,7 @@ export const portfolio = {
       skills: ["JavaScript"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1395",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQEcMC6kpo-81Q/profile-treasury-image-shrink_1920_1920/B4EZwVdKYtH4Ac-/0/1769886493312?e=1787184000&v=beta&t=3kPrm8Of8SEN6viPGvls0QhFRWTTrG13x9PEEQyGeLE",
+      image: "/certificates/codesignal-javascript.jpg",
     },
     {
       id: "codesignal-javascript-dom",
@@ -593,8 +578,7 @@ export const portfolio = {
       skills: ["JavaScript"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1396",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQEkvXUzCXb1XQ/profile-treasury-image-shrink_1280_1280/B4EZwZxBIMJ8AY-/0/1769958807851?e=1787184000&v=beta&t=tD-OYrkAP2e27Ynl8-dBncTklWlAMI4lDlB90hduizY",
+      image: "/certificates/codesignal-javascript-dom.jpg",
     },
     {
       id: "codesignal-intro-web-dev",
@@ -606,8 +590,7 @@ export const portfolio = {
       skills: ["HTML", "CSS", "JavaScript", "HTTP", "API", "JSON"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/course-paths/324",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D562DAQFNIyUsAAH2ng/profile-treasury-image-shrink_1920_1920/B56ZwfE5SZJwAk-/0/1770047904296?e=1787184000&v=beta&t=6ljRz1HmwnfqgcgX-gYUldsN3Y12AJcY80qCuzMWSyg",
+      image: "/certificates/codesignal-intro-web-dev.jpg",
     },
     {
       id: "codesignal-hello-javascript",
@@ -619,8 +602,7 @@ export const portfolio = {
       skills: ["JavaScript"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1464",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQG6paFE8IVJcg/profile-treasury-image-shrink_1280_1280/B4DZxCiSXuHMAQ-/0/1770642811815?e=1787184000&v=beta&t=wOP_tnh7mqPZkbxlIOsX9QqbSdISVucN5XKQgoJnYYg",
+      image: "/certificates/codesignal-hello-javascript.jpg",
     },
     {
       id: "codesignal-js-data-variables",
@@ -632,8 +614,7 @@ export const portfolio = {
       skills: ["JavaScript"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1465",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQFft8z3o8g07A/profile-treasury-image-shrink_1280_1280/B4DZxrGhsEJkAQ-/0/1771323400490?e=1787184000&v=beta&t=bFj2JXwHiqlb7FRolSNA_SwFh529Xz7FH0TR-RQICaM",
+      image: "/certificates/codesignal-js-data-variables.jpg",
     },
     {
       id: "codesignal-crossroads-of-code",
@@ -645,8 +626,7 @@ export const portfolio = {
       skills: ["Boolean Logic and JavaScript"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1466",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQEQ2hx4aJeV_g/profile-treasury-image-shrink_1280_1280/B4DZyK3JShG0AY-/0/1771856239232?e=1787184000&v=beta&t=BACc-E9sCn0KuQEsfx28yazND7akguoX5ndCrLEE0cY",
+      image: "/certificates/codesignal-crossroads-of-code.jpg",
     },
     {
       id: "codesignal-mastering-loops",
@@ -658,8 +638,7 @@ export const portfolio = {
       skills: ["JavaScript and Boolean Logic"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/1467",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQHcfyEIieeVVw/profile-treasury-image-shrink_8192_8192/B4DZyo3mLWHIAg-/0/1772359673769?e=1787184000&v=beta&t=LwaknQUH9kTjWQN91gx6MyPFJEvvMH1HggUFoy3nUr8",
+      image: "/certificates/codesignal-mastering-loops.jpg",
     },
     {
       id: "codesignal-intro-programming-js",
@@ -671,8 +650,7 @@ export const portfolio = {
       skills: ["JavaScript", "Boolean Logic"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/course-paths/341",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQG8nfN3_SH1xQ/profile-treasury-image-shrink_1280_1280/B4EZzPUir8GoAQ-/0/1773004795838?e=1787184000&v=beta&t=4AA_Dy1Alxk3TaMTmH1_in9fIo7XVbv68VD50T_Qw-4",
+      image: "/certificates/codesignal-intro-programming-js.jpg",
     },
     {
       id: "codesignal-java-fundamentals",
@@ -684,8 +662,7 @@ export const portfolio = {
       skills: ["Java"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/2168",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQEAYL_4oMh7UQ/profile-treasury-image-shrink_1920_1920/B4EZ0MJYPMGwAc-/0/1774025279684?e=1787184000&v=beta&t=EIYyEmzvubOXGkY2lwMBm5ff26nuS9WPYanmyCU1HMU",
+      image: "/certificates/codesignal-java-fundamentals.jpg",
     },
     {
       id: "codesignal-oop-java",
@@ -697,8 +674,7 @@ export const portfolio = {
       skills: ["Java", "Object-Oriented Programming (OOP)"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/2169",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQEtQK9fPEF_CA/profile-treasury-image-shrink_1920_1920/B4EZ1Pv7QcIQAc-/0/1775159458771?e=1787184000&v=beta&t=ecqi1csBJxEsrIxeY6sWMNBDCGvhOKR0gW7sxTcMK-c",
+      image: "/certificates/codesignal-oop-java.jpg",
     },
     {
       id: "codesignal-java-collections",
@@ -710,8 +686,7 @@ export const portfolio = {
       skills: ["Java"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/2170",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQEfjorMA3-MrA/profile-treasury-image-shrink_1280_1280/B4EZ1443zNJwAQ-/0/1775849672018?e=1787184000&v=beta&t=U0d4-uQjcEv9KHBeQ9XtGzY_BHDP3Yo10n1uYfXIeD4",
+      image: "/certificates/codesignal-java-collections.jpg",
     },
     {
       id: "codesignal-functional-java",
@@ -723,8 +698,7 @@ export const portfolio = {
       skills: ["Java"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/2171",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4E2DAQGXrFQ3WQj1lA/profile-treasury-image-shrink_1920_1920/B4EZ3OvT3RKAAk-/0/1777290003206?e=1787184000&v=beta&t=jPkF-R66wkuFG7YwUFDINCWE3dVpLkOhdXVbkf1oV5I",
+      image: "/certificates/codesignal-functional-java.jpg",
     },
     {
       id: "codesignal-multithreading",
@@ -736,8 +710,7 @@ export const portfolio = {
       skills: ["Multithreading", "Java"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/courses/2172",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQGIVXjUM5tBbg/profile-treasury-image-shrink_1920_1920/B4DZ43wiclI4Ag-/0/1779051931652?e=1787184000&v=beta&t=WJrSlFUBbnz8vfhtfuXBjWYjHrcMhYUcSQU6NDJkkYU",
+      image: "/certificates/codesignal-multithreading.jpg",
     },
     {
       id: "codesignal-java-interview-prep",
@@ -749,8 +722,7 @@ export const portfolio = {
       skills: ["Java", "Multithreading", "Object-Oriented Programming (OOP)"],
       credentialUrl: "https://codesignal.com/learn/certificates/cmkn3ikkq006qjg04ctp1kgxe/course-paths/514",
       status: "Verified",
-      image:
-        "https://media.licdn.com/dms/image/v2/D4D2DAQEyqrdi1m405A/profile-treasury-image-shrink_1280_1280/B4DZ515sUGJEAY-/0/1780094518892?e=1787184000&v=beta&t=viuYTQ2Z0Y8UFYQU2kWeDBaJYL5AUf7Lt4FptwI34VQ",
+      image: "/certificates/codesignal-java-interview-prep.jpg",
     },
   ] satisfies CertificateItem[],
 
