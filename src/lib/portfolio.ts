@@ -93,7 +93,7 @@ export const portfolio = {
   linkedinHandle: "majesty-olatimilehin",
 
   /** Resume — viewers open the Google Doc directly. */
-  resumeUrl: "https://docs.google.com/document/d/1pXHt8mSOz6YBjgafrG-TPbIh-gEJ-S34/",
+  resumeUrl: "https://docs.google.com/document/d/1pXHt8mSOz6YBjgafrG-TPbIh-gEJ-S34/edit",
 
   nav: [
     { label: "About", href: "#about" },
