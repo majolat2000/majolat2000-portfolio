@@ -3,7 +3,6 @@ import {
   Download,
   Linkedin,
   Mail,
-  Phone,
   type LucideIcon,
 } from "lucide-react";
 import { portfolio } from "@/lib/portfolio";
@@ -22,12 +21,6 @@ const channels: {
     label: "Email",
     value: portfolio.email,
     href: `mailto:${portfolio.email}`,
-  },
-  {
-    icon: Phone,
-    label: "Phone",
-    value: portfolio.phoneDisplay,
-    href: `tel:${portfolio.phoneTel}`,
   },
   {
     icon: Linkedin,
@@ -58,7 +51,7 @@ export function Contact() {
               from you.
             </p>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+            <div className="mt-10 grid gap-4 sm:grid-cols-2">
               {channels.map(({ icon: Icon, label, value, href, external }) => (
                 <a
                   key={label}

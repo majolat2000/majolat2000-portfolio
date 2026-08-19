@@ -1,4 +1,4 @@
-import { ArrowUpRight, Linkedin, Mail, Phone } from "lucide-react";
+import { ArrowUpRight, Linkedin, Mail } from "lucide-react";
 import { portfolio } from "@/lib/portfolio";
 
 export function Footer() {
@@ -41,7 +41,6 @@ export function Footer() {
           <div className="flex items-center gap-2">
             {[
               { icon: Mail, href: `mailto:${portfolio.email}`, label: "Email" },
-              { icon: Phone, href: `tel:${portfolio.phoneTel}`, label: "Phone" },
               {
                 icon: Linkedin,
                 href: portfolio.linkedinUrl,

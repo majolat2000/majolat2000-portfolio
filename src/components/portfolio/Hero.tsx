@@ -9,7 +9,6 @@ import {
   Linkedin,
   Mail,
   Palette,
-  Phone,
   Sparkles,
   Star,
   Zap,
@@ -168,7 +167,6 @@ export function Hero() {
               icon={Mail}
               label="Email"
             />
-            <ContactChip href={`tel:${portfolio.phoneTel}`} icon={Phone} label="Phone" />
           </motion.div>
         </div>
 
