@@ -88,7 +88,7 @@ export const portfolio = {
 
   about: `I'm a Computer Scientist who enjoys turning ideas into practical digital solutions. With a creative mindset shaped by my hobby as an artist, I approach technology with curiosity, structure, and innovation — allowing me to tackle problems from both analytical and creative angles. I'm still learning every day, because for me, learning never stops.`,
 
-  email: "info@majolat2000.com.ng",
+  email: "hello@majolat2000.com.ng",
   linkedinUrl: "https://www.linkedin.com/in/majesty-olatimilehin",
   linkedinHandle: "majesty-olatimilehin",
 
