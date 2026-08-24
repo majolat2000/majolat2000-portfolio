@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Sparkles, Star } from "lucide-react";
 import { portfolio } from "@/lib/portfolio";
 import { cn } from "@/lib/utils";
 import { Favicon, favicons } from "@/components/ui/favicon";
@@ -198,7 +199,6 @@ export function Hero() {
                 {[
                   { src: favicons.github, alt: "Code", label: "Computer Science" },
                   { src: favicons.linkedin, alt: "Briefcase", label: "Virtual Assistant" },
-                  { src: favicons.site, alt: "Sparkles", label: "Always learning" },
                 ].map(({ src, alt, label }) => (
                   <div
                     key={label}
@@ -210,6 +210,12 @@ export function Hero() {
                     </span>
                   </div>
                 ))}
+                <div className="flex flex-col items-center gap-2 rounded-2xl bg-white/55 px-2 py-3 text-center shadow-sm backdrop-blur-sm">
+                  <Sparkles className="h-[18px] w-[18px] text-primary" />
+                  <span className="text-[10px] font-semibold leading-tight text-foreground/70">
+                    Always learning
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -235,13 +241,16 @@ export function Hero() {
             label="CS student"
             delay={1.8}
           />
-          <FloatBadge
-            className="-right-10 bottom-8"
-            src={favicons.site}
-            alt="Detail"
-            label="Detail-focused"
-            delay={0.7}
-          />
+          <motion.div
+            className="absolute z-10 hidden lg:block -right-10 bottom-8"
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.7 }}
+          >
+            <div className="glass-deep flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-foreground/85 shadow-lg shadow-indigo-500/10">
+              <Star className="h-4 w-4 text-primary" />
+              Detail-focused
+            </div>
+          </motion.div>
         </motion.div>
       </div>
 

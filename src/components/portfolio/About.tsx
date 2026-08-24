@@ -1,10 +1,11 @@
+import { Target } from "lucide-react";
 import { portfolio } from "@/lib/portfolio";
 import { Favicon, favicons } from "@/components/ui/favicon";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
-const traitFavicons = [
-  { src: favicons.site, alt: "Target" },
+const traitFavicons: Array<{ src?: string; alt: string; Icon?: typeof Target }> = [
+  { Icon: Target, alt: "Target" },
   { src: favicons.figma, alt: "Palette" },
   { src: favicons.github, alt: "Brain" },
   { src: favicons.google, alt: "Download" },
@@ -41,7 +42,11 @@ export function About() {
                       className="glass-chip flex items-start gap-3 rounded-2xl p-4"
                     >
                       <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white/80 shadow-sm">
-                        <Favicon src={fav.src} alt={fav.alt} size={16} />
+                        {fav.Icon ? (
+                          <fav.Icon className="h-4 w-4 text-primary" />
+                        ) : (
+                          <Favicon src={fav.src!} alt={fav.alt} size={16} />
+                        )}
                       </span>
                       <div>
                         <p className="text-sm font-bold text-foreground">{trait.label}</p>

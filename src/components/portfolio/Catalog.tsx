@@ -1,3 +1,4 @@
+import { HeartHandshake, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { portfolio, type CatalogItem } from "@/lib/portfolio";
@@ -17,7 +18,7 @@ type FilterId = (typeof FILTERS)[number]["id"];
 
 const TYPE_META: Record<
   CatalogItem["type"],
-  { src: string; alt: string; tile: string; badge: string; label: string }
+  { src?: string; alt: string; Icon?: typeof HeartHandshake; tile: string; badge: string; label: string }
 > = {
   certificate: {
     src: favicons.coursera,
@@ -34,7 +35,7 @@ const TYPE_META: Record<
     label: "Experience",
   },
   volunteering: {
-    src: favicons.site,
+    Icon: HeartHandshake,
     alt: "Volunteering",
     tile: "from-violet-500 to-fuchsia-400",
     badge: "bg-violet-100/80 text-violet-700",
@@ -134,7 +135,11 @@ export function Catalog() {
                           "grid h-12 w-12 place-items-center rounded-2xl bg-white/80 shadow-md ring-1 ring-white/70 transition-transform duration-300 group-hover:scale-110",
                         )}
                       >
-                        <Favicon src={meta.src} alt={meta.alt} size={20} />
+                        {meta.Icon ? (
+                          <meta.Icon className="h-5 w-5 text-violet-500" />
+                        ) : (
+                          <Favicon src={meta.src!} alt={meta.alt} size={20} />
+                        )}
                       </span>
                       <span
                         className={cn(
@@ -152,7 +157,7 @@ export function Catalog() {
                       {item.description}
                     </p>
                     <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-amber-100/80 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700">
-                      <Favicon src={favicons.site} alt="Status" size={12} />
+                      <Sparkles className="h-3 w-3" />
                       {item.status}
                     </span>
                   </div>

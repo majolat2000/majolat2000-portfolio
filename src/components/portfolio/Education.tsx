@@ -1,3 +1,4 @@
+import { Star } from "lucide-react";
 import { portfolio } from "@/lib/portfolio";
 import { Favicon, favicons } from "@/components/ui/favicon";
 import { Reveal } from "./Reveal";
@@ -33,7 +34,7 @@ export function Education() {
                     </h3>
                   </div>
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200/70 bg-amber-50/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700">
-                    <Favicon src={favicons.site} alt="Honors" size={12} />
+                    <Star className="h-3 w-3" />
                     {item.honors}
                   </span>
                 </div>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import { Award, BadgeCheck, Fingerprint, Play, Sparkles } from "lucide-react";
 import type { CertificateItem } from "@/lib/portfolio";
 import { Favicon, favicons } from "@/components/ui/favicon";
 import { cn } from "@/lib/utils";
@@ -11,12 +12,7 @@ function CertificateSlide({ item }: { item: CertificateItem }) {
   return (
     <article className="glass group relative flex h-full min-h-[22rem] flex-col overflow-hidden rounded-[2rem] p-7 shadow-lg shadow-indigo-500/5 ring-1 ring-white/70 transition-shadow duration-300 hover:shadow-xl hover:shadow-indigo-500/10 sm:p-10">
       <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400" />
-      <Favicon
-        src={favicons.site}
-        alt=""
-        size={176}
-        className="absolute -bottom-8 -right-8 h-44 w-44 rounded-2xl opacity-[0.06] ring-0"
-      />
+      <Award className="absolute -bottom-8 -right-8 h-44 w-44 text-indigo-500/[0.07] transition-transform duration-500 group-hover:scale-110" />
 
       <div className="relative flex flex-1 flex-col">
         {/* Header: seal + title + issuer */}
@@ -39,7 +35,7 @@ function CertificateSlide({ item }: { item: CertificateItem }) {
               </h3>
               {item.issuer && (
                 <p className="mt-1.5 flex items-center gap-1.5 text-sm font-semibold text-primary">
-                  <Favicon src={favicons.site} alt="Issuer" size={16} />
+                  <BadgeCheck className="h-4 w-4 shrink-0" />
                   {item.issuer}
                 </p>
               )}
@@ -66,7 +62,7 @@ function CertificateSlide({ item }: { item: CertificateItem }) {
                 key={skill}
                 className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3.5 py-1.5 text-xs font-semibold text-foreground/80 ring-1 ring-white/80"
               >
-                <Favicon src={favicons.site} alt="" size={12} />
+                <Sparkles className="h-3 w-3 text-primary" />
                 {skill}
               </span>
             ))}
@@ -91,7 +87,7 @@ function CertificateSlide({ item }: { item: CertificateItem }) {
             )}
             {item.credentialId && (
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                <Favicon src={favicons.site} alt="ID" size={14} />
+                <Fingerprint className="h-3.5 w-3.5 text-primary" />
                 ID: {item.credentialId}
               </span>
             )}
@@ -257,7 +253,7 @@ export function CertificateSlideshow({ items }: CertificateSlideshowProps) {
             onClick={() => setPaused(false)}
             className="glass-chip group inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-foreground/80 transition-all hover:-translate-y-0.5 hover:text-foreground hover:shadow-md"
           >
-            <Favicon src={favicons.site} alt="Play" size={14} />
+            <Play className="h-3.5 w-3.5 text-primary transition-transform group-hover:scale-110" />
             Paused — you&apos;re in control
           </button>
         ) : (
