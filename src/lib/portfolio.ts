@@ -722,6 +722,19 @@ export const portfolio = {
       status: "Verified",
       image: "/certificates/codesignal-java-interview-prep.jpg",
     },
+    {
+      id: "jobberman-get-hired-sales",
+      title: "Get Hired In Sales",
+      issuer: "Jobberman Nigeria",
+      date: "August 2026",
+      description:
+        "In partnership with Mastercard Foundation — successfully completed and passed the Get Hired in Sales course. Awarded by Jobberman Nigeria for sales fundamentals, customer engagement and job-readiness skills.",
+      skills: ["Digital Marketing"],
+      credentialId: "CERT-000000000578",
+      credentialUrl: "https://www.jobberman.com/certificate/69780fbf-621a-4e6a-b353-0a11f368f447",
+      status: "Verified",
+      image: "/certificates/jobberman-get-hired-sales.jpg",
+    },
   ] satisfies CertificateItem[],
 
   /** Achievements & honours — milestones worth celebrating. */
