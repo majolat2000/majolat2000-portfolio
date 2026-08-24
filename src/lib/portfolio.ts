@@ -733,7 +733,7 @@ export const portfolio = {
       credentialId: "CERT-000000000578",
       credentialUrl: "https://www.jobberman.com/certificate/69780fbf-621a-4e6a-b353-0a11f368f447",
       status: "Verified",
-      image: "/certificates/jobberman-get-hired-sales.jpg",
+      image: "https://media.licdn.com/dms/image/v2/D4E2DAQGau43ffHsWnA/profile-treasury-image-shrink_1920_1920/B4EaApfMNkG8Ac-/0/1787402437749?e=1788184800&v=beta&t=8VVaRPrprtuOsrjc7gUSsFqFouJimLUJVvOq1rRRLD8",
     },
   ] satisfies CertificateItem[],
 
