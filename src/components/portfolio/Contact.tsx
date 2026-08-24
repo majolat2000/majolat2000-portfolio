@@ -1,11 +1,18 @@
 import {
   ArrowUpRight,
+  CheckCircle2,
   Download,
   Linkedin,
+  Loader2,
   Mail,
+  Send,
   type LucideIcon,
 } from "lucide-react";
+import { useForm, ValidationError } from "@formspree/react";
 import { portfolio } from "@/lib/portfolio";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
@@ -30,6 +37,162 @@ const channels: {
     external: true,
   },
 ];
+
+function ContactForm() {
+  const [state, handleSubmit] = useForm("xeajwywl");
+
+  if (state.succeeded) {
+    return (
+      <div className="glass mt-10 rounded-[1.75rem] p-8 text-center sm:p-10">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-500/15 text-green-600">
+          <CheckCircle2 className="h-6 w-6" />
+        </div>
+        <h3 className="mt-4 font-display text-2xl font-semibold text-foreground">
+          Thanks for reaching out!
+        </h3>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+          Your message has been sent successfully. I&apos;ll get back to you
+          within a day at the email you provided.
+        </p>
+        <p className="mt-6 text-xs text-muted-foreground">
+          Prefer a faster channel?{" "}
+          <a
+            href={`mailto:${portfolio.email}`}
+            className="font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            Email me directly
+          </a>{" "}
+          or{" "}
+          <a
+            href={portfolio.linkedinUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-primary underline-offset-4 hover:underline"
+          >
+            DM on LinkedIn
+          </a>
+          .
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="glass mt-10 rounded-[1.75rem] p-6 text-left sm:p-8"
+    >
+      <div className="flex items-center gap-3">
+        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-400 text-white shadow-md shadow-indigo-500/25">
+          <Send className="h-4 w-4" />
+        </span>
+        <div>
+          <h3 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
+            Send me a message
+          </h3>
+          <p className="text-xs text-muted-foreground sm:text-sm">
+            Fill the form and I&apos;ll reply as soon as possible.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-5">
+        <div className="grid gap-2">
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            placeholder="Majesty Olatimilehin"
+            required
+            autoComplete="name"
+            className="bg-white/60"
+          />
+          <ValidationError
+            prefix="Name"
+            field="name"
+            errors={state.errors}
+            className="text-sm text-destructive"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="email">Email *</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            required
+            autoComplete="email"
+            className="bg-white/60"
+          />
+          <ValidationError
+            prefix="Email"
+            field="email"
+            errors={state.errors}
+            className="text-sm text-destructive"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="message">Message *</Label>
+          <Textarea
+            id="message"
+            name="message"
+            placeholder="Tell me about the opportunity, project, or idea you have in mind..."
+            required
+            rows={5}
+            className="min-h-[128px] bg-white/60"
+          />
+          <ValidationError
+            prefix="Message"
+            field="message"
+            errors={state.errors}
+            className="text-sm text-destructive"
+          />
+        </div>
+
+        {/* General form errors (e.g. network / Formspree config) */}
+        <ValidationError
+          errors={state.errors}
+          className="text-sm text-destructive"
+        />
+
+        <button
+          type="submit"
+          disabled={state.submitting}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-sm font-semibold text-background shadow-md transition-all hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
+        >
+          {state.submitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Sending...
+            </>
+          ) : (
+            <>
+              Send message
+              <Send className="h-4 w-4" />
+            </>
+          )}
+        </button>
+
+        <p className="text-center text-xs text-muted-foreground">
+          Powered by{" "}
+          <a
+            href="https://formspree.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline-offset-4 hover:underline"
+          >
+            Formspree
+          </a>{" "}
+          — your email stays private.
+        </p>
+      </div>
+    </form>
+  );
+}
 
 export function Contact() {
   return (
@@ -73,6 +236,8 @@ export function Contact() {
                 </a>
               ))}
             </div>
+
+            <ContactForm />
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <a
