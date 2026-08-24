@@ -1,3 +1,4 @@
+import { Send } from "lucide-react";
 import { useForm, ValidationError } from "@formspree/react";
 import { portfolio } from "@/lib/portfolio";
 import { Favicon, favicons } from "@/components/ui/favicon";
@@ -77,8 +78,8 @@ function ContactForm() {
       className="glass mt-10 rounded-[1.75rem] p-6 text-left sm:p-8"
     >
       <div className="flex items-center gap-3">
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/80 shadow-sm ring-1 ring-white/70">
-          <Favicon src={favicons.gmail} alt="Send" size={18} />
+        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-400 text-white shadow-md shadow-indigo-500/25">
+          <Send className="h-4 w-4" />
         </span>
         <div>
           <h3 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
