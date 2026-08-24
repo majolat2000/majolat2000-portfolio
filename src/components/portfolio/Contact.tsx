@@ -1,4 +1,4 @@
-import { Send } from "lucide-react";
+import { Mail, Send } from "lucide-react";
 import { useForm, ValidationError } from "@formspree/react";
 import { portfolio } from "@/lib/portfolio";
 import { Favicon, favicons } from "@/components/ui/favicon";
@@ -8,17 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
-const channels: {
-  src: string;
-  alt: string;
-  label: string;
-  value: string;
-  href: string;
-  external?: boolean;
-}[] = [
+const channels: Array<
+  | { Icon: typeof Mail; label: string; value: string; href: string; external?: boolean }
+  | { src: string; alt: string; label: string; value: string; href: string; external?: boolean }
+> = [
   {
-    src: favicons.gmail,
-    alt: "Email",
+    Icon: Mail,
     label: "Email",
     value: portfolio.email,
     href: `mailto:${portfolio.email}`,
@@ -206,17 +201,23 @@ export function Contact() {
             </p>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
-              {channels.map(({ src, alt, label, value, href, external }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target={external ? "_blank" : undefined}
-                  rel={external ? "noopener noreferrer" : undefined}
-                  className="glass group rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10"
-                >
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/80 shadow-sm ring-1 ring-white/70">
-                    <Favicon src={src} alt={alt} size={18} />
-                  </span>
+              {channels.map((ch) => {
+                const { label, value, href, external } = ch;
+                return (
+                  <a
+                    key={label}
+                    href={href}
+                    target={external ? "_blank" : undefined}
+                    rel={external ? "noopener noreferrer" : undefined}
+                    className="glass group rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10"
+                  >
+                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-400 text-white shadow-md shadow-indigo-500/25">
+                      {"Icon" in ch ? (
+                        <ch.Icon className="h-4 w-4" />
+                      ) : (
+                        <Favicon src={ch.src} alt={ch.alt} size={18} className="rounded-[4px] ring-white/20" />
+                      )}
+                    </span>
                   <span className="mt-4 block text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
                     {label}
                   </span>
@@ -227,7 +228,8 @@ export function Contact() {
                     </span>
                   </span>
                 </a>
-              ))}
+                  );
+                })}
             </div>
 
             <ContactForm />
