@@ -1,15 +1,6 @@
-import {
-  ArrowUpRight,
-  CheckCircle2,
-  Download,
-  Linkedin,
-  Loader2,
-  Mail,
-  Send,
-  type LucideIcon,
-} from "lucide-react";
 import { useForm, ValidationError } from "@formspree/react";
 import { portfolio } from "@/lib/portfolio";
+import { Favicon, favicons } from "@/components/ui/favicon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,20 +8,23 @@ import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
 const channels: {
-  icon: LucideIcon;
+  src: string;
+  alt: string;
   label: string;
   value: string;
   href: string;
   external?: boolean;
 }[] = [
   {
-    icon: Mail,
+    src: favicons.gmail,
+    alt: "Email",
     label: "Email",
     value: portfolio.email,
     href: `mailto:${portfolio.email}`,
   },
   {
-    icon: Linkedin,
+    src: favicons.linkedin,
+    alt: "LinkedIn",
     label: "LinkedIn",
     value: portfolio.linkedinHandle,
     href: portfolio.linkedinUrl,
@@ -44,8 +38,8 @@ function ContactForm() {
   if (state.succeeded) {
     return (
       <div className="glass mt-10 rounded-[1.75rem] p-8 text-center sm:p-10">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-500/15 text-green-600">
-          <CheckCircle2 className="h-6 w-6" />
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-500/15">
+          <Favicon src={favicons.gmail} alt="Sent" size={24} />
         </div>
         <h3 className="mt-4 font-display text-2xl font-semibold text-foreground">
           Thanks for reaching out!
@@ -83,8 +77,8 @@ function ContactForm() {
       className="glass mt-10 rounded-[1.75rem] p-6 text-left sm:p-8"
     >
       <div className="flex items-center gap-3">
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-400 text-white shadow-md shadow-indigo-500/25">
-          <Send className="h-4 w-4" />
+        <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/80 shadow-sm ring-1 ring-white/70">
+          <Favicon src={favicons.gmail} alt="Send" size={18} />
         </span>
         <div>
           <h3 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
@@ -153,11 +147,7 @@ function ContactForm() {
           />
         </div>
 
-        {/* General form errors (e.g. network / Formspree config) */}
-        <ValidationError
-          errors={state.errors}
-          className="text-sm text-destructive"
-        />
+        <ValidationError errors={state.errors} className="text-sm text-destructive" />
 
         <button
           type="submit"
@@ -166,13 +156,13 @@ function ContactForm() {
         >
           {state.submitting ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               Sending...
             </>
           ) : (
             <>
               Send message
-              <Send className="h-4 w-4" />
+              <Favicon src={favicons.gmail} alt="" size={14} className="rounded-[3px] ring-white/20" />
             </>
           )}
         </button>
@@ -215,7 +205,7 @@ export function Contact() {
             </p>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
-              {channels.map(({ icon: Icon, label, value, href, external }) => (
+              {channels.map(({ src, alt, label, value, href, external }) => (
                 <a
                   key={label}
                   href={href}
@@ -223,15 +213,17 @@ export function Contact() {
                   rel={external ? "noopener noreferrer" : undefined}
                   className="glass group rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10"
                 >
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-400 text-white shadow-md shadow-indigo-500/25">
-                    <Icon className="h-4 w-4" />
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/80 shadow-sm ring-1 ring-white/70">
+                    <Favicon src={src} alt={alt} size={18} />
                   </span>
                   <span className="mt-4 block text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
                     {label}
                   </span>
                   <span className="mt-1 flex items-center justify-between gap-2 text-sm font-semibold text-foreground">
                     <span className="truncate">{value}</span>
-                    <ArrowUpRight className="h-4 w-4 shrink-0 text-primary opacity-0 transition-opacity group-hover:opacity-100" />
+                    <span className="shrink-0 text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                      ↗
+                    </span>
                   </span>
                 </a>
               ))}
@@ -245,7 +237,9 @@ export function Contact() {
                 className="group inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3.5 text-sm font-semibold text-background shadow-md transition-all hover:-translate-y-0.5 hover:shadow-xl"
               >
                 Send me an email
-                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <span className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                  ↗
+                </span>
               </a>
               <a
                 href={portfolio.linkedinUrl}
@@ -253,7 +247,7 @@ export function Contact() {
                 rel="noopener noreferrer"
                 className="glass inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-foreground transition-all hover:-translate-y-0.5 hover:shadow-xl"
               >
-                <Linkedin className="h-4 w-4 text-primary" />
+                <Favicon src={favicons.linkedin} alt="LinkedIn" size={16} />
                 Connect on LinkedIn
               </a>
               <a
@@ -262,7 +256,7 @@ export function Contact() {
                 rel="noopener noreferrer"
                 className="glass inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-foreground transition-all hover:-translate-y-0.5 hover:shadow-xl"
               >
-                <Download className="h-4 w-4 text-primary" />
+                <Favicon src={favicons.google} alt="Resume" size={16} />
                 View resume
               </a>
             </div>

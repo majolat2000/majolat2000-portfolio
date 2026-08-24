@@ -1,17 +1,8 @@
-import {
-  ArrowUpRight,
-  Award,
-  Briefcase,
-  HeartHandshake,
-  Search,
-  SearchX,
-  Sparkles,
-  type LucideIcon,
-} from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { portfolio, type CatalogItem } from "@/lib/portfolio";
 import { cn } from "@/lib/utils";
+import { Favicon, favicons } from "@/components/ui/favicon";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
@@ -26,22 +17,25 @@ type FilterId = (typeof FILTERS)[number]["id"];
 
 const TYPE_META: Record<
   CatalogItem["type"],
-  { icon: LucideIcon; tile: string; badge: string; label: string }
+  { src: string; alt: string; tile: string; badge: string; label: string }
 > = {
   certificate: {
-    icon: Award,
+    src: favicons.coursera,
+    alt: "Certificate",
     tile: "from-indigo-500 to-violet-400",
     badge: "bg-indigo-100/80 text-indigo-700",
     label: "Certificate",
   },
   experience: {
-    icon: Briefcase,
+    src: favicons.linkedin,
+    alt: "Experience",
     tile: "from-sky-500 to-cyan-400",
     badge: "bg-sky-100/80 text-sky-700",
     label: "Experience",
   },
   volunteering: {
-    icon: HeartHandshake,
+    src: favicons.site,
+    alt: "Volunteering",
     tile: "from-violet-500 to-fuchsia-400",
     badge: "bg-violet-100/80 text-violet-700",
     label: "Volunteering",
@@ -83,7 +77,7 @@ export function Catalog() {
       <Reveal>
         <div className="mx-auto flex max-w-xl flex-col items-center gap-4">
           <div className="glass-deep flex w-full items-center gap-3 rounded-full px-5 py-2.5 shadow-lg shadow-indigo-500/5 transition-shadow focus-within:shadow-indigo-500/15">
-            <Search className="h-4 w-4 shrink-0 text-primary" />
+            <Favicon src={favicons.google} alt="Search" size={16} />
             <input
               type="search"
               value={query}
@@ -99,7 +93,7 @@ export function Catalog() {
                 aria-label="Clear search"
                 className="rounded-full bg-white/70 p-1 text-muted-foreground transition-colors hover:text-foreground"
               >
-                <SearchX className="h-3.5 w-3.5" />
+                <span className="text-xs leading-none">✕</span>
               </button>
             )}
           </div>
@@ -129,7 +123,6 @@ export function Catalog() {
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((item, i) => {
             const meta = TYPE_META[item.type];
-            const Icon = meta.icon;
             return (
               <Reveal key={item.id} delay={Math.min(i, 5) * 0.06}>
                 <div className="glass group relative h-full overflow-hidden rounded-3xl p-7 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10">
@@ -138,11 +131,10 @@ export function Catalog() {
                     <div className="flex items-start justify-between gap-3">
                       <span
                         className={cn(
-                          "grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br text-white shadow-md transition-transform duration-300 group-hover:scale-110",
-                          meta.tile,
+                          "grid h-12 w-12 place-items-center rounded-2xl bg-white/80 shadow-md ring-1 ring-white/70 transition-transform duration-300 group-hover:scale-110",
                         )}
                       >
-                        <Icon className="h-5 w-5" />
+                        <Favicon src={meta.src} alt={meta.alt} size={20} />
                       </span>
                       <span
                         className={cn(
@@ -160,7 +152,7 @@ export function Catalog() {
                       {item.description}
                     </p>
                     <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-amber-100/80 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700">
-                      <Sparkles className="h-3 w-3" />
+                      <Favicon src={favicons.site} alt="Status" size={12} />
                       {item.status}
                     </span>
                   </div>
@@ -172,15 +164,14 @@ export function Catalog() {
       ) : (
         <Reveal>
           <div className="glass-deep mx-auto mt-12 max-w-lg rounded-3xl px-8 py-12 text-center">
-            <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 to-sky-400 text-white shadow-md">
-              <SearchX className="h-6 w-6" />
+            <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-white/80 shadow-md ring-1 ring-white/70">
+              <Favicon src={favicons.google} alt="No results" size={24} />
             </span>
             <h3 className="mt-5 font-display text-xl font-semibold text-foreground">
               Nothing matches that yet
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Try a different search, or clear the filters to see the whole
-              collection.
+              Try a different search, or clear the filters to see the whole collection.
             </p>
             <button
               type="button"
@@ -202,17 +193,16 @@ export function Catalog() {
             to="/credentials"
             className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-sky-400 px-7 py-3.5 text-sm font-semibold text-white shadow-md shadow-indigo-500/30 transition-all hover:-translate-y-0.5 hover:shadow-xl"
           >
-            <Award className="h-4 w-4" />
+            <Favicon src={favicons.coursera} alt="Certificates" size={16} className="rounded-[4px] ring-white/20" />
             View all certificates &amp; achievements
-            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            <span className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">↗</span>
           </Link>
         </div>
       </Reveal>
 
       <Reveal delay={0.2}>
         <p className="mt-8 text-center text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-          {filtered.length} {filtered.length === 1 ? "item" : "items"} in the
-          catalog
+          {filtered.length} {filtered.length === 1 ? "item" : "items"} in the catalog
         </p>
       </Reveal>
     </Section>

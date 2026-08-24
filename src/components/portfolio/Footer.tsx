@@ -1,5 +1,5 @@
-import { ArrowUpRight, Linkedin, Mail } from "lucide-react";
 import { portfolio } from "@/lib/portfolio";
+import { Favicon, favicons } from "@/components/ui/favicon";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -40,14 +40,15 @@ export function Footer() {
 
           <div className="flex items-center gap-2">
             {[
-              { icon: Mail, href: `mailto:${portfolio.email}`, label: "Email" },
+              { src: favicons.gmail, alt: "Email", href: `mailto:${portfolio.email}`, label: "Email" },
               {
-                icon: Linkedin,
+                src: favicons.linkedin,
+                alt: "LinkedIn",
                 href: portfolio.linkedinUrl,
                 label: "LinkedIn",
                 external: true,
               },
-            ].map(({ icon: Icon, href, label, external }) => (
+            ].map(({ src, alt, href, label, external }) => (
               <a
                 key={label}
                 href={href}
@@ -56,7 +57,7 @@ export function Footer() {
                 rel={external ? "noopener noreferrer" : undefined}
                 className="glass-chip group grid h-10 w-10 place-items-center rounded-xl text-foreground/70 transition-all hover:-translate-y-0.5 hover:text-foreground hover:shadow-lg"
               >
-                <Icon className="h-4 w-4 transition-transform group-hover:scale-110" />
+                <Favicon src={src} alt={alt} size={16} />
               </a>
             ))}
           </div>
@@ -68,7 +69,7 @@ export function Footer() {
           </p>
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             Crafted with care — {portfolio.firstName}
-            <ArrowUpRight className="h-3 w-3 text-primary" />
+            <span className="text-primary">↗</span>
           </p>
         </div>
       </div>

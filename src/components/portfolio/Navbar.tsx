@@ -1,7 +1,7 @@
-import { ArrowUpRight, Award, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { portfolio } from "@/lib/portfolio";
+import { Favicon, favicons } from "@/components/ui/favicon";
 import { cn } from "@/lib/utils";
 
 export function Navbar() {
@@ -57,7 +57,7 @@ export function Navbar() {
             to="/credentials"
             className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-white/70"
           >
-            <Award className="h-4 w-4" />
+            <Favicon src={favicons.coursera} alt="Certificates" size={16} />
             Certificates
           </Link>
         </div>
@@ -68,7 +68,7 @@ export function Navbar() {
             className="hidden items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-sm font-semibold text-background shadow-sm transition-all hover:-translate-y-0.5 hover:opacity-90 hover:shadow-lg sm:inline-flex"
           >
             Hire me
-            <ArrowUpRight className="h-4 w-4" />
+            <span>↗</span>
           </a>
           <button
             type="button"
@@ -77,7 +77,7 @@ export function Navbar() {
             onClick={() => setOpen((v) => !v)}
             className="glass-chip grid h-10 w-10 place-items-center rounded-xl text-foreground md:hidden"
           >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <span className="text-lg leading-none">{open ? "✕" : "☰"}</span>
           </button>
         </div>
       </nav>
@@ -100,7 +100,7 @@ export function Navbar() {
               onClick={close}
               className="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-primary transition-colors hover:bg-white/70"
             >
-              <Award className="h-4 w-4" />
+              <Favicon src={favicons.coursera} alt="Certificates" size={16} />
               Certificates &amp; achievements
             </Link>
             <a

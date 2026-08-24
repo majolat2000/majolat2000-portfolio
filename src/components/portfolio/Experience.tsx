@@ -1,18 +1,12 @@
-import {
-  Briefcase,
-  Building2,
-  CalendarDays,
-  HeartHandshake,
-  MapPin,
-} from "lucide-react";
 import { portfolio, type ExperienceItem, type VolunteeringItem } from "@/lib/portfolio";
+import { Favicon, favicons } from "@/components/ui/favicon";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
 function PeriodBadge({ children }: { children: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-200/70 bg-sky-50/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-sky-700">
-      <CalendarDays className="h-3 w-3" />
+      <Favicon src={favicons.calendar} alt="Calendar" size={12} />
       {children}
     </span>
   );
@@ -24,13 +18,13 @@ function MetaRow({ location, jobType }: { location?: string; jobType?: string })
     <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-muted-foreground">
       {location && (
         <span className="inline-flex items-center gap-1.5">
-          <MapPin className="h-3.5 w-3.5 text-primary/70" />
+          <Favicon src={favicons.maps} alt="Location" size={14} />
           {location}
         </span>
       )}
       {jobType && (
         <span className="inline-flex items-center gap-1.5">
-          <Building2 className="h-3.5 w-3.5 text-primary/70" />
+          <Favicon src={favicons.site} alt="Work type" size={14} />
           {jobType}
         </span>
       )}
@@ -41,8 +35,8 @@ function MetaRow({ location, jobType }: { location?: string; jobType?: string })
 function ExperienceCard({ item, index }: { item: ExperienceItem; index: number }) {
   return (
     <li className="relative">
-      <span className="glass-deep absolute -left-[3rem] top-2 grid h-9 w-9 place-items-center rounded-full text-primary shadow-md shadow-indigo-500/20">
-        <Briefcase className="h-4 w-4" />
+      <span className="glass-deep absolute -left-[3rem] top-2 grid h-9 w-9 place-items-center rounded-full bg-white/80 shadow-md shadow-indigo-500/20 ring-1 ring-white/70">
+        <Favicon src={favicons.linkedin} alt="Work" size={16} />
       </span>
       <Reveal delay={index * 0.08}>
         <div className="glass rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/10 sm:p-7">
@@ -81,8 +75,8 @@ function ExperienceCard({ item, index }: { item: ExperienceItem; index: number }
 function VolunteeringCard({ item, index }: { item: VolunteeringItem; index: number }) {
   return (
     <li className="relative">
-      <span className="glass-deep absolute -left-[3rem] top-2 grid h-9 w-9 place-items-center rounded-full text-primary shadow-md shadow-indigo-500/20">
-        <HeartHandshake className="h-4 w-4" />
+      <span className="glass-deep absolute -left-[3rem] top-2 grid h-9 w-9 place-items-center rounded-full bg-white/80 shadow-md shadow-indigo-500/20 ring-1 ring-white/70">
+        <Favicon src={favicons.site} alt="Volunteer" size={16} />
       </span>
       <Reveal delay={index * 0.08}>
         <div className="glass rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/10 sm:p-7">
@@ -98,7 +92,7 @@ function VolunteeringCard({ item, index }: { item: VolunteeringItem; index: numb
             <PeriodBadge>{item.period}</PeriodBadge>
           </div>
           <span className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-violet-200/70 bg-violet-50/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-violet-700">
-            <HeartHandshake className="h-3 w-3" />
+            <Favicon src={favicons.site} alt="Cause" size={12} />
             {item.cause}
           </span>
         </div>
@@ -125,16 +119,14 @@ export function Experience() {
           <Reveal>
             <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-sky-500 to-cyan-400 text-white shadow-md shadow-sky-500/30">
-                  <Briefcase className="h-5 w-5" />
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/80 shadow-md shadow-sky-500/20 ring-1 ring-white/70">
+                  <Favicon src={favicons.linkedin} alt="Professional" size={20} />
                 </span>
                 <div>
                   <h3 className="font-display text-lg font-semibold text-foreground">
                     Professional Experience
                   </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Internships and roles building real-world skills
-                  </p>
+                  <p className="text-xs text-muted-foreground">Internships and roles building real-world skills</p>
                 </div>
               </div>
               <span className="glass-chip rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-foreground/70">
@@ -154,16 +146,14 @@ export function Experience() {
           <Reveal>
             <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-400 text-white shadow-md shadow-violet-500/30">
-                  <HeartHandshake className="h-5 w-5" />
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/80 shadow-md shadow-violet-500/20 ring-1 ring-white/70">
+                  <Favicon src={favicons.site} alt="Volunteering" size={20} />
                 </span>
                 <div>
                   <h3 className="font-display text-lg font-semibold text-foreground">
                     Volunteering & Community
                   </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Causes I give my time and skills to
-                  </p>
+                  <p className="text-xs text-muted-foreground">Causes I give my time and skills to</p>
                 </div>
               </div>
               <span className="glass-chip rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-foreground/70">

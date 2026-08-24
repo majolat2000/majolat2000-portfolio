@@ -1,17 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Award,
-  BadgeCheck,
-  CalendarDays,
-  ExternalLink,
-  Fingerprint,
-  Play,
-  Sparkles,
-} from "lucide-react";
 import type { CertificateItem } from "@/lib/portfolio";
+import { Favicon, favicons } from "@/components/ui/favicon";
 import { cn } from "@/lib/utils";
 
 const AUTOPLAY_MS = 4500;
@@ -21,7 +11,12 @@ function CertificateSlide({ item }: { item: CertificateItem }) {
   return (
     <article className="glass group relative flex h-full min-h-[22rem] flex-col overflow-hidden rounded-[2rem] p-7 shadow-lg shadow-indigo-500/5 ring-1 ring-white/70 transition-shadow duration-300 hover:shadow-xl hover:shadow-indigo-500/10 sm:p-10">
       <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400" />
-      <Award className="absolute -bottom-8 -right-8 h-44 w-44 text-indigo-500/[0.07] transition-transform duration-500 group-hover:scale-110" />
+      <Favicon
+        src={favicons.site}
+        alt=""
+        size={176}
+        className="absolute -bottom-8 -right-8 h-44 w-44 rounded-2xl opacity-[0.06] ring-0"
+      />
 
       <div className="relative flex flex-1 flex-col">
         {/* Header: seal + title + issuer */}
@@ -34,8 +29,8 @@ function CertificateSlide({ item }: { item: CertificateItem }) {
                 className="h-16 w-16 rounded-2xl object-cover shadow-md ring-2 ring-white/80"
               />
             ) : (
-              <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-indigo-500 via-violet-400 to-sky-400 text-white shadow-md shadow-indigo-500/25 ring-4 ring-white/60">
-                <Award className="h-7 w-7" />
+              <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-white/80 shadow-md ring-4 ring-white/60">
+                <Favicon src={favicons.coursera} alt="Certificate" size={28} />
               </span>
             )}
             <div className="min-w-0">
@@ -44,7 +39,7 @@ function CertificateSlide({ item }: { item: CertificateItem }) {
               </h3>
               {item.issuer && (
                 <p className="mt-1.5 flex items-center gap-1.5 text-sm font-semibold text-primary">
-                  <BadgeCheck className="h-4 w-4 shrink-0" />
+                  <Favicon src={favicons.site} alt="Issuer" size={16} />
                   {item.issuer}
                 </p>
               )}
@@ -71,7 +66,7 @@ function CertificateSlide({ item }: { item: CertificateItem }) {
                 key={skill}
                 className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3.5 py-1.5 text-xs font-semibold text-foreground/80 ring-1 ring-white/80"
               >
-                <Sparkles className="h-3 w-3 text-primary" />
+                <Favicon src={favicons.site} alt="" size={12} />
                 {skill}
               </span>
             ))}
@@ -90,13 +85,13 @@ function CertificateSlide({ item }: { item: CertificateItem }) {
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2.5 border-t border-indigo-100/60 pt-5">
             {item.date && (
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                <CalendarDays className="h-3.5 w-3.5 text-primary" />
+                <Favicon src={favicons.calendar} alt="Date" size={14} />
                 {item.date}
               </span>
             )}
             {item.credentialId && (
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                <Fingerprint className="h-3.5 w-3.5 text-primary" />
+                <Favicon src={favicons.site} alt="ID" size={14} />
                 ID: {item.credentialId}
               </span>
             )}
@@ -108,7 +103,9 @@ function CertificateSlide({ item }: { item: CertificateItem }) {
                 className="group/link inline-flex items-center gap-1.5 text-xs font-bold text-primary transition-colors hover:text-indigo-600"
               >
                 View credential
-                <ExternalLink className="h-3.5 w-3.5 transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5" />
+                <span className="transition-transform group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5">
+                  ↗
+                </span>
               </a>
             )}
           </div>
@@ -130,7 +127,6 @@ export function CertificateSlideshow({ items }: CertificateSlideshowProps) {
   const [selected, setSelected] = useState(0);
   const [paused, setPaused] = useState(false);
 
-  // Keep the active slide index in sync.
   useEffect(() => {
     if (!emblaApi) return;
     const onSelect = () => setSelected(emblaApi.selectedScrollSnap());
@@ -143,7 +139,6 @@ export function CertificateSlideshow({ items }: CertificateSlideshowProps) {
     };
   }, [emblaApi]);
 
-  // Autoplay — advances on its own until the viewer takes control.
   useEffect(() => {
     if (!emblaApi || paused) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -151,8 +146,6 @@ export function CertificateSlideshow({ items }: CertificateSlideshowProps) {
     return () => window.clearInterval(id);
   }, [emblaApi, paused]);
 
-  // The moment the viewer touches, swipes, clicks or types, autoplay stops
-  // permanently — the viewer is now in control.
   useEffect(() => {
     if (!emblaApi || paused) return;
     const stop = () => setPaused(true);
@@ -165,8 +158,6 @@ export function CertificateSlideshow({ items }: CertificateSlideshowProps) {
     };
   }, [emblaApi, paused]);
 
-  // Any manual navigation — arrows, dots, keyboard — also hands control to the
-  // viewer, same as swiping does.
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev();
     setPaused(true);
@@ -174,7 +165,8 @@ export function CertificateSlideshow({ items }: CertificateSlideshowProps) {
   const scrollNext = useCallback(() => {
     emblaApi?.scrollNext();
     setPaused(true);
-  }, [emblaApi]);    const handleKeyDown = useCallback(
+  }, [emblaApi]);
+  const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "ArrowLeft") {
         event.preventDefault();
@@ -224,7 +216,7 @@ export function CertificateSlideshow({ items }: CertificateSlideshowProps) {
           aria-label="Previous certificate"
           className="glass grid h-11 w-11 place-items-center rounded-full text-foreground/80 shadow-md shadow-indigo-500/10 transition-all hover:-translate-y-0.5 hover:text-foreground hover:shadow-lg"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <span className="text-lg leading-none">‹</span>
         </button>
 
         <div className="flex max-w-full flex-wrap items-center justify-center gap-1.5">
@@ -253,7 +245,7 @@ export function CertificateSlideshow({ items }: CertificateSlideshowProps) {
           aria-label="Next certificate"
           className="glass grid h-11 w-11 place-items-center rounded-full text-foreground/80 shadow-md shadow-indigo-500/10 transition-all hover:-translate-y-0.5 hover:text-foreground hover:shadow-lg"
         >
-          <ArrowRight className="h-4 w-4" />
+          <span className="text-lg leading-none">›</span>
         </button>
       </div>
 
@@ -265,7 +257,7 @@ export function CertificateSlideshow({ items }: CertificateSlideshowProps) {
             onClick={() => setPaused(false)}
             className="glass-chip group inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-foreground/80 transition-all hover:-translate-y-0.5 hover:text-foreground hover:shadow-md"
           >
-            <Play className="h-3.5 w-3.5 text-primary transition-transform group-hover:scale-110" />
+            <Favicon src={favicons.site} alt="Play" size={14} />
             Paused — you&apos;re in control
           </button>
         ) : (

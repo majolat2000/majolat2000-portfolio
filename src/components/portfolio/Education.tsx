@@ -1,5 +1,5 @@
-import { CalendarDays, GraduationCap, Star } from "lucide-react";
 import { portfolio } from "@/lib/portfolio";
+import { Favicon, favicons } from "@/components/ui/favicon";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
@@ -10,7 +10,7 @@ export function Education() {
       eyebrow="Education"
       title={
         <>
-          Where I'm <span className="text-gradient italic">learning</span>
+          Where I&apos;m <span className="text-gradient italic">learning</span>
         </>
       }
       description="The academic foundation I'm building — one first-class semester at a time."
@@ -18,8 +18,8 @@ export function Education() {
       <ol className="relative space-y-8 border-l border-indigo-200/70 pl-8">
         {portfolio.education.map((item, i) => (
           <li key={item.id} className="relative">
-            <span className="glass-deep absolute -left-[3rem] top-2 grid h-9 w-9 place-items-center rounded-full text-primary shadow-md shadow-indigo-500/20">
-              <GraduationCap className="h-4 w-4" />
+            <span className="glass-deep absolute -left-[3rem] top-2 grid h-9 w-9 place-items-center rounded-full bg-white/80 shadow-md shadow-indigo-500/20 ring-1 ring-white/70">
+              <Favicon src={favicons.coursera} alt="Education" size={16} />
             </span>
             <Reveal delay={i * 0.1}>
               <div className="glass rounded-2xl p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-indigo-500/10 sm:p-7">
@@ -33,13 +33,13 @@ export function Education() {
                     </h3>
                   </div>
                   <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200/70 bg-amber-50/90 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-amber-700">
-                    <Star className="h-3 w-3" />
+                    <Favicon src={favicons.site} alt="Honors" size={12} />
                     {item.honors}
                   </span>
                 </div>
                 <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-medium text-muted-foreground">
                   <span className="inline-flex items-center gap-1.5">
-                    <CalendarDays className="h-3.5 w-3.5 text-primary/70" />
+                    <Favicon src={favicons.calendar} alt="Calendar" size={14} />
                     {item.period} · Expected graduation
                   </span>
                 </p>
