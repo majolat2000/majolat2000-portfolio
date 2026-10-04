@@ -163,18 +163,9 @@ function ContactForm() {
           )}
         </button>
 
-        <p className="text-center text-xs text-muted-foreground">
-          Powered by{" "}
-          <a
-            href="https://formspree.io"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline-offset-4 hover:underline"
-          >
-            Formspree
-          </a>{" "}
-          — your email stays private.
-        </p>
+        
+
+
       </div>
     </form>
   );
