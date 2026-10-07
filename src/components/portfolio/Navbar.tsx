@@ -43,7 +43,7 @@ export function Navbar() {
           </span>
         </a>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-1 xl:flex">
           {portfolio.nav.map((item) => (
             <a
               key={item.href}
@@ -75,7 +75,7 @@ export function Navbar() {
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            className="glass-chip grid h-10 w-10 place-items-center rounded-xl text-foreground md:hidden"
+            className="glass-chip grid h-10 w-10 place-items-center rounded-xl text-foreground xl:hidden"
           >
             <span className="text-lg leading-none">{open ? "✕" : "☰"}</span>
           </button>
@@ -83,7 +83,7 @@ export function Navbar() {
       </nav>
 
       {open && (
-        <div className="mx-auto mt-2 max-w-6xl md:hidden">
+        <div className="mx-auto mt-2 max-w-6xl xl:hidden">
           <div className="glass-deep rounded-2xl p-2 shadow-xl shadow-indigo-500/10">
             {portfolio.nav.map((item) => (
               <a

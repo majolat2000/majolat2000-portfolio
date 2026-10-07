@@ -84,9 +84,9 @@ export const portfolio = {
   avatar: "/majesty-avatar.jpg",
 
   tagline:
-    "Turning ideas into practical digital solutions — blending the structure of computer science with a creative, artist's eye for detail.",
+    "I build digital solutions and digital products — blending the structure of computer science with a creative, artist's eye for detail.",
 
-  about: `I'm a Computer Scientist who enjoys turning ideas into practical digital solutions. With a creative mindset shaped by my hobby as an artist, I approach technology with curiosity, structure, and innovation — allowing me to tackle problems from both analytical and creative angles. I'm still learning every day, because for me, learning never stops.`,
+  about: `I build digital solutions and digital products. As a Computer Scientist with a creative mindset shaped by my hobby as an artist, I approach technology with curiosity, structure, and innovation — allowing me to tackle problems from both analytical and creative angles. I'm still learning every day, because for me, learning never stops.`,
 
   email: "hello@majolat2000.com.ng",
   linkedinUrl: "https://www.linkedin.com/in/majesty-olatimilehin",

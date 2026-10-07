@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -234,6 +235,10 @@ function CtaSection() {
 }
 
 export default function Credentials() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="relative min-h-screen overflow-x-clip text-foreground">
       <Background />

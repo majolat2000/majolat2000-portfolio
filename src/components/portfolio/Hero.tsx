@@ -85,7 +85,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.08, ease: "easeOut" }}
-            className="mt-6 font-display text-5xl leading-[1.04] tracking-tight text-foreground sm:text-6xl lg:text-7xl"
+            className="mt-6 font-display text-4xl leading-[1.04] tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-7xl break-words"
           >
             Hi, I&apos;m{" "}
             <span className="text-gradient italic">Majesty</span>
