@@ -99,7 +99,7 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.16, ease: "easeOut" }}
             className="mt-3 flex items-center text-base sm:text-lg text-foreground/90 font-medium"
           >
-            I'm a&nbsp;<span className="underline underline-offset-4 decoration-2"><Typewriter roles={portfolio.roles} /></span>
+            I'm a&nbsp;<span className="underline underline-offset-4 decoration-2">{portfolio.roles[0]}|</span>
           </motion.div>
 
           <motion.p
@@ -108,7 +108,7 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.20, ease: "easeOut" }}
             className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base"
           >
-            {portfolio.bio || portfolio.tagline}
+            {portfolio.tagline}
           </motion.p>
 
           <motion.div
@@ -137,9 +137,6 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.32, ease: "easeOut" }}
             className="mt-8 flex items-center gap-4"
           >
-            <a href={portfolio.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full border border-border hover:bg-white/5 transition-colors">
-              <Favicon src={favicons.github} alt="Code" size={16} className="opacity-75 grayscale" />
-            </a>
             <a href={portfolio.linkedinUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full border border-border hover:bg-white/5 transition-colors">
               <Favicon src={favicons.linkedin} alt="LinkedIn" size={16} className="opacity-75 grayscale" />
             </a>
