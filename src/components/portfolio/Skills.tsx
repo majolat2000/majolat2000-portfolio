@@ -20,7 +20,7 @@ export function Skills() {
           What I bring <span className="text-gradient italic">to the table</span>
         </>
       }
-      description="A toolkit shaped by computer science, sharpened by a creative mindset — and still growing every day."
+      description="A toolkit shaped by AI/ML engineering, sharpened by a creative mindset — and still growing every day."
     >
       <div className="grid gap-6 md:grid-cols-3">
         {Object.values(portfolio.skills).map((group, i) => {

@@ -11,19 +11,21 @@ import { Footer } from "@/components/portfolio/Footer";
 
 export default function Landing() {
   return (
-    <div className="relative min-h-screen overflow-x-clip text-foreground">
+    <div className="relative min-h-screen overflow-x-clip text-foreground bg-background">
       <Background />
-      <Navbar />
-      <main className="relative z-10">
-        <Hero />
-        <About />
-        <Skills />
-        <Experience />
-        <Education />
-        <Catalog />
-        <Contact />
-      </main>
-      <Footer />
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-8 lg:py-12 flex flex-col lg:flex-row lg:gap-12 lg:items-start">
+        <Navbar />
+        <main className="relative z-10 flex-1 w-full mt-24 lg:mt-0">
+          <Hero />
+          <About />
+          <Skills />
+          <Experience />
+          <Education />
+          <Catalog />
+          <Contact />
+          <Footer />
+        </main>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,20 @@
 import { cn } from "@/lib/utils";
+import { Linkedin, Mail, Github, Figma, Triangle, Award, Chrome, Calendar, MapPin, User, Layout } from "lucide-react";
 
-// Small browser-tab style favicon image. Use local site favicons
-// (/bimi-logo.svg, /majesty-avatar.jpg) for generic icons and
-// Google S2 favicons for real brand domains to avoid AI-generic Lucide look.
+export const favicons = {
+  site: "site",
+  avatar: "avatar",
+  linkedin: "linkedin",
+  gmail: "gmail",
+  github: "github",
+  figma: "figma",
+  vercel: "vercel",
+  coursera: "coursera",
+  google: "google",
+  calendar: "calendar",
+  maps: "maps",
+} as const;
+
 export function Favicon({
   src,
   alt,
@@ -14,41 +26,37 @@ export function Favicon({
   size?: number;
   className?: string;
 }) {
-  return (
-    <img
-      src={src}
-      alt={alt}
-      width={size}
-      height={size}
-      loading="lazy"
-      decoding="async"
-      className={cn(
-        "shrink-0 rounded-[3px] object-cover shadow-sm ring-1 ring-black/5",
-        className,
-      )}
-      style={{ width: size, height: size }}
-      onError={(e) => {
-        // Fallback to site favicon if external favicon fails
-        const target = e.currentTarget as HTMLImageElement;
-        if (target.src !== window.location.origin + "/bimi-logo.svg") {
-          target.src = "/bimi-logo.svg";
-        }
-      }}
-    />
-  );
-}
+  const iconProps = { 
+    width: size, 
+    height: size, 
+    className: cn("shrink-0", className) 
+  };
 
-// Predefined favicons — keeps site offline-friendly but uses real brand favicons where it matters.
-export const favicons = {
-  site: "/bimi-logo.svg", // Majesty's M — generic fallback, looks like a real tab favicon
-  avatar: "/majesty-avatar.jpg",
-  linkedin: "https://www.google.com/s2/favicons?domain=linkedin.com&sz=64",
-  gmail: "https://www.google.com/s2/favicons?domain=mail.google.com&sz=64",
-  github: "https://www.google.com/s2/favicons?domain=github.com&sz=64",
-  figma: "https://www.google.com/s2/favicons?domain=figma.com&sz=64",
-  vercel: "https://www.google.com/s2/favicons?domain=vercel.com&sz=64",
-  coursera: "https://www.google.com/s2/favicons?domain=coursera.org&sz=64",
-  google: "https://www.google.com/s2/favicons?domain=google.com&sz=64",
-  calendar: "https://www.google.com/s2/favicons?domain=calendar.google.com&sz=64",
-  maps: "https://www.google.com/s2/favicons?domain=maps.google.com&sz=64",
-} as const;
+  switch (src) {
+    case favicons.linkedin:
+      return <Linkedin {...iconProps} />;
+    case favicons.gmail:
+      return <Mail {...iconProps} />;
+    case favicons.github:
+      return <Github {...iconProps} />;
+    case favicons.figma:
+      return <Figma {...iconProps} />;
+    case favicons.vercel:
+      return <Triangle {...iconProps} />; // Vercel logo approx
+    case favicons.coursera:
+      return <Award {...iconProps} />;
+    case favicons.google:
+      return <Chrome {...iconProps} />; // Google fallback
+    case favicons.calendar:
+      return <Calendar {...iconProps} />;
+    case favicons.maps:
+      return <MapPin {...iconProps} />;
+    case favicons.avatar:
+      return <User {...iconProps} />;
+    case favicons.site:
+      return <Layout {...iconProps} />;
+    default:
+      // If it's a raw URL that we don't map, fallback
+      return <Layout {...iconProps} />;
+  }
+}

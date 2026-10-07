@@ -68,10 +68,10 @@ export interface AchievementItem {
 }
 
 export const portfolio = {
-  name: "Majesty Olatimilehin",
+  name: "AI/ML Engineer | Technical VA",
   firstName: "Majesty",
-  brand: "Majesty's Portfolio",
-  roles: ["Computer Scientist", "Virtual Assistant"],
+  brand: "Majesty Olatimilehin",
+  roles: ["AI/ML Engineer", "Technical VA"],
   initials: "MO",
 
   /** Full-size profile photo. */
@@ -84,9 +84,9 @@ export const portfolio = {
   avatar: "/majesty-avatar.jpg",
 
   tagline:
-    "I build digital solutions and digital products — blending the structure of computer science with a creative, artist's eye for detail.",
+    "I build digital solutions and digital products — blending the structure of AI/ML engineering with a creative, artist's eye for detail.",
 
-  about: `I build digital solutions and digital products. As a Computer Scientist with a creative mindset shaped by my hobby as an artist, I approach technology with curiosity, structure, and innovation — allowing me to tackle problems from both analytical and creative angles. I'm still learning every day, because for me, learning never stops.`,
+  about: `I build digital solutions and digital products. As an AI/ML Engineer and Technical VA, with a creative mindset shaped by my hobby as an artist, I approach technology with curiosity, structure, and innovation — allowing me to tackle problems from both analytical and creative angles. I'm still learning every day, because for me, learning never stops.`,
 
   email: "hello@majolat2000.com.ng",
   linkedinUrl: "https://www.linkedin.com/in/majesty-olatimilehin",
@@ -125,8 +125,8 @@ export const portfolio = {
 
   skills: {
     computerScience: {
-      title: "Computer Science",
-      description: "Core toolkit I'm building through my Computer Science journey.",
+      title: "AI/ML Engineering",
+      description: "Core toolkit I'm building through my AI/ML engineering journey.",
       items: [
         "Web development",
         "Programming & scripting",
@@ -137,7 +137,7 @@ export const portfolio = {
       ],
     },
     virtualAssistance: {
-      title: "Virtual Assistance",
+      title: "Technical VA",
       description: "Reliable, organised support that keeps things running smoothly.",
       items: [
         "Email & calendar management",
@@ -173,7 +173,7 @@ export const portfolio = {
       type: "certificate",
       title: "Academic achievements",
       description:
-        "Certificates and course completions from my Computer Science journey — the full list lives on the Certificates & Achievements page.",
+        "Certificates and course completions from my AI/ML engineering journey — the full list lives on the Certificates & Achievements page.",
       status: "Live",
     },
     {
@@ -327,7 +327,7 @@ export const portfolio = {
     },
     {
       id: "vsavvy-virtual-assistance",
-      title: "Virtual Assistance",
+      title: "Technical VA",
       issuer: "VSavvy Academy",
       date: "December 2025",
       description:
