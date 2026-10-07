@@ -113,7 +113,9 @@ function AuthPanel() {
           setError(
             signInError.message === "Invalid login credentials"
               ? "Wrong email or password."
-              : signInError.message,
+              : signInError.message === "Email not confirmed"
+                ? "Confirm your email first — check your inbox for the link."
+                : signInError.message,
           );
         }
       } else {
