@@ -72,50 +72,60 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            <span className="glass-chip inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold text-foreground/80">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-              </span>
-              Open to internships &amp; opportunities
-            </span>
+            {/* Kept empty for spacing if needed, removing the open to work badge to match reference */}
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.08, ease: "easeOut" }}
-            className="mt-6 font-display text-5xl leading-[1.04] tracking-tight text-foreground sm:text-6xl lg:text-7xl"
+            className="font-display text-[3.5rem] leading-[1.1] font-extrabold tracking-tight text-foreground sm:text-[4.5rem] lg:text-[5.5rem]"
           >
-            Hi, I&apos;m{" "}
-            <span className="text-gradient italic">Majesty</span>
-            <span className="block">Olatimilehin</span>
+            {portfolio.brand}
           </motion.h1>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.12, ease: "easeOut" }}
+            className="mt-1 text-2xl font-bold text-foreground sm:text-3xl"
+          >
+            {portfolio.name}
+          </motion.h2>
+
+          <motion.div
+            initial={{ opacity: 0, y: 22 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.16, ease: "easeOut" }}
+            className="mt-3 flex items-center text-base sm:text-lg text-foreground/90 font-medium"
+          >
+            I'm a&nbsp;<span className="underline underline-offset-4 decoration-2"><Typewriter roles={portfolio.roles} /></span>
+          </motion.div>
 
           <motion.p
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.16, ease: "easeOut" }}
-            className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground"
+            transition={{ duration: 0.7, delay: 0.20, ease: "easeOut" }}
+            className="mt-5 max-w-md text-sm leading-relaxed text-muted-foreground sm:text-base"
           >
-            {portfolio.tagline}
+            {portfolio.bio || portfolio.tagline}
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.24, ease: "easeOut" }}
-            className="mt-8 flex flex-wrap items-center gap-3"
+            className="mt-8 flex flex-wrap items-center gap-4"
           >
             <a
               href="#catalog"
-              className="group inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background shadow-md transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              className="inline-flex items-center justify-center rounded-full bg-foreground px-6 py-2.5 text-sm font-semibold text-background transition-colors hover:bg-foreground/90"
             >
               View My Work
             </a>
             <a
               href="#contact"
-              className="glass inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-foreground transition-all hover:-translate-y-0.5 hover:shadow-xl"
+              className="inline-flex items-center justify-center rounded-full border border-border bg-transparent px-6 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-white/5"
             >
               Get In Touch
             </a>
@@ -125,20 +135,17 @@ export function Hero() {
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.32, ease: "easeOut" }}
-            className="mt-8 flex flex-wrap items-center gap-3"
+            className="mt-8 flex items-center gap-4"
           >
-            <ContactChip
-              href={portfolio.linkedinUrl}
-              src={favicons.linkedin}
-              alt="LinkedIn"
-              label="LinkedIn"
-            />
-            <ContactChip
-              href={`mailto:${portfolio.email}`}
-              src={favicons.gmail}
-              alt="Email"
-              label="Email"
-            />
+            <a href={portfolio.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full border border-border hover:bg-white/5 transition-colors">
+              <Favicon src={favicons.github} alt="Code" size={16} className="opacity-75 grayscale" />
+            </a>
+            <a href={portfolio.linkedinUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full border border-border hover:bg-white/5 transition-colors">
+              <Favicon src={favicons.linkedin} alt="LinkedIn" size={16} className="opacity-75 grayscale" />
+            </a>
+            <a href={`mailto:${portfolio.email}`} className="p-2 rounded-full border border-border hover:bg-white/5 transition-colors">
+              <Favicon src={favicons.gmail} alt="Email" size={16} className="opacity-75 grayscale" />
+            </a>
           </motion.div>
         </div>
 
@@ -147,85 +154,15 @@ export function Hero() {
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="relative mx-auto w-full max-w-sm lg:max-w-none"
+          className="relative mx-auto w-full max-w-sm lg:max-w-none flex items-center justify-center lg:justify-end"
         >
-          <div className="glass relative overflow-hidden rounded-[2.25rem] p-8">
-            <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-sky-300/40 blur-2xl" />
-            <div className="absolute -bottom-20 -left-16 h-52 w-52 rounded-full bg-indigo-300/30 blur-2xl" />
-
-            <div className="relative">
-              <div className="group/avatar mx-auto h-28 w-28 overflow-hidden rounded-full bg-white/60 shadow-xl shadow-indigo-500/30 ring-4 ring-white/70 transition-transform duration-500 hover:scale-105">
-                <img
-                  src={portfolio.avatar}
-                  alt={portfolio.name}
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <h3 className="mt-6 text-center font-display text-2xl font-semibold text-foreground">
-                {portfolio.name}
-              </h3>
-              <p className="mt-1.5 text-center text-sm font-semibold text-primary">
-                {portfolio.roles.join("  ·  ")}
-              </p>
-
-              <div className="my-6 h-px bg-gradient-to-r from-transparent via-indigo-200/80 to-transparent" />
-
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { src: favicons.github, alt: "Code", label: "Computer Science" },
-                  { src: favicons.linkedin, alt: "Briefcase", label: "Virtual Assistant" },
-                ].map(({ src, alt, label }) => (
-                  <div
-                    key={label}
-                    className="flex flex-col items-center gap-2 rounded-2xl bg-white/55 px-2 py-3 text-center shadow-sm backdrop-blur-sm"
-                  >
-                    <Favicon src={src} alt={alt} size={18} />
-                    <span className="text-[10px] font-semibold leading-tight text-foreground/70">
-                      {label}
-                    </span>
-                  </div>
-                ))}
-                <div className="flex flex-col items-center gap-2 rounded-2xl bg-white/55 px-2 py-3 text-center shadow-sm backdrop-blur-sm">
-                  <Sparkles className="h-[18px] w-[18px] text-primary" />
-                  <span className="text-[10px] font-semibold leading-tight text-foreground/70">
-                    Always learning
-                  </span>
-                </div>
-              </div>
-            </div>
+          <div className="relative aspect-square w-full max-w-[320px] overflow-hidden rounded-[2.5rem] bg-card border border-border shadow-2xl">
+            <img
+              src={portfolio.photo || portfolio.avatar}
+              alt={portfolio.name}
+              className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+            />
           </div>
-
-          <FloatBadge
-            className="-left-16 top-10"
-            src={favicons.figma}
-            alt="Artist"
-            label="Artist's eye"
-            delay={0.2}
-          />
-          <FloatBadge
-            className="-right-12 top-1/3"
-            src={favicons.vercel}
-            alt="Fast"
-            label="Fast learner"
-            delay={1}
-          />
-          <FloatBadge
-            className="-left-14 bottom-24"
-            src={favicons.coursera}
-            alt="Student"
-            label="CS student"
-            delay={1.8}
-          />
-          <motion.div
-            className="absolute z-10 hidden lg:block -right-10 bottom-8"
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.7 }}
-          >
-            <div className="glass-deep flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-foreground/85 shadow-lg shadow-indigo-500/10">
-              <Star className="h-4 w-4 text-primary" />
-              Detail-focused
-            </div>
-          </motion.div>
         </motion.div>
       </div>
 
