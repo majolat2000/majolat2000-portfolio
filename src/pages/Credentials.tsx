@@ -15,7 +15,7 @@ import { CertificateSlideshow } from "@/components/portfolio/CertificateSlidesho
 import { Footer } from "@/components/portfolio/Footer";
 import { Reveal } from "@/components/portfolio/Reveal";
 import { Section } from "@/components/portfolio/Section";
-import { portfolio, type AchievementItem } from "@/lib/portfolio";
+import { portfolio } from "@/lib/portfolio";
 
 const NAV_LINKS = [
   { label: "About", href: "/#about" },

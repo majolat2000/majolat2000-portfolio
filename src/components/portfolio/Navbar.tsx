@@ -83,11 +83,7 @@ export function Navbar() {
           </a>
         </div>
 
-        {/* Desktop Footer / Socials */}
         <div className="hidden lg:flex flex-wrap items-center gap-3 mt-auto pt-8 border-t border-border/50 w-full justify-center">
-          <a href={portfolio.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full glass-chip hover:bg-white/70 transition-colors">
-            <Favicon src={favicons.github} alt="GitHub" size={18} />
-          </a>
           <a href={portfolio.linkedinUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full glass-chip hover:bg-white/70 transition-colors">
             <Favicon src={favicons.linkedin} alt="LinkedIn" size={18} />
           </a>
