@@ -108,42 +108,17 @@ export function Hero() {
             className="mt-8 flex flex-wrap items-center gap-3"
           >
             <a
-              href="#contact"
+              href="#catalog"
               className="group inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-semibold text-background shadow-md transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
-              Get in touch
-              <span className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
-                ↗
-              </span>
+              View My Work
             </a>
             <a
-              href="#about"
+              href="#contact"
               className="glass inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-foreground transition-all hover:-translate-y-0.5 hover:shadow-xl"
             >
-              About me
+              Get In Touch
             </a>
-            {portfolio.resumeUrl ? (
-              <a
-                href={portfolio.resumeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="glass-chip inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-foreground/80 transition-all hover:-translate-y-0.5 hover:text-foreground hover:shadow-lg"
-              >
-                <Favicon src={favicons.google} alt="Resume" size={16} />
-                Resume
-              </a>
-            ) : (
-              <span
-                title="Resume link coming soon"
-                className="glass-chip inline-flex cursor-default items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-foreground/55"
-              >
-                <Favicon src={favicons.google} alt="Resume" size={16} className="opacity-60" />
-                Resume
-                <span className="rounded-full bg-amber-100/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">
-                  Soon
-                </span>
-              </span>
-            )}
           </motion.div>
 
           <motion.div
