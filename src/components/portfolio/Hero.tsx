@@ -38,15 +38,6 @@ export function Hero() {
             {portfolio.name}
           </motion.h2>
 
-          <motion.div
-            initial={{ opacity: 0, y: 22 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.16, ease: "easeOut" }}
-            className="mt-3 flex items-center text-base sm:text-lg text-foreground/90 font-medium"
-          >
-            I'm a&nbsp;<span className="underline underline-offset-4 decoration-2">{portfolio.roles[0]}|</span>
-          </motion.div>
-
           <motion.p
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
