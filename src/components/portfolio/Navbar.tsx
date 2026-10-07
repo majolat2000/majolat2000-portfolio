@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { portfolio } from "@/lib/portfolio";
-import { Favicon, favicons } from "@/components/ui/favicon";
 import { cn } from "@/lib/utils";
-import { Home, User, FileText, Briefcase, Mail, ChevronDown } from "lucide-react";
+import { Home, User, FileText, Briefcase, Mail, ChevronDown, Award, Linkedin, Github } from "lucide-react";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -70,18 +69,18 @@ export function Navbar() {
               to="/credentials"
               className="flex items-center gap-4 rounded-2xl px-4 py-3.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
             >
-              <Favicon src={favicons.coursera} alt="Certificates" size={16} className="opacity-60 grayscale" />
+              <Award className="w-4 h-4" />
               Certificates
             </Link>
           </div>
 
           {/* Desktop Footer / Socials */}
           <div className="hidden lg:flex flex-wrap items-center gap-2 mt-auto w-full justify-start pl-2">
-            <a href={portfolio.linkedinUrl} target="_blank" rel="noopener noreferrer" className="grid h-10 w-10 place-items-center rounded-full glass-chip hover:bg-white/10 transition-colors">
-              <Favicon src={favicons.linkedin} alt="LinkedIn" size={16} />
+            <a href={portfolio.linkedinUrl} target="_blank" rel="noopener noreferrer" className="grid h-10 w-10 place-items-center rounded-full glass-chip hover:bg-white/10 transition-colors text-foreground">
+              <Linkedin className="w-4 h-4" />
             </a>
-            <a href={`mailto:${portfolio.email}`} className="grid h-10 w-10 place-items-center rounded-full glass-chip hover:bg-white/10 transition-colors">
-              <Favicon src={favicons.gmail} alt="Email" size={16} />
+            <a href={`mailto:${portfolio.email}`} className="grid h-10 w-10 place-items-center rounded-full glass-chip hover:bg-white/10 transition-colors text-foreground">
+              <Mail className="w-4 h-4" />
             </a>
           </div>
 
@@ -119,7 +118,7 @@ export function Navbar() {
                 onClick={close}
                 className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-foreground/80 transition-colors hover:bg-white/10"
               >
-                <Favicon src={favicons.coursera} alt="Certificates" size={16} className="opacity-60 grayscale" />
+                <Award className="w-4 h-4" />
                 Certificates
               </Link>
             </div>

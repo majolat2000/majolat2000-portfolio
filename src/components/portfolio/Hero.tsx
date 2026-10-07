@@ -1,62 +1,7 @@
 import { motion } from "framer-motion";
-import { Sparkles, Star } from "lucide-react";
+import { Sparkles, Star, Github, Linkedin, Mail } from "lucide-react";
 import { portfolio } from "@/lib/portfolio";
 import { cn } from "@/lib/utils";
-import { Favicon, favicons } from "@/components/ui/favicon";
-
-function FloatBadge({
-  className,
-  src,
-  alt,
-  label,
-  delay = 0,
-}: {
-  className?: string;
-  src: string;
-  alt: string;
-  label: string;
-  delay?: number;
-}) {
-  return (
-    <motion.div
-      className={cn("absolute z-10 hidden lg:block", className)}
-      animate={{ y: [0, -10, 0] }}
-      transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay }}
-    >
-      <div className="glass-deep flex items-center gap-2 rounded-2xl px-3.5 py-2.5 text-xs font-semibold text-foreground/85 shadow-lg shadow-indigo-500/10">
-        <Favicon src={src} alt={alt} size={16} />
-        {label}
-      </div>
-    </motion.div>
-  );
-}
-
-function ContactChip({
-  href,
-  src,
-  alt,
-  label,
-}: {
-  href: string;
-  src: string;
-  alt: string;
-  label: string;
-}) {
-  return (
-    <a
-      href={href}
-      target={href.startsWith("http") ? "_blank" : undefined}
-      rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-      className="glass-chip group inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-foreground/80 transition-all hover:-translate-y-0.5 hover:text-foreground hover:shadow-lg"
-    >
-      <Favicon src={src} alt={alt} size={16} />
-      {label}
-      <span className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
-        ↗
-      </span>
-    </a>
-  );
-}
 
 export function Hero() {
   return (
@@ -72,7 +17,7 @@ export function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
-            {/* Kept empty for spacing if needed, removing the open to work badge to match reference */}
+            {/* Kept empty for spacing if needed */}
           </motion.div>
 
           <motion.h1
@@ -137,11 +82,11 @@ export function Hero() {
             transition={{ duration: 0.7, delay: 0.32, ease: "easeOut" }}
             className="mt-8 flex items-center gap-4"
           >
-            <a href={portfolio.linkedinUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full border border-border hover:bg-white/5 transition-colors">
-              <Favicon src={favicons.linkedin} alt="LinkedIn" size={16} className="opacity-75 grayscale" />
+            <a href={portfolio.linkedinUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full border border-border hover:bg-white/5 transition-colors text-muted-foreground hover:text-foreground">
+              <Linkedin className="h-5 w-5" />
             </a>
-            <a href={`mailto:${portfolio.email}`} className="p-2 rounded-full border border-border hover:bg-white/5 transition-colors">
-              <Favicon src={favicons.gmail} alt="Email" size={16} className="opacity-75 grayscale" />
+            <a href={`mailto:${portfolio.email}`} className="p-2 rounded-full border border-border hover:bg-white/5 transition-colors text-muted-foreground hover:text-foreground">
+              <Mail className="h-5 w-5" />
             </a>
           </motion.div>
         </div>

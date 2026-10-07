@@ -1,17 +1,13 @@
-import { Mail, Send } from "lucide-react";
+import { Mail, Send, Linkedin, FileText, CheckCircle2 } from "lucide-react";
 import { useForm, ValidationError } from "@formspree/react";
 import { portfolio } from "@/lib/portfolio";
-import { Favicon, favicons } from "@/components/ui/favicon";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Reveal } from "./Reveal";
 import { Section } from "./Section";
 
-const channels: Array<
-  | { Icon: typeof Mail; label: string; value: string; href: string; external?: boolean }
-  | { src: string; alt: string; label: string; value: string; href: string; external?: boolean }
-> = [
+const channels: Array<{ Icon: React.ElementType; label: string; value: string; href: string; external?: boolean }> = [
   {
     Icon: Mail,
     label: "Email",
@@ -19,8 +15,7 @@ const channels: Array<
     href: `mailto:${portfolio.email}`,
   },
   {
-    src: favicons.linkedin,
-    alt: "LinkedIn",
+    Icon: Linkedin,
     label: "LinkedIn",
     value: portfolio.linkedinHandle,
     href: portfolio.linkedinUrl,
@@ -35,7 +30,7 @@ function ContactForm() {
     return (
       <div className="glass mt-10 rounded-[1.75rem] p-8 text-center sm:p-10">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-500/15">
-          <Favicon src={favicons.gmail} alt="Sent" size={24} />
+          <CheckCircle2 className="h-6 w-6 text-green-500" />
         </div>
         <h3 className="mt-4 font-display text-2xl font-semibold text-foreground">
           Thanks for reaching out!
@@ -50,7 +45,7 @@ function ContactForm() {
             href={`mailto:${portfolio.email}`}
             className="font-semibold text-primary underline-offset-4 hover:underline"
           >
-            Email me directly
+            Email directly
           </a>{" "}
           or{" "}
           <a
@@ -96,7 +91,7 @@ function ContactForm() {
             placeholder="Majesty Olatimilehin"
             required
             autoComplete="name"
-            className="bg-white/60"
+            className="bg-white/5"
           />
           <ValidationError
             prefix="Name"
@@ -115,7 +110,7 @@ function ContactForm() {
             placeholder="you@example.com"
             required
             autoComplete="email"
-            className="bg-white/60"
+            className="bg-white/5"
           />
           <ValidationError
             prefix="Email"
@@ -133,7 +128,7 @@ function ContactForm() {
             placeholder="Tell me about the opportunity, project, or idea you have in mind..."
             required
             rows={5}
-            className="min-h-[128px] bg-white/60"
+            className="min-h-[128px] bg-white/5"
           />
           <ValidationError
             prefix="Message"
@@ -158,14 +153,10 @@ function ContactForm() {
           ) : (
             <>
               Send message
-              <Favicon src={favicons.gmail} alt="" size={14} className="rounded-[3px] ring-white/20" />
+              <Send className="h-4 w-4" />
             </>
           )}
         </button>
-
-        
-
-
       </div>
     </form>
   );
@@ -176,9 +167,6 @@ export function Contact() {
     <Section id="contact" className="pb-28 sm:pb-32">
       <Reveal>
         <div className="glass-deep relative overflow-hidden rounded-[2.5rem] px-6 py-14 text-center sm:px-12 sm:py-16">
-          <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-sky-300/40 blur-3xl" />
-          <div className="absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-indigo-300/35 blur-3xl" />
-
           <div className="relative mx-auto max-w-2xl">
             <p className="eyebrow justify-center">Contact</p>
             <h2 className="mt-4 font-display text-4xl leading-tight tracking-tight text-foreground sm:text-5xl">
@@ -193,7 +181,7 @@ export function Contact() {
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
               {channels.map((ch) => {
-                const { label, value, href, external } = ch;
+                const { label, value, href, external, Icon } = ch;
                 return (
                   <a
                     key={label}
@@ -203,11 +191,7 @@ export function Contact() {
                     className="glass group rounded-2xl p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10"
                   >
                     <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-sky-400 text-white shadow-md shadow-indigo-500/25">
-                      {"Icon" in ch ? (
-                        <ch.Icon className="h-4 w-4" />
-                      ) : (
-                        <Favicon src={ch.src} alt={ch.alt} size={18} className="rounded-[4px] ring-white/20" />
-                      )}
+                      <Icon className="h-4 w-4" />
                     </span>
                   <span className="mt-4 block text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground">
                     {label}
@@ -241,7 +225,7 @@ export function Contact() {
                 rel="noopener noreferrer"
                 className="glass inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-foreground transition-all hover:-translate-y-0.5 hover:shadow-xl"
               >
-                <Favicon src={favicons.linkedin} alt="LinkedIn" size={16} />
+                <Linkedin className="h-4 w-4" />
                 Connect on LinkedIn
               </a>
               <a
@@ -250,7 +234,7 @@ export function Contact() {
                 rel="noopener noreferrer"
                 className="glass inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold text-foreground transition-all hover:-translate-y-0.5 hover:shadow-xl"
               >
-                <Favicon src={favicons.google} alt="Resume" size={16} />
+                <FileText className="h-4 w-4" />
                 View resume
               </a>
             </div>
