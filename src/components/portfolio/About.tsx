@@ -70,7 +70,7 @@ export function About() {
               <li className="flex items-start justify-between gap-4 border-b border-indigo-100/70 pb-4">
                 <span className="text-sm font-medium text-muted-foreground">Name</span>
                 <span className="text-right text-sm font-semibold text-foreground">
-                  {portfolio.name}
+                  {portfolio.brand}
                 </span>
               </li>
               <li className="flex items-start justify-between gap-4 border-b border-indigo-100/70 pb-4">
