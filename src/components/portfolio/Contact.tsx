@@ -174,7 +174,7 @@ export function Contact() {
               <span className="text-gradient italic">together</span>
             </h2>
             <p className="mt-5 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Whether it&apos;s an internship opportunity, a virtual-assistant
+              Whether it&apos;s an internship opportunity, a Technical VA
               role, or a project idea — my inbox is open. I&apos;d love to hear
               from you.
             </p>
