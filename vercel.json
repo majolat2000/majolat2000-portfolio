@@ -1,4 +1,5 @@
 {
+  "buildCommand": "npm run build",
   "rewrites": [
     { "source": "/credentials", "destination": "/index.html" },
     { "source": "/auth", "destination": "/index.html" },
