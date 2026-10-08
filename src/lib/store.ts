@@ -55,11 +55,12 @@ export async function listProducts(): Promise<StoreProduct[]> {
   return unwrap(data ?? [], error);
 }
 
-export async function listMyAccess(): Promise<AccessGrantWithProduct[]> {
+export async function listMyAccess(userId: string): Promise<AccessGrantWithProduct[]> {
   if (!supabase) return [];
   const { data, error } = await supabase
     .from("product_access")
     .select("*, product:products(*)")
+    .eq("user_id", userId)
     .gte("expires_at", new Date().toISOString())
     .order("expires_at", { ascending: true });
   return unwrap(data ?? [], error) as AccessGrantWithProduct[];
@@ -131,4 +132,13 @@ export function formatDate(iso: string): string {
     month: "short",
     year: "numeric",
   });
+}
+
+export async function adminDeleteProduct(productId: string): Promise<void> {
+  if (!supabase) return;
+  const { error } = await supabase
+    .from("products")
+    .delete()
+    .eq("id", productId);
+  if (error) throw new Error(error.message);
 }

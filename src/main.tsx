@@ -16,6 +16,7 @@ const StorefrontAdmin = lazy(() => import("./pages/StorefrontAdmin.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const Solutions = lazy(() => import("./pages/Solutions.tsx"));
 const Storefront = lazy(() => import("./pages/Storefront.tsx"));
+const CoursePage = lazy(() => import("./pages/CoursePage.tsx"));
 
 // Simple loading fallback for route transitions
 function RouteLoading() {
@@ -121,6 +122,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/solutions" element={<Solutions />} />
             <Route path="/storefront" element={<Storefront />} />
             <Route path="/storefront/admin" element={<StorefrontAdmin />} />
+            <Route path="/storefront/product/:id" element={<CoursePage />} />
             <Route
               path="/auth"
               element={<AuthPage redirectAfterAuth="/dashboard" />}

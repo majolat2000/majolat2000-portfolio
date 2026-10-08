@@ -63,7 +63,7 @@ function NotConfigured() {
   );
 }
 
-function AuthPanel() {
+export function AuthPanel() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -239,13 +239,13 @@ function AccountPanel({
   const isAdmin =
     session.user.email === portfolio.email;
 
-  const [view, setView] = useState<"storefront" | "preview" | "course">("storefront");
+  const [view, setView] = useState<"storefront" | "preview">("storefront");
   const [agreed1, setAgreed1] = useState(false);
   const [agreed2, setAgreed2] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([listMyAccess(), listProducts()])
+    Promise.all([listMyAccess(session.user.id), listProducts()])
       .then(([nextAccess, nextCatalog]) => {
         if (cancelled) return;
         setAccess(nextAccess);
@@ -297,27 +297,6 @@ function AccountPanel({
   const created = session.user.created_at
     ? new Date(session.user.created_at).toLocaleDateString()
     : null;
-
-  if (view === "course") {
-    return (
-      <div className="w-full max-w-3xl space-y-6">
-        <Button variant="ghost" onClick={() => setView("storefront")} className="mb-4">
-          <ArrowLeft className="mr-2 size-4" /> Back to Dashboard
-        </Button>
-        <Card className="min-h-[50vh]">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">
-              HIDDEN SECRETS TO LAND YOUR FIRST REMOTE JOB: The Exact Strategy I Used to Get Hired
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center pt-20 text-center">
-            <h3 className="text-xl font-semibold">Welcome to the Course!</h3>
-            <p className="mt-2 text-muted-foreground">The course content is currently being prepared. Check back soon!</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   if (view === "preview") {
     return (
@@ -419,18 +398,6 @@ function AccountPanel({
             )}
             Sign out
           </Button>
-          {isAdmin && (
-            <Button
-              variant="outline"
-              asChild
-              className="flex-1 rounded-full font-semibold"
-            >
-              <Link to="/storefront/admin">
-                <ShieldCheck className="size-4" />
-                Admin
-              </Link>
-            </Button>
-          )}
         </CardFooter>
       </Card>
 
@@ -458,9 +425,11 @@ function AccountPanel({
                 {hasAccess ? (
                   <Button 
                     className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
-                    onClick={() => setView("course")}
+                    asChild
                   >
-                    View Course
+                    <Link to={`/storefront/product/${primaryProduct.id}`}>
+                      View Course
+                    </Link>
                   </Button>
                 ) : (
                   <Button 

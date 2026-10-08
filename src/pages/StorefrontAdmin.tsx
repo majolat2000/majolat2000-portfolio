@@ -26,6 +26,7 @@ import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { portfolio } from "@/lib/portfolio";
 import {
   adminAddProduct,
+  adminDeleteProduct,
   adminGrantAccess,
   adminListUsers,
   formatDate,
@@ -46,6 +47,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate } from "react-router";
+import { AuthPanel } from "./Storefront";
 
 function errorText(error: unknown): string {
   return error instanceof Error ? error.message : "Something went wrong.";
@@ -125,6 +127,22 @@ export default function StorefrontAdmin() {
         `${product?.name ?? "Product"} granted to ${selected.email} — active until ${formatDate(grant.expires_at)}`,
       );
       setGrants(await listAccessFor(selected.id));
+    } catch (err) {
+      setError(errorText(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  
+  const handleDeleteProduct = async (productId: string) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await adminDeleteProduct(productId);
+      setMessage("Product deleted.");
+      setProducts(await listProducts());
     } catch (err) {
       setError(errorText(err));
     } finally {
@@ -369,7 +387,7 @@ export default function StorefrontAdmin() {
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <Label htmlFor="grant-days">Days of access</Label>
+                              <div className="flex items-center justify-between"><Label htmlFor="grant-days">Days of access</Label><span className="text-[10px] text-muted-foreground">36500 = Lifetime</span></div>
                               <Input
                                 id="grant-days"
                                 type="number"
@@ -486,7 +504,7 @@ export default function StorefrontAdmin() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="product-days">Access (days)</Label>
+                          <div className="flex items-center justify-between"><Label htmlFor="product-days">Access (days)</Label><span className="text-[10px] text-muted-foreground">Or type 36500 for Lifetime</span></div>
                           <Input
                             id="product-days"
                             name="duration_days"
