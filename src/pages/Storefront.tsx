@@ -384,6 +384,17 @@ function AccountPanel({
           </CardContent>
         )}
         <CardFooter className="gap-2">
+          {isAdmin && (
+            <Button
+              variant="default"
+              className="flex-1 rounded-full font-semibold bg-foreground text-background"
+              asChild
+            >
+              <Link to="/storefront/admin">
+                Admin Panel
+              </Link>
+            </Button>
+          )}
           <Button
             variant="outline"
             className="flex-1 rounded-full font-semibold"

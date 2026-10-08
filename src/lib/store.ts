@@ -142,3 +142,13 @@ export async function adminDeleteProduct(productId: string): Promise<void> {
     .eq("id", productId);
   if (error) throw new Error(error.message);
 }
+
+export async function adminRevokeAccess(grantId: string): Promise<void> {
+  if (!supabase) throw new Error("Storefront is not configured.");
+  const { error } = await supabase
+    .from("product_access")
+    .delete()
+    .eq("id", grantId);
+  if (error) throw new Error(error.message);
+}
+

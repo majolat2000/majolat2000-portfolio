@@ -27,6 +27,7 @@ import { portfolio } from "@/lib/portfolio";
 import {
   adminAddProduct,
   adminDeleteProduct,
+  adminRevokeAccess,
   adminGrantAccess,
   adminListUsers,
   formatDate,
@@ -65,6 +66,8 @@ export default function StorefrontAdmin() {
   const [grants, setGrants] = useState<AccessGrantWithProduct[]>([]);
   const [grantProductId, setGrantProductId] = useState<string>("");
   const [grantDays, setGrantDays] = useState<string>("30");
+  const [isLifetimeGrant, setIsLifetimeGrant] = useState(false);
+  const [isLifetimeProduct, setIsLifetimeProduct] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -109,10 +112,28 @@ export default function StorefrontAdmin() {
     user.email.toLowerCase().includes(query.trim().toLowerCase()),
   );
 
+  
+  const handleRevokeAccess = async (grantId: string) => {
+    if (!window.confirm("Are you sure you want to revoke this user's access?")) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await adminRevokeAccess(grantId);
+      setMessage("Access revoked.");
+      if (selected) {
+        setGrants(await listAccessFor(selected.id));
+      }
+    } catch (err) {
+      setError(errorText(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const handleGrant = async (event: FormEvent) => {
     event.preventDefault();
     if (!selected || !grantProductId) return;
-    const days = Number(grantDays);
+    const days = isLifetimeGrant ? 3650 : Number(grantDays);
     if (!Number.isFinite(days) || days < 1 || days > 3650) {
       setError("Days must be between 1 and 3650.");
       return;
@@ -157,7 +178,7 @@ export default function StorefrontAdmin() {
     const name = String(data.get("name") ?? "").trim();
     const description = String(data.get("description") ?? "").trim();
     const price = Number(data.get("price"));
-    const days = Number(data.get("duration_days"));
+    const days = isLifetimeProduct ? 3650 : Number(data.get("duration_days"));
 
     if (!name) {
       setError("Give the product a name.");
@@ -356,6 +377,7 @@ export default function StorefrontAdmin() {
                                       ? " · paid"
                                       : ""}
                                   </span>
+                                  <Button variant="destructive" size="sm" className="ml-4 shrink-0" onClick={() => handleRevokeAccess(grant.id)} disabled={busy}>Revoke</Button>
                                 </li>
                               ))}
                             </ul>
@@ -387,17 +409,23 @@ export default function StorefrontAdmin() {
                               </Select>
                             </div>
                             <div className="space-y-2">
-                              <div className="flex items-center justify-between"><Label htmlFor="grant-days">Days of access</Label><span className="text-[10px] text-muted-foreground">36500 = Lifetime</span></div>
-                              <Input
-                                id="grant-days"
-                                type="number"
-                                min={1}
-                                max={3650}
-                                value={grantDays}
-                                onChange={(event) =>
-                                  setGrantDays(event.target.value)
-                                }
-                              />
+                              <div className="flex items-center gap-2 mb-2">
+                                <input type="checkbox" id="life-grant" checked={isLifetimeGrant} onChange={(e) => setIsLifetimeGrant(e.target.checked)} className="rounded border-border text-foreground focus:ring-foreground" />
+                                <Label htmlFor="life-grant">Lifetime Access</Label>
+                              </div>
+                              {!isLifetimeGrant && (
+                                <div className="space-y-2">
+                                  <Label htmlFor="grant-days">Days of access</Label>
+                                  <Input
+                                    id="grant-days"
+                                    type="number"
+                                    min={1}
+                                    max={36500}
+                                    value={grantDays}
+                                    onChange={(event) => setGrantDays(event.target.value)}
+                                  />
+                                </div>
+                              )}
                             </div>
                           </div>
                           <Button
@@ -451,6 +479,7 @@ export default function StorefrontAdmin() {
                             <br />
                             {product.duration_days} days
                           </span>
+                          <Button variant="destructive" size="sm" className="ml-4 shrink-0" onClick={() => handleDeleteProduct(product.id)} disabled={busy}>Delete</Button>
                         </li>
                       ))}
                       {products.length === 0 && (
@@ -504,15 +533,23 @@ export default function StorefrontAdmin() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <div className="flex items-center justify-between"><Label htmlFor="product-days">Access (days)</Label><span className="text-[10px] text-muted-foreground">Or type 36500 for Lifetime</span></div>
-                          <Input
-                            id="product-days"
-                            name="duration_days"
-                            type="number"
-                            min={1}
-                            defaultValue={30}
-                            required
-                          />
+                          <div className="flex items-center gap-2 mb-2">
+                            <input type="checkbox" id="life-prod" checked={isLifetimeProduct} onChange={(e) => setIsLifetimeProduct(e.target.checked)} className="rounded border-border text-foreground focus:ring-foreground" />
+                            <Label htmlFor="life-prod">Lifetime Access</Label>
+                          </div>
+                          {!isLifetimeProduct && (
+                            <div className="space-y-2">
+                              <Label htmlFor="product-days">Access (days)</Label>
+                              <Input
+                                id="product-days"
+                                name="duration_days"
+                                type="number"
+                                min={1}
+                                defaultValue={30}
+                                required
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
                       <Button
