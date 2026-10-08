@@ -74,17 +74,20 @@ export async function startCheckout(
       title: input.productName,
       description: `${input.durationDays}-day access`,
     },
-    callback: (response: {
-      status: string;
-      transaction_id?: string | number;
-      tx_ref?: string;
-    }) => {
+    callback: (response: Record<string, unknown>) => {
+      console.log("[FLW] Full callback response:", JSON.stringify(response));
+      const status = String(response.status ?? "");
+      const transactionId = response.transaction_id ?? response.id ?? response.transactionId ?? null;
+      const responseTxRef = (response.tx_ref ?? response.txRef ?? txRef) as string;
+      console.log("[FLW] Parsed:", { status, transactionId, responseTxRef });
       onCompleted?.({
-        status: response.status,
-        transactionId: response.transaction_id ?? null,
-        txRef: response.tx_ref ?? txRef,
+        status,
+        transactionId: transactionId as string | number | null,
+        txRef: responseTxRef,
       });
     },
-    onclose: () => undefined,
+    onclose: () => {
+      console.log("[FLW] Modal closed by user");
+    },
   });
 }

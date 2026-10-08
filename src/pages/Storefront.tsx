@@ -287,7 +287,9 @@ function AccountPanel({
         productName: primaryProduct.name,
         durationDays: primaryProduct.duration_days,
       }, async (result) => {
-        if (result.status === "successful") {
+        console.log("[Storefront] Checkout result:", JSON.stringify(result));
+        const isSuccess = ["successful", "completed", "succeeded"].includes(result.status?.toLowerCase?.() ?? "");
+        if (isSuccess && result.transactionId) {
           try {
             setNotice("Verifying payment...");
             const res = await fetch("/api/verify-payment", {
@@ -298,17 +300,23 @@ function AccountPanel({
                 txRef: result.txRef,
               }),
             });
+            const responseText = await res.text();
+            console.log("[Storefront] Verify response:", res.status, responseText);
             if (!res.ok) {
-              const text = await res.text();
-              throw new Error("Verification failed: " + text);
+              throw new Error("Verification failed: " + responseText);
             }
             const accessList = await listMyAccess(session.user.id);
             setAccess(accessList);
             navigate(`/storefront/product/${primaryProduct.id}`);
           } catch (e) {
+            console.error("[Storefront] Verify error:", e);
             setNotice(e instanceof Error ? e.message : "Failed to verify payment");
-              alert("Error: " + (e instanceof Error ? e.message : "Failed to verify"));
+            alert("Error: " + (e instanceof Error ? e.message : "Failed to verify"));
           }
+        } else {
+          console.warn("[Storefront] Payment not successful or no transactionId:", result);
+          setNotice("Payment was not completed. Status: " + result.status + ", TX ID: " + result.transactionId);
+          alert("Payment callback received but status=" + result.status + " transactionId=" + result.transactionId);
         }
       });
     } catch (err) {
