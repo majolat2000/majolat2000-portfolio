@@ -1,6 +1,15 @@
 import { Background } from "@/components/portfolio/Background";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -26,6 +35,7 @@ import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { portfolio } from "@/lib/portfolio";
 import {
   adminAddProduct,
+  adminUpdateProduct,
   adminDeleteProduct,
   adminRevokeAccess,
   adminGrantAccess,
@@ -45,6 +55,7 @@ import {
   Search,
   ShieldCheck,
   UserPlus,
+  Pencil,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate } from "react-router";
@@ -68,6 +79,12 @@ export default function StorefrontAdmin() {
   const [grantDays, setGrantDays] = useState<string>("30");
   const [isLifetimeGrant, setIsLifetimeGrant] = useState(false);
   const [isLifetimeProduct, setIsLifetimeProduct] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<StoreProduct | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editIsLifetime, setEditIsLifetime] = useState(false);
+  const [editDays, setEditDays] = useState("30");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -164,6 +181,58 @@ export default function StorefrontAdmin() {
       await adminDeleteProduct(productId);
       setMessage("Product deleted.");
       setProducts(await listProducts());
+    } catch (err) {
+      setError(errorText(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const startEditProduct = (product: StoreProduct) => {
+    setEditingProduct(product);
+    setEditName(product.name);
+    setEditDescription(product.description ?? "");
+    setEditPrice(String(product.price_kobo / 100));
+    const isLife = product.duration_days >= 3650;
+    setEditIsLifetime(isLife);
+    setEditDays(isLife ? "3650" : String(product.duration_days));
+    setError(null);
+    setMessage(null);
+  };
+
+  const handleUpdateProduct = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!editingProduct) return;
+    const price = Number(editPrice);
+    const days = editIsLifetime ? 3650 : Number(editDays);
+
+    if (!editName.trim()) {
+      setError("Give the product a name.");
+      return;
+    }
+    if (!Number.isFinite(price) || price <= 0) {
+      setError("Enter a valid price in naira.");
+      return;
+    }
+    if (!Number.isFinite(days) || days < 1) {
+      setError("Access duration must be at least 1 day.");
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const updated = await adminUpdateProduct({
+        id: editingProduct.id,
+        name: editName.trim(),
+        description: editDescription.trim(),
+        priceNaira: price,
+        durationDays: Math.round(days),
+      });
+      setMessage(`Updated "${updated.name}" successfully.`);
+      setProducts(await listProducts());
+      setEditingProduct(null);
     } catch (err) {
       setError(errorText(err));
     } finally {
@@ -570,6 +639,107 @@ export default function StorefrontAdmin() {
               </div>
             </TabsContent>
           </Tabs>
+          <Dialog
+            open={!!editingProduct}
+            onOpenChange={(open) => {
+              if (!open) setEditingProduct(null);
+            }}
+          >
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Edit Course / Product</DialogTitle>
+                <DialogDescription>
+                  Update the name, description, price, and access duration.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleUpdateProduct} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-name">Course / Product Name</Label>
+                  <Input
+                    id="edit-name"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    placeholder="e.g. Design Starter Pack"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Textarea
+                    id="edit-description"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    placeholder="Short line or overview shown to customers"
+                    rows={3}
+                  />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-price">Price (₦)</Label>
+                    <Input
+                      id="edit-price"
+                      type="number"
+                      min={1}
+                      step="any"
+                      value={editPrice}
+                      onChange={(e) => setEditPrice(e.target.value)}
+                      placeholder="5000"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 mb-2 pt-1">
+                      <input
+                        type="checkbox"
+                        id="edit-life"
+                        checked={editIsLifetime}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setEditIsLifetime(checked);
+                          if (checked) setEditDays("3650");
+                        }}
+                        className="rounded border-border text-foreground focus:ring-foreground"
+                      />
+                      <Label htmlFor="edit-life">Lifetime Access</Label>
+                    </div>
+                    {!editIsLifetime && (
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-days">Access (days)</Label>
+                        <Input
+                          id="edit-days"
+                          type="number"
+                          min={1}
+                          value={editDays}
+                          onChange={(e) => setEditDays(e.target.value)}
+                          required
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <DialogFooter className="gap-2 sm:gap-0 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setEditingProduct(null)}
+                    disabled={busy}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-foreground text-background font-semibold hover:bg-foreground/90"
+                    disabled={busy}
+                  >
+                    {busy ? (
+                      <Loader2 className="size-4 animate-spin mr-1" />
+                    ) : null}
+                    Save Changes
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </main>
       </div>
     </div>

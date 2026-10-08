@@ -41,6 +41,14 @@ export interface NewProductInput {
   durationDays: number;
 }
 
+export interface UpdateProductInput {
+  id: string;
+  name: string;
+  description: string;
+  priceNaira: number;
+  durationDays: number;
+}
+
 function unwrap<T>(data: T, error: { message: string } | null): T {
   if (error) throw new Error(error.message);
   return data;
@@ -132,6 +140,24 @@ export function formatDate(iso: string): string {
     month: "short",
     year: "numeric",
   });
+}
+
+export async function adminUpdateProduct(
+  input: UpdateProductInput,
+): Promise<StoreProduct> {
+  if (!supabase) throw new Error("Storefront is not configured.");
+  const { data, error } = await supabase
+    .from("products")
+    .update({
+      name: input.name.trim(),
+      description: input.description.trim() || null,
+      price_kobo: Math.round(input.priceNaira * 100),
+      duration_days: input.durationDays,
+    })
+    .eq("id", input.id)
+    .select("*")
+    .single();
+  return unwrap(data as StoreProduct, error);
 }
 
 export async function adminDeleteProduct(productId: string): Promise<void> {

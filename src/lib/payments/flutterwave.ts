@@ -72,7 +72,7 @@ export async function startCheckout(
     meta: { product_id: input.productId, user_id: input.userId },
     customizations: {
       title: input.productName,
-      description: `${input.durationDays}-day access`,
+      description: input.durationDays >= 3650 ? "Lifetime access" : `${input.durationDays}-day access`,
     },
     callback: (response: Record<string, unknown>) => {
       console.log("[FLW] Full callback response:", JSON.stringify(response));

@@ -339,17 +339,28 @@ function AccountPanel({
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl font-bold leading-tight">
-              HIDDEN SECRETS TO LAND YOUR FIRST REMOTE JOB: The Exact Strategy I Used to Get Hired
+              {primaryProduct?.name ?? "HIDDEN SECRETS TO LAND YOUR FIRST REMOTE JOB: The Exact Strategy I Used to Get Hired"}
             </CardTitle>
+            <div className="flex items-center gap-2 pt-1 text-sm text-muted-foreground font-medium">
+              <span>{primaryProduct?.duration_days && primaryProduct.duration_days >= 3650 ? "Lifetime Access" : `${primaryProduct?.duration_days ?? 30} Days Access`}</span>
+              <span>•</span>
+              <span>{primaryProduct ? formatNaira(primaryProduct.price_kobo) : ""}</span>
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4 text-muted-foreground">
-              <p>
-                Landing my first remote job felt impossible until I stopped playing by the standard rules. When you're competing against a global talent pool, sending out 100 identical resumes a day is a recipe for burnout. I had to completely engineer a new approach to get noticed.
-              </p>
-              <p>
-                In this video course, I break down the exact strategy that finally got me hired. From optimizing my online presence to running targeted outreach that hiring managers actually respond to, this is the completely transparent breakdown of what works right now. If you're ready to ditch the daily commute and land a role that gives you your time back, this is your starting line.
-              </p>
+              {primaryProduct?.description ? (
+                <p className="whitespace-pre-line leading-relaxed">{primaryProduct.description}</p>
+              ) : (
+                <>
+                  <p>
+                    Landing my first remote job felt impossible until I stopped playing by the standard rules. When you're competing against a global talent pool, sending out 100 identical resumes a day is a recipe for burnout. I had to completely engineer a new approach to get noticed.
+                  </p>
+                  <p>
+                    In this video course, I break down the exact strategy that finally got me hired. From optimizing my online presence to running targeted outreach that hiring managers actually respond to, this is the completely transparent breakdown of what works right now. If you're ready to ditch the daily commute and land a role that gives you your time back, this is your starting line.
+                  </p>
+                </>
+              )}
             </div>
 
             <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-5">
@@ -460,10 +471,13 @@ function AccountPanel({
             <div className="overflow-hidden rounded-2xl border border-border bg-muted/10">
               <div className="p-5">
                 <h3 className="mb-2 font-display text-lg font-bold leading-snug">
-                  HIDDEN SECRETS TO LAND YOUR FIRST REMOTE JOB: The Exact Strategy I Used to Get Hired
+                  {primaryProduct.name}
                 </h3>
-                <div className="mb-4 text-sm text-muted-foreground">
-                  Video Course
+                <div className="mb-4 flex items-center justify-between text-sm text-muted-foreground">
+                  <span className="truncate pr-2">{primaryProduct.description || "Video Course"}</span>
+                  <span className="shrink-0 font-medium text-foreground">
+                    {primaryProduct.duration_days >= 3650 ? "Lifetime access" : `${primaryProduct.duration_days} days`}
+                  </span>
                 </div>
                 {hasAccess ? (
                   <Button 
