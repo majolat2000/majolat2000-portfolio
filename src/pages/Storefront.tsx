@@ -285,6 +285,29 @@ function AccountPanel({
         amountKobo: primaryProduct.price_kobo,
         productName: primaryProduct.name,
         durationDays: primaryProduct.duration_days,
+      }, async (result) => {
+        if (result.status === "successful") {
+          try {
+            setNotice("Verifying payment...");
+            const res = await fetch("/api/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                transactionId: result.transactionId,
+                txRef: result.txRef,
+              }),
+            });
+            if (!res.ok) {
+              const text = await res.text();
+              throw new Error("Verification failed: " + text);
+            }
+            const accessList = await listMyAccess(session.user.id);
+            setAccess(accessList);
+            setNotice("Payment successful! You now have access.");
+          } catch (e) {
+            setNotice(e instanceof Error ? e.message : "Failed to verify payment");
+          }
+        }
       });
     } catch (err) {
       setNotice(
