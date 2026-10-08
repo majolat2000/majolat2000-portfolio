@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import logo from "@/assets/logo.svg";
+import { portfolio } from "@/lib/portfolio";
 import { supabase, supabaseConfigured } from "@/lib/supabase";
 import type { Session } from "@supabase/supabase-js";
 import {
@@ -19,7 +19,6 @@ import {
   Loader2,
   LogOut,
   PackageSearch,
-  ShieldCheck,
   TriangleAlert,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
@@ -146,10 +145,14 @@ function AuthPanel() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
-        <img src={logo} alt="" className="mx-auto mb-2 size-10" />
-        <CardTitle className="text-xl">Majolat Storefront</CardTitle>
+        <img
+          src={portfolio.avatar}
+          alt={portfolio.name}
+          className="mx-auto mb-2 size-10 rounded-full object-cover"
+        />
+        <CardTitle className="text-xl">Majesty&apos;s Digital Storefront</CardTitle>
         <CardDescription>
-          Sign in or create an account to start shopping.
+          Sign in or create an account to explore.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -223,10 +226,6 @@ function AuthPanel() {
           </form>
         </Tabs>
       </CardContent>
-      <CardFooter className="justify-center text-xs text-muted-foreground">
-        <ShieldCheck className="mr-1.5 size-3.5" />
-        Accounts are secured by Supabase Auth
-      </CardFooter>
     </Card>
   );
 }
@@ -256,7 +255,11 @@ function AccountPanel({
     <div className="w-full max-w-lg space-y-4">
       <Card>
         <CardHeader className="text-center">
-          <img src={logo} alt="" className="mx-auto mb-2 size-10" />
+          <img
+            src={portfolio.avatar}
+            alt={portfolio.name}
+            className="mx-auto mb-2 size-10 rounded-full object-cover"
+          />
           <CardTitle className="text-xl">Welcome back</CardTitle>
           <CardDescription>{session.user.email}</CardDescription>
         </CardHeader>
