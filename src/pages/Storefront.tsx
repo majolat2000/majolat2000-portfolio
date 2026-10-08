@@ -22,7 +22,6 @@ import {
   ArrowLeft,
   Loader2,
   LogOut,
-  PackageSearch,
   TriangleAlert,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
@@ -142,13 +141,17 @@ function AuthPanel() {
 
   return (
     <Card className="w-full max-w-md">
-      <CardHeader className="text-center">
-        <img
-          src={portfolio.avatar}
-          alt={portfolio.name}
-          className="mx-auto mb-2 size-10 rounded-full object-cover"
-        />
-        <CardTitle className="text-xl">Majesty&apos;s Digital Storefront</CardTitle>
+      <CardHeader className="items-center justify-items-center text-center">
+        <span className="grid size-12 place-items-center overflow-hidden rounded-full ring-1 ring-border">
+          <img
+            src={portfolio.avatar}
+            alt={portfolio.name}
+            className="h-full w-full object-cover"
+          />
+        </span>
+        <CardTitle className="font-display text-2xl font-extrabold tracking-tight">
+          Majesty&apos;s Digital Storefront
+        </CardTitle>
         <CardDescription>
           Sign in or create an account to explore.
         </CardDescription>
@@ -214,10 +217,14 @@ function AuthPanel() {
               <p className="text-sm font-medium text-destructive">{error}</p>
             )}
             {notice && (
-              <p className="text-sm font-medium text-emerald-600">{notice}</p>
+              <p className="text-sm font-medium text-foreground">{notice}</p>
             )}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
+              disabled={isSubmitting}
+            >
               {isSubmitting && <Loader2 className="size-4 animate-spin" />}
               {mode === "signin" ? "Sign in" : "Create account"}
             </Button>
@@ -250,35 +257,34 @@ function AccountPanel({
     : null;
 
   return (
-    <div className="w-full max-w-lg space-y-4">
+    <div className="w-full max-w-lg space-y-6">
       <Card>
-        <CardHeader className="text-center">
-          <img
-            src={portfolio.avatar}
-            alt={portfolio.name}
-            className="mx-auto mb-2 size-10 rounded-full object-cover"
-          />
-          <CardTitle className="text-xl">Welcome back</CardTitle>
+        <CardHeader className="items-center justify-items-center text-center">
+          <span className="grid size-14 place-items-center overflow-hidden rounded-full ring-1 ring-border">
+            <img
+              src={portfolio.avatar}
+              alt={portfolio.name}
+              className="h-full w-full object-cover"
+            />
+          </span>
+          <p className="eyebrow">Account</p>
+          <CardTitle className="font-display text-3xl font-extrabold tracking-tight">
+            Welcome
+          </CardTitle>
           <CardDescription>{session.user.email}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-4 py-3">
-            <span>Account status</span>
-            <span className="font-medium text-emerald-600">
-              {session.user.email_confirmed_at ? "Confirmed" : "Pending"}
-            </span>
-          </div>
-          {created && (
-            <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-4 py-3">
+        {created && (
+          <CardContent className="text-sm text-muted-foreground">
+            <div className="flex items-center justify-between rounded-2xl border border-border bg-muted/40 px-4 py-3">
               <span>Member since</span>
               <span className="font-medium text-foreground">{created}</span>
             </div>
-          )}
-        </CardContent>
+          </CardContent>
+        )}
         <CardFooter>
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full rounded-full font-semibold"
             onClick={handleSignOut}
             disabled={isSigningOut}
           >
@@ -292,12 +298,14 @@ function AccountPanel({
         </CardFooter>
       </Card>
 
-      <Card className="border-dashed">
-        <CardContent className="flex flex-col items-center gap-2 py-8 text-center">
-          <PackageSearch className="size-8 text-muted-foreground" />
-          <p className="font-medium">Products are on the way</p>
-          <p className="text-sm text-muted-foreground">
-            The catalog lands here next. Your account is ready for it.
+      <Card>
+        <CardContent className="px-6 py-6">
+          <p className="eyebrow">Coming soon</p>
+          <p className="mt-3 font-display text-xl font-extrabold tracking-tight text-foreground">
+            Products land here next
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            The catalog and checkout are still being put together.
           </p>
         </CardContent>
       </Card>
@@ -313,11 +321,23 @@ export default function Storefront() {
       <Background />
       <div className="relative z-10 flex min-h-screen flex-col">
         <header className="flex items-center justify-between px-4 py-4 sm:px-8">
-          <div className="flex items-center gap-2 font-semibold">
-            <span className="size-2.5 rounded-full bg-violet-500" />
-            Storefront
-          </div>
-          <Button variant="ghost" asChild>
+          <Link to="/" className="group flex items-center gap-3">
+            <span className="grid size-10 place-items-center overflow-hidden rounded-full ring-1 ring-border transition-transform duration-300 group-hover:scale-105">
+              <img
+                src={portfolio.avatar}
+                alt={portfolio.name}
+                className="h-full w-full object-cover"
+              />
+            </span>
+            <span className="font-display text-[15px] font-semibold text-foreground">
+              {portfolio.brand}
+            </span>
+          </Link>
+          <Button
+            variant="ghost"
+            asChild
+            className="rounded-full text-muted-foreground hover:text-foreground"
+          >
             <Link to="/">
               <ArrowLeft className="size-4" />
               Back to portfolio
