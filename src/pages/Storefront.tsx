@@ -11,7 +11,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { portfolio } from "@/lib/portfolio";
+import { startCheckout } from "@/lib/payments/flutterwave";
+import {
+  formatDate,
+  formatNaira,
+  listMyAccess,
+  listProducts,
+  type AccessGrantWithProduct,
+  type StoreProduct,
+} from "@/lib/store";
 import {
   friendlyAuthError,
   supabase,
@@ -22,31 +32,11 @@ import {
   ArrowLeft,
   Loader2,
   LogOut,
+  ShieldCheck,
   TriangleAlert,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router";
-
-function useSupabaseSession() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(Boolean(supabase));
-
-  useEffect(() => {
-    if (!supabase) return;
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, next) => {
-      setSession(next);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  return { session, loading };
-}
 
 function NotConfigured() {
   return (
@@ -243,6 +233,33 @@ function AccountPanel({
   onSignedOut: () => void;
 }) {
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [access, setAccess] = useState<AccessGrantWithProduct[]>([]);
+  const [catalog, setCatalog] = useState<StoreProduct[]>([]);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const isAdmin = session.user.app_metadata?.role === "admin";
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([listMyAccess(), listProducts()])
+      .then(([nextAccess, nextCatalog]) => {
+        if (cancelled) return;
+        setAccess(nextAccess);
+        setCatalog(nextCatalog);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setNotice(
+            err instanceof Error ? err.message : "Could not load the store.",
+          );
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const activeByProduct = new Map(access.map((grant) => [grant.product_id, grant]));
 
   const handleSignOut = async () => {
     if (!supabase) return;
@@ -250,6 +267,24 @@ function AccountPanel({
     await supabase.auth.signOut();
     setIsSigningOut(false);
     onSignedOut();
+  };
+
+  const handleBuy = async (product: StoreProduct) => {
+    setNotice(null);
+    try {
+      await startCheckout({
+        productId: product.id,
+        userId: session.user.id,
+        email: session.user.email ?? "",
+        amountKobo: product.price_kobo,
+        productName: product.name,
+        durationDays: product.duration_days,
+      });
+    } catch (err) {
+      setNotice(
+        err instanceof Error ? err.message : "Checkout could not start.",
+      );
+    }
   };
 
   const created = session.user.created_at
@@ -280,10 +315,10 @@ function AccountPanel({
             </div>
           </CardContent>
         )}
-        <CardFooter>
+        <CardFooter className="gap-2">
           <Button
             variant="outline"
-            className="w-full rounded-full font-semibold"
+            className="flex-1 rounded-full font-semibold"
             onClick={handleSignOut}
             disabled={isSigningOut}
           >
@@ -294,18 +329,94 @@ function AccountPanel({
             )}
             Sign out
           </Button>
+          {isAdmin && (
+            <Button
+              variant="outline"
+              asChild
+              className="flex-1 rounded-full font-semibold"
+            >
+              <Link to="/storefront/admin">
+                <ShieldCheck className="size-4" />
+                Admin
+              </Link>
+            </Button>
+          )}
         </CardFooter>
       </Card>
 
       <Card>
-        <CardContent className="px-6 py-6">
-          <p className="eyebrow">Coming soon</p>
-          <p className="mt-3 font-display text-xl font-extrabold tracking-tight text-foreground">
-            Products land here next
-          </p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            The catalog and checkout are still being put together.
-          </p>
+        <CardContent className="px-6 py-5">
+          <p className="eyebrow">Access</p>
+          {access.length === 0 ? (
+            <p className="mt-3 text-sm text-muted-foreground">
+              Nothing unlocked yet.
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-1.5">
+              {access.map((grant) => (
+                <li
+                  key={grant.id}
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 px-3 py-2 text-sm"
+                >
+                  <span className="truncate">
+                    {grant.product?.name ?? "Product"}
+                  </span>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    until {formatDate(grant.expires_at)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="px-6 py-5">
+          <p className="eyebrow">Store</p>
+          {catalog.length === 0 ? (
+            <p className="mt-3 text-sm text-muted-foreground">
+              No products listed yet.
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-1.5">
+              {catalog.map((product) => {
+                const active = activeByProduct.get(product.id);
+                return (
+                  <li
+                    key={product.id}
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 px-3 py-2.5"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-foreground">
+                        {product.name}
+                      </span>
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {formatNaira(product.price_kobo)} ·{" "}
+                        {product.duration_days} days
+                      </span>
+                    </span>
+                    {active ? (
+                      <span className="shrink-0 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">
+                        until {formatDate(active.expires_at)}
+                      </span>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="shrink-0 rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
+                        onClick={() => handleBuy(product)}
+                      >
+                        Buy
+                      </Button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          {notice && (
+            <p className="mt-3 text-sm text-muted-foreground">{notice}</p>
+          )}
         </CardContent>
       </Card>
     </div>
