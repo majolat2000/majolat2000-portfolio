@@ -30,6 +30,7 @@ export default async function handler(
   const secretKey = process.env.FLUTTERWAVE_SECRET_KEY;
 
   if (!supabaseUrl || !serviceKey || !secretKey) {
+    return res.status(503).json({ error: "server_not_configured", details: { hasUrl: !!supabaseUrl, hasService: !!serviceKey, hasSecret: !!secretKey } });
     console.error("Missing config:", { hasUrl: !!supabaseUrl, hasService: !!serviceKey, hasSecret: !!secretKey });
     res.status(503).json({ error: "server_not_configured" });
     return;
@@ -82,7 +83,7 @@ export default async function handler(
 
     if (verified.amount + 0.001 < product.price_kobo / 100) {
       console.error("Amount mismatch:", verified.amount, product.price_kobo / 100);
-      res.status(400).json({ error: "amount_mismatch" });
+      res.status(400).json({ error: "amount_mismatch", expected: product.price_kobo / 100, received: verified.amount });
       return;
     }
 

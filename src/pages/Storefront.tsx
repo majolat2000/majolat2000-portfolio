@@ -307,6 +307,7 @@ function AccountPanel({
             navigate(`/storefront/product/${primaryProduct.id}`);
           } catch (e) {
             setNotice(e instanceof Error ? e.message : "Failed to verify payment");
+              alert("Error: " + (e instanceof Error ? e.message : "Failed to verify"));
           }
         }
       });
