@@ -546,9 +546,27 @@ export default function StorefrontAdmin() {
                           <span className="shrink-0 text-right text-xs text-muted-foreground">
                             {formatNaira(product.price_kobo)}
                             <br />
-                            {product.duration_days} days
+                            {product.duration_days >= 3650 ? "Lifetime access" : `${product.duration_days} days`}
                           </span>
-                          <Button variant="destructive" size="sm" className="ml-4 shrink-0" onClick={() => handleDeleteProduct(product.id)} disabled={busy}>Delete</Button>
+                          <div className="ml-4 flex items-center gap-2 shrink-0">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => startEditProduct(product)}
+                              disabled={busy}
+                            >
+                              <Pencil className="size-3.5 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteProduct(product.id)}
+                              disabled={busy}
+                            >
+                              Delete
+                            </Button>
+                          </div>
                         </li>
                       ))}
                       {products.length === 0 && (
