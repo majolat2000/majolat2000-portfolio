@@ -7,6 +7,7 @@ import { Home, User, FileText, Briefcase, Mail, ChevronDown, Award, Linkedin, Gi
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [workOpen, setWorkOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 16);
@@ -15,17 +16,19 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const close = () => setOpen(false);
+  const close = () => {
+    setOpen(false);
+    setWorkOpen(false);
+  };
 
-  // Icon mapping for navigation links based on labels from SnapFolio design
   const getIcon = (label: string) => {
     const l = label.toLowerCase();
     if (l.includes("home")) return <Home className="w-4 h-4" />;
     if (l.includes("about")) return <User className="w-4 h-4" />;
     if (l.includes("resume") || l.includes("experience")) return <FileText className="w-4 h-4" />;
-    if (l.includes("portfolio") || l.includes("catalog") || l.includes("project")) return <Briefcase className="w-4 h-4" />;
+    if (l.includes("portfolio") || l.includes("catalog") || l.includes("project") || l.includes("work")) return <Briefcase className="w-4 h-4" />;
     if (l.includes("contact")) return <Mail className="w-4 h-4" />;
-    return <ChevronDown className="w-4 h-4" />; // Default/Dropdown
+    return <ChevronDown className="w-4 h-4" />;
   };
 
   return (
@@ -37,8 +40,7 @@ export function Navbar() {
             scrolled || open ? "glass shadow-xl shadow-black/20 lg:shadow-none" : "glass lg:shadow-xl lg:shadow-black/20",
           )}
         >
-          {/* Logo / Brand (Wait, image doesn't have avatar in sidebar, just links. Oh wait, it has Home, About, etc. But I'll keep the avatar/brand at top of sidebar or remove it?) The image doesn't have avatar in the sidebar. Let's keep it minimal if we want. Let's just keep our brand block. */}
-          <a href="#home" className="group flex items-center gap-3 lg:mb-4 lg:hidden" onClick={close}>
+          <a href="/#home" className="group flex items-center gap-3 lg:mb-4 lg:hidden" onClick={close}>
             <span className="relative grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-white/70 shadow-md ring-1 ring-white/80 transition-transform duration-300 group-hover:scale-105">
               <img
                 src={portfolio.avatar}
@@ -55,16 +57,41 @@ export function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex flex-col w-full gap-2 flex-1">
-            {portfolio.nav.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="flex items-center gap-4 rounded-2xl px-4 py-3.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
-              >
-                {getIcon(item.label)}
-                {item.label}
-              </a>
-            ))}
+            {portfolio.nav.map((item) => {
+              if (item.label.toLowerCase() === "catalog") {
+                return (
+                  <div key="my-work-dropdown" className="relative group w-full">
+                    <button
+                      className="flex w-full items-center justify-between gap-4 rounded-2xl px-4 py-3.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                    >
+                      <div className="flex items-center gap-4">
+                        <Briefcase className="w-4 h-4" />
+                        My Work
+                      </div>
+                      <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
+                    </button>
+                    <div className="hidden group-hover:block pl-12 pr-4 py-2 space-y-3">
+                      <Link to="/storefront" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        My Digital Products
+                      </Link>
+                      <Link to="/solutions" className="block text-sm text-muted-foreground hover:text-foreground transition-colors">
+                        Digital Solutions Provided
+                      </Link>
+                    </div>
+                  </div>
+                );
+              }
+              return (
+                <a
+                  key={item.href}
+                  href={`/${item.href}`}
+                  className="flex items-center gap-4 rounded-2xl px-4 py-3.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                >
+                  {getIcon(item.label)}
+                  {item.label}
+                </a>
+              );
+            })}
             <Link
               to="/credentials"
               className="flex items-center gap-4 rounded-2xl px-4 py-3.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
@@ -102,17 +129,45 @@ export function Navbar() {
         {open && (
           <div className="mx-auto mt-2 max-w-6xl lg:hidden">
             <div className="glass rounded-2xl p-2 shadow-xl shadow-black/20">
-              {portfolio.nav.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  onClick={close}
-                  className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-foreground/80 transition-colors hover:bg-white/10"
-                >
-                  {getIcon(item.label)}
-                  {item.label}
-                </a>
-              ))}
+              {portfolio.nav.map((item) => {
+                if (item.label.toLowerCase() === "catalog") {
+                  return (
+                    <div key="my-work-mobile" className="w-full">
+                      <button
+                        onClick={() => setWorkOpen(!workOpen)}
+                        className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm font-medium text-foreground/80 transition-colors hover:bg-white/10"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Briefcase className="w-4 h-4" />
+                          My Work
+                        </div>
+                        <ChevronDown className={cn("w-4 h-4 transition-transform", workOpen ? "rotate-180" : "")} />
+                      </button>
+                      {workOpen && (
+                        <div className="pl-11 pr-4 py-2 space-y-3">
+                          <Link onClick={close} to="/storefront" className="block text-sm text-foreground/70 hover:text-foreground transition-colors">
+                            My Digital Products
+                          </Link>
+                          <Link onClick={close} to="/solutions" className="block text-sm text-foreground/70 hover:text-foreground transition-colors">
+                            Digital Solutions Provided
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return (
+                  <a
+                    key={item.href}
+                    href={`/${item.href}`}
+                    onClick={close}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-foreground/80 transition-colors hover:bg-white/10"
+                  >
+                    {getIcon(item.label)}
+                    {item.label}
+                  </a>
+                );
+              })}
               <Link
                 to="/credentials"
                 onClick={close}
