@@ -236,8 +236,7 @@ function AccountPanel({
   const [catalog, setCatalog] = useState<StoreProduct[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const isAdmin =
-    session.user.email === portfolio.email;
+  const isAdmin = session.user.email === "info@majolat2000.com.ng";
 
   const [view, setView] = useState<"storefront" | "preview">("storefront");
   const [agreed1, setAgreed1] = useState(false);
@@ -403,7 +402,7 @@ function AccountPanel({
 
       <Card>
         <CardContent className="px-6 py-5">
-          <p className="eyebrow mb-4">Available Courses</p>
+          <p className="eyebrow mb-4">Available Products</p>
           {!primaryProduct ? (
             <div className="rounded-xl border border-dashed border-border p-6 text-center text-muted-foreground">
               <p className="text-sm">Course coming soon...</p>
