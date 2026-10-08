@@ -15,3 +15,16 @@ export const supabase: SupabaseClient | null =
         },
       })
     : null;
+
+export function friendlyAuthError(message: string): string {
+  if (message === "Invalid login credentials") {
+    return "Wrong email or password.";
+  }
+  if (message === "Email not confirmed") {
+    return "Confirm your email first — check your inbox for the link.";
+  }
+  if (message.toLowerCase().includes("rate limit")) {
+    return "Too many attempts right now — please wait about an hour and try again.";
+  }
+  return message;
+}

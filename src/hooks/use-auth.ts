@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { friendlyAuthError, supabase } from "@/lib/supabase";
 import type { Session, User } from "@supabase/supabase-js";
 import { useCallback, useEffect, useState } from "react";
 
@@ -23,13 +23,7 @@ function mapUser(user: User): AuthUser {
 }
 
 function toError(error: { message: string }): Error {
-  const message =
-    error.message === "Invalid login credentials"
-      ? "Wrong email or password."
-      : error.message === "Email not confirmed"
-        ? "Confirm your email first — check your inbox for the link."
-        : error.message;
-  return new Error(message);
+  return new Error(friendlyAuthError(error.message));
 }
 
 export function useAuth() {

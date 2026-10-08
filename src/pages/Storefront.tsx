@@ -12,7 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { portfolio } from "@/lib/portfolio";
-import { supabase, supabaseConfigured } from "@/lib/supabase";
+import {
+  friendlyAuthError,
+  supabase,
+  supabaseConfigured,
+} from "@/lib/supabase";
 import type { Session } from "@supabase/supabase-js";
 import {
   ArrowLeft,
@@ -109,13 +113,7 @@ function AuthPanel() {
           { email, password },
         );
         if (signInError) {
-          setError(
-            signInError.message === "Invalid login credentials"
-              ? "Wrong email or password."
-              : signInError.message === "Email not confirmed"
-                ? "Confirm your email first — check your inbox for the link."
-                : signInError.message,
-          );
+          setError(friendlyAuthError(signInError.message));
         }
       } else {
         const { data, error: signUpError } = await supabase.auth.signUp({
@@ -126,7 +124,7 @@ function AuthPanel() {
           },
         });
         if (signUpError) {
-          setError(signUpError.message);
+          setError(friendlyAuthError(signUpError.message));
         } else if (!data.session) {
           setNotice(
             "Account created. Check your inbox to confirm your email, then sign in.",
