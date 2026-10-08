@@ -232,12 +232,16 @@ function AccountPanel({
   session: Session;
   onSignedOut: () => void;
 }) {
-  const [isSigningOut, setIsSigningOut] = useState(false);
   const [access, setAccess] = useState<AccessGrantWithProduct[]>([]);
   const [catalog, setCatalog] = useState<StoreProduct[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const isAdmin =
+    session.user.email === portfolio.email;
 
-  const isAdmin = session.user.app_metadata?.role === "admin";
+  const [view, setView] = useState<"storefront" | "preview" | "course">("storefront");
+  const [agreed1, setAgreed1] = useState(false);
+  const [agreed2, setAgreed2] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -260,6 +264,8 @@ function AccountPanel({
   }, []);
 
   const activeByProduct = new Map(access.map((grant) => [grant.product_id, grant]));
+  const primaryProduct = catalog[0];
+  const hasAccess = primaryProduct ? activeByProduct.has(primaryProduct.id) : false;
 
   const handleSignOut = async () => {
     if (!supabase) return;
@@ -269,16 +275,17 @@ function AccountPanel({
     onSignedOut();
   };
 
-  const handleBuy = async (product: StoreProduct) => {
+  const handleBuy = async () => {
+    if (!primaryProduct) return;
     setNotice(null);
     try {
       await startCheckout({
-        productId: product.id,
+        productId: primaryProduct.id,
         userId: session.user.id,
         email: session.user.email ?? "",
-        amountKobo: product.price_kobo,
-        productName: product.name,
-        durationDays: product.duration_days,
+        amountKobo: primaryProduct.price_kobo,
+        productName: primaryProduct.name,
+        durationDays: primaryProduct.duration_days,
       });
     } catch (err) {
       setNotice(
@@ -290,6 +297,89 @@ function AccountPanel({
   const created = session.user.created_at
     ? new Date(session.user.created_at).toLocaleDateString()
     : null;
+
+  if (view === "course") {
+    return (
+      <div className="w-full max-w-3xl space-y-6">
+        <Button variant="ghost" onClick={() => setView("storefront")} className="mb-4">
+          <ArrowLeft className="mr-2 size-4" /> Back to Dashboard
+        </Button>
+        <Card className="min-h-[50vh]">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">
+              HIDDEN SECRETS TO LAND YOUR FIRST REMOTE JOB: The Exact Strategy I Used to Get Hired
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center justify-center pt-20 text-center">
+            <h3 className="text-xl font-semibold">Welcome to the Course!</h3>
+            <p className="mt-2 text-muted-foreground">The course content is currently being prepared. Check back soon!</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (view === "preview") {
+    return (
+      <div className="w-full max-w-2xl space-y-6">
+        <Button variant="ghost" onClick={() => setView("storefront")} className="mb-4">
+          <ArrowLeft className="mr-2 size-4" /> Back to Dashboard
+        </Button>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold leading-tight">
+              HIDDEN SECRETS TO LAND YOUR FIRST REMOTE JOB: The Exact Strategy I Used to Get Hired
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4 text-muted-foreground">
+              <p>
+                Landing my first remote job felt impossible until I stopped playing by the standard rules. When you're competing against a global talent pool, sending out 100 identical resumes a day is a recipe for burnout. I had to completely engineer a new approach to get noticed.
+              </p>
+              <p>
+                In this video course, I break down the exact strategy that finally got me hired. From optimizing my online presence to running targeted outreach that hiring managers actually respond to, this is the completely transparent breakdown of what works right now. If you're ready to ditch the daily commute and land a role that gives you your time back, this is your starting line.
+              </p>
+            </div>
+
+            <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-5">
+              <h4 className="font-semibold">Before purchasing, please agree to the following terms:</h4>
+              <div className="flex items-start gap-3">
+                <input 
+                  type="checkbox" 
+                  id="term1" 
+                  checked={agreed1} 
+                  onChange={(e) => setAgreed1(e.target.checked)} 
+                  className="mt-1 size-4 rounded border-border text-foreground focus:ring-foreground"
+                />
+                <label htmlFor="term1" className="text-sm">I understand this is a digital product and all sales are final.</label>
+              </div>
+              <div className="flex items-start gap-3">
+                <input 
+                  type="checkbox" 
+                  id="term2" 
+                  checked={agreed2} 
+                  onChange={(e) => setAgreed2(e.target.checked)} 
+                  className="mt-1 size-4 rounded border-border text-foreground focus:ring-foreground"
+                />
+                <label htmlFor="term2" className="text-sm">I agree that this material is for personal use only and cannot be resold or distributed.</label>
+              </div>
+            </div>
+
+            <Button
+              className="w-full rounded-full bg-foreground py-6 text-lg font-bold text-background hover:bg-foreground/90"
+              disabled={!agreed1 || !agreed2 || !primaryProduct}
+              onClick={handleBuy}
+            >
+              Buy Course for {primaryProduct ? formatNaira(primaryProduct.price_kobo) : "..."}
+            </Button>
+            {notice && (
+              <p className="text-center text-sm text-red-500">{notice}</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-lg space-y-6">
@@ -303,7 +393,7 @@ function AccountPanel({
             />
           </span>
           <CardTitle className="font-display text-3xl font-extrabold tracking-tight">
-            Welcome
+            Dashboard
           </CardTitle>
           <CardDescription>{session.user.email}</CardDescription>
         </CardHeader>
@@ -346,82 +436,50 @@ function AccountPanel({
 
       <Card>
         <CardContent className="px-6 py-5">
-          <p className="eyebrow">Access</p>
-          {access.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">
-              Nothing unlocked yet.
-            </p>
+          <p className="eyebrow mb-4">Available Courses</p>
+          {!primaryProduct ? (
+            <div className="rounded-xl border border-dashed border-border p-6 text-center text-muted-foreground">
+              <p className="text-sm">Course coming soon...</p>
+              {isAdmin && (
+                <p className="mt-2 text-xs">
+                  (Admin: Please add the course product in the Admin panel for it to show up here.)
+                </p>
+              )}
+            </div>
           ) : (
-            <ul className="mt-3 space-y-1.5">
-              {access.map((grant) => (
-                <li
-                  key={grant.id}
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 px-3 py-2 text-sm"
-                >
-                  <span className="truncate">
-                    {grant.product?.name ?? "Product"}
-                  </span>
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    until {formatDate(grant.expires_at)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="px-6 py-5">
-          <p className="eyebrow">Store</p>
-          {catalog.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">
-              No products listed yet.
-            </p>
-          ) : (
-            <ul className="mt-3 space-y-1.5">
-              {catalog.map((product) => {
-                const active = activeByProduct.get(product.id);
-                return (
-                  <li
-                    key={product.id}
-                    className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 px-3 py-2.5"
+            <div className="overflow-hidden rounded-2xl border border-border bg-muted/10">
+              <div className="p-5">
+                <h3 className="mb-2 font-display text-lg font-bold leading-snug">
+                  HIDDEN SECRETS TO LAND YOUR FIRST REMOTE JOB: The Exact Strategy I Used to Get Hired
+                </h3>
+                <div className="mb-4 text-sm text-muted-foreground">
+                  Video Course
+                </div>
+                {hasAccess ? (
+                  <Button 
+                    className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
+                    onClick={() => setView("course")}
                   >
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium text-foreground">
-                        {product.name}
-                      </span>
-                      <span className="block truncate text-xs text-muted-foreground">
-                        {formatNaira(product.price_kobo)} ·{" "}
-                        {product.duration_days} days
-                      </span>
-                    </span>
-                    {active ? (
-                      <span className="shrink-0 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">
-                        until {formatDate(active.expires_at)}
-                      </span>
-                    ) : (
-                      <Button
-                        size="sm"
-                        className="shrink-0 rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
-                        onClick={() => handleBuy(product)}
-                      >
-                        Buy
-                      </Button>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-          {notice && (
-            <p className="mt-3 text-sm text-muted-foreground">{notice}</p>
+                    View Course
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="w-full rounded-full font-semibold"
+                    onClick={() => setView("preview")}
+                  >
+                    View Details
+                  </Button>
+                )}
+              </div>
+            </div>
           )}
         </CardContent>
       </Card>
     </div>
   );
 }
+
 
 export default function Storefront() {
   const { session, loading } = useSupabaseSession();
