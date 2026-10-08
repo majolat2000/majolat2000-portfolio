@@ -2,8 +2,6 @@ import '@vly-ai/integrations';
 import { Toaster } from "@/components/ui/sonner";
 import { RequireAuth } from "@/components/RequireAuth";
 import { VlyToolbar } from "../vly-toolbar-readonly.tsx";
-import { ConvexAuthProvider } from "@convex-dev/auth/react";
-import { ConvexReactClient } from "convex/react";
 import React, { StrictMode, useEffect, lazy, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router";
@@ -14,6 +12,7 @@ const Landing = lazy(() => import("./pages/Landing.tsx"));
 const Credentials = lazy(() => import("./pages/Credentials.tsx"));
 const AuthPage = lazy(() => import("./pages/Auth.tsx"));
 const Dashboard = lazy(() => import("./pages/Dashboard.tsx"));
+const StorefrontAdmin = lazy(() => import("./pages/StorefrontAdmin.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const Solutions = lazy(() => import("./pages/Solutions.tsx"));
 const Storefront = lazy(() => import("./pages/Storefront.tsx"));
@@ -83,10 +82,6 @@ class RootErrorBoundary extends React.Component<
   }
 }
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
-
-
-
 function RouteSyncer() {
   const location = useLocation();
   useEffect(() => {
@@ -126,6 +121,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="/credentials" element={<Credentials />} />
               <Route path="/solutions" element={<Solutions />} />
               <Route path="/storefront" element={<Storefront />} />
+              <Route path="/storefront/admin" element={<StorefrontAdmin />} />
               <Route
                 path="/auth"
                 element={<AuthPage redirectAfterAuth="/dashboard" />}
