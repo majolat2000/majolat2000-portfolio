@@ -8,8 +8,7 @@
 - Tailwind v4 (for styling)
 - Shadcn UI (for UI components library)
 - Lucide Icons (for icons)
-- Convex (for backend & database)
-- Convex Auth (for authentication)
+- Supabase (for backend, database & authentication)
 - Framer Motion (for animations)
 - Three js (for 3d models)
 
