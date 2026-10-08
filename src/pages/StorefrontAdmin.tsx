@@ -298,7 +298,7 @@ export default function StorefrontAdmin() {
     <div className="relative min-h-screen bg-background text-foreground">
       <Background />
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-        <header className="flex items-center justify-between gap-4">
+        <header className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4 border-b border-border/40 backdrop-blur-md bg-background/50 sticky top-0 z-20">
           <Link to="/" className="group flex items-center gap-3">
             <span className="grid size-10 place-items-center overflow-hidden rounded-full ring-1 ring-border transition-transform duration-300 group-hover:scale-105">
               <img
@@ -325,10 +325,10 @@ export default function StorefrontAdmin() {
 
         <main className="mt-8">
           <p className="eyebrow">Admin</p>
-          <h1 className="mt-3 font-display text-3xl font-extrabold tracking-tight sm:text-4xl">
+          <h1 className="mt-3 font-display text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight">
             Customers &amp; access
           </h1>
-          <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          <p className="mt-2 max-w-2xl text-xs sm:text-sm text-muted-foreground leading-relaxed">
             Pick a customer, choose a product and the number of days. Grants
             stack: extending adds to whatever is left.
           </p>
@@ -349,7 +349,7 @@ export default function StorefrontAdmin() {
           )}
 
           <Tabs defaultValue="users" className="mt-6">
-            <TabsList>
+            <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:inline-flex">
               <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="products">Products</TabsTrigger>
             </TabsList>
@@ -435,18 +435,26 @@ export default function StorefrontAdmin() {
                               {grants.map((grant) => (
                                 <li
                                   key={grant.id}
-                                  className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 px-3 py-2 text-sm"
+                                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 rounded-2xl border border-border bg-muted/40 p-3 sm:px-4 sm:py-3 text-sm"
                                 >
-                                  <span className="truncate">
-                                    {grant.product?.name ?? "Unknown product"}
-                                  </span>
-                                  <span className="shrink-0 text-xs text-muted-foreground">
-                                    until {formatDate(grant.expires_at)}
-                                    {grant.source === "flutterwave"
-                                      ? " · paid"
-                                      : ""}
-                                  </span>
-                                  <Button variant="destructive" size="sm" className="ml-4 shrink-0" onClick={() => handleRevokeAccess(grant.id)} disabled={busy}>Revoke</Button>
+                                  <div className="min-w-0 flex-1">
+                                    <span className="block truncate font-medium text-foreground text-sm sm:text-base">
+                                      {grant.product?.name ?? "Unknown product"}
+                                    </span>
+                                    <span className="block text-xs text-muted-foreground">
+                                      Active until {formatDate(grant.expires_at)}
+                                      {grant.source === "flutterwave" ? " · Paid via Flutterwave" : " · Manual grant"}
+                                    </span>
+                                  </div>
+                                  <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    className="w-full sm:w-auto shrink-0 self-end sm:self-center"
+                                    onClick={() => handleRevokeAccess(grant.id)}
+                                    disabled={busy}
+                                  >
+                                    Revoke
+                                  </Button>
                                 </li>
                               ))}
                             </ul>
@@ -531,29 +539,41 @@ export default function StorefrontAdmin() {
                       {products.map((product) => (
                         <li
                           key={product.id}
-                          className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 px-3 py-2.5 text-sm"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-border bg-muted/40 p-3.5 sm:px-4 sm:py-3 text-sm transition-colors hover:border-border/80"
                         >
-                          <span className="min-w-0">
-                            <span className="block truncate font-medium text-foreground">
-                              {product.name}
-                            </span>
-                            {product.description && (
-                              <span className="block truncate text-xs text-muted-foreground">
-                                {product.description}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                              <span className="block font-medium text-foreground text-sm sm:text-base">
+                                {product.name}
                               </span>
+                              <span className="sm:hidden shrink-0 text-right text-xs font-bold text-foreground">
+                                {formatNaira(product.price_kobo)}
+                              </span>
+                            </div>
+                            {product.description && (
+                              <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                                {product.description}
+                              </p>
                             )}
-                          </span>
-                          <span className="shrink-0 text-right text-xs text-muted-foreground">
-                            {formatNaira(product.price_kobo)}
-                            <br />
-                            {product.duration_days >= 3650 ? "Lifetime access" : `${product.duration_days} days`}
-                          </span>
-                          <div className="ml-4 flex items-center gap-2 shrink-0">
+                            <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground sm:hidden">
+                              <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 font-medium text-foreground text-[11px]">
+                                {product.duration_days >= 3650 ? "Lifetime access" : `${product.duration_days} days access`}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="hidden sm:block shrink-0 text-right text-xs text-muted-foreground">
+                            <div className="font-bold text-sm text-foreground">{formatNaira(product.price_kobo)}</div>
+                            <div className="mt-0.5">{product.duration_days >= 3650 ? "Lifetime access" : `${product.duration_days} days`}</div>
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-2.5 sm:pt-0 border-t border-border/40 sm:border-0 justify-end shrink-0">
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => startEditProduct(product)}
                               disabled={busy}
+                              className="flex-1 sm:flex-none text-xs sm:text-sm font-medium"
                             >
                               <Pencil className="size-3.5 mr-1" />
                               Edit
@@ -563,6 +583,7 @@ export default function StorefrontAdmin() {
                               size="sm"
                               onClick={() => handleDeleteProduct(product.id)}
                               disabled={busy}
+                              className="flex-1 sm:flex-none text-xs sm:text-sm font-medium"
                             >
                               Delete
                             </Button>
@@ -663,7 +684,7 @@ export default function StorefrontAdmin() {
               if (!open) setEditingProduct(null);
             }}
           >
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="w-[calc(100%-2rem)] sm:max-w-md max-h-[88vh] overflow-y-auto p-4 sm:p-6 rounded-2xl">
               <DialogHeader>
                 <DialogTitle>Edit Course / Product</DialogTitle>
                 <DialogDescription>

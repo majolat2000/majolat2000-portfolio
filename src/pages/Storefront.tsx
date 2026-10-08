@@ -40,7 +40,7 @@ import { Link, useNavigate } from "react-router";
 
 function NotConfigured() {
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md rounded-2xl sm:rounded-3xl border-border/60 shadow-xl">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <TriangleAlert className="size-5 text-amber-500" />
@@ -332,8 +332,8 @@ function AccountPanel({
 
   if (view === "preview") {
     return (
-      <div className="w-full max-w-2xl space-y-6">
-        <Button variant="ghost" onClick={() => setView("storefront")} className="mb-4">
+      <div className="w-full max-w-2xl space-y-4 sm:space-y-6">
+        <Button variant="ghost" onClick={() => setView("storefront")} className="mb-2 sm:mb-4 text-xs sm:text-sm font-medium rounded-full">
           <ArrowLeft className="mr-2 size-4" /> Back to Dashboard
         </Button>
         <Card>
@@ -363,7 +363,7 @@ function AccountPanel({
               )}
             </div>
 
-            <div className="space-y-4 rounded-xl border border-border bg-muted/20 p-5">
+            <div className="space-y-3 sm:space-y-4 rounded-xl sm:rounded-2xl border border-border bg-muted/20 p-4 sm:p-5">
               <h4 className="font-semibold">Before purchasing, please agree to the following terms:</h4>
               <div className="flex items-start gap-3">
                 <input 
@@ -371,9 +371,9 @@ function AccountPanel({
                   id="term1" 
                   checked={agreed1} 
                   onChange={(e) => setAgreed1(e.target.checked)} 
-                  className="mt-1 size-4 rounded border-border text-foreground focus:ring-foreground"
+                  className="mt-0.5 size-4.5 rounded border-border text-foreground focus:ring-foreground cursor-pointer shrink-0"
                 />
-                <label htmlFor="term1" className="text-sm">I understand this is a digital product and all sales are final.</label>
+                <label htmlFor="term1" className="text-xs sm:text-sm leading-snug cursor-pointer select-none">I understand this is a digital product and all sales are final.</label>
               </div>
               <div className="flex items-start gap-3">
                 <input 
@@ -381,9 +381,9 @@ function AccountPanel({
                   id="term2" 
                   checked={agreed2} 
                   onChange={(e) => setAgreed2(e.target.checked)} 
-                  className="mt-1 size-4 rounded border-border text-foreground focus:ring-foreground"
+                  className="mt-0.5 size-4.5 rounded border-border text-foreground focus:ring-foreground cursor-pointer shrink-0"
                 />
-                <label htmlFor="term2" className="text-sm">I agree that this material is for personal use only and cannot be resold or distributed.</label>
+                <label htmlFor="term2" className="text-xs sm:text-sm leading-snug cursor-pointer select-none">I agree that this material is for personal use only and cannot be resold or distributed.</label>
               </div>
             </div>
 
@@ -427,7 +427,7 @@ function AccountPanel({
             </div>
           </CardContent>
         )}
-        <CardFooter className="gap-2">
+        <CardFooter className="flex flex-col sm:flex-row gap-2.5 w-full">
           {isAdmin && (
             <Button
               variant="default"
@@ -468,9 +468,9 @@ function AccountPanel({
               )}
             </div>
           ) : (
-            <div className="overflow-hidden rounded-2xl border border-border bg-muted/10">
-              <div className="p-5">
-                <h3 className="mb-2 font-display text-lg font-bold leading-snug">
+            <div className="overflow-hidden rounded-2xl border border-border bg-muted/10 transition-all hover:border-border/80">
+              <div className="p-4 sm:p-5">
+                <h3 className="mb-2 font-display text-base sm:text-lg font-bold leading-snug">
                   {primaryProduct.name}
                 </h3>
                 <div className="mb-4 flex items-center justify-between text-sm text-muted-foreground">
@@ -514,7 +514,7 @@ export default function Storefront() {
     <div className="relative min-h-screen text-foreground">
       <Background />
       <div className="relative z-10 flex min-h-screen flex-col">
-        <header className="flex items-center justify-between px-4 py-4 sm:px-8">
+        <header className="flex items-center justify-between px-4 py-3 sm:px-8 sm:py-4 border-b border-border/40 backdrop-blur-md bg-background/50 sticky top-0 z-20">
           <Link to="/" className="group flex items-center gap-3">
             <span className="grid size-10 place-items-center overflow-hidden rounded-full ring-1 ring-border transition-transform duration-300 group-hover:scale-105">
               <img
@@ -539,7 +539,7 @@ export default function Storefront() {
           </Button>
         </header>
 
-        <main className="flex flex-1 items-center justify-center px-4 pb-16">
+        <main className="flex flex-1 items-center justify-center px-3 sm:px-6 py-6 sm:py-12 pb-16">
           {loading ? (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
