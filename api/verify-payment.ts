@@ -25,16 +25,19 @@ export default async function handler(
   }
 
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
+  console.log("Verify payment started for TX:", transactionId);
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const secretKey = process.env.FLUTTERWAVE_SECRET_KEY;
 
   if (!supabaseUrl || !serviceKey || !secretKey) {
+    console.error("Missing config:", { hasUrl: !!supabaseUrl, hasService: !!serviceKey, hasSecret: !!secretKey });
     res.status(503).json({ error: "server_not_configured" });
     return;
   }
 
   const parsed = parseTxRef(txRef);
   if (!parsed) {
+    console.error("Invalid tx ref:", txRef);
     res.status(400).json({ error: "invalid_tx_ref" });
     return;
   }
@@ -52,12 +55,14 @@ export default async function handler(
     const body = (await response.json()) as any;
     
     if (!response.ok || !body.data) {
+      console.error("FLW Verify failed:", response.status, body);
       res.status(400).json({ error: "verification_failed", message: body.message });
       return;
     }
 
     const verified = body.data;
     if (!["successful", "succeeded"].includes(verified.status ?? "")) {
+      console.error("FLW status not successful:", verified.status);
       res.status(400).json({ error: "payment_not_successful" });
       return;
     }
@@ -70,11 +75,13 @@ export default async function handler(
       .maybeSingle();
 
     if (productError || !product) {
+      console.error("Product fetch failed:", productError, "product id:", parsed.productId);
       res.status(404).json({ error: "product_not_found" });
       return;
     }
 
     if (verified.amount + 0.001 < product.price_kobo / 100) {
+      console.error("Amount mismatch:", verified.amount, product.price_kobo / 100);
       res.status(400).json({ error: "amount_mismatch" });
       return;
     }
@@ -117,6 +124,7 @@ export default async function handler(
     });
 
     if (insertError) {
+      console.error("Insert error:", insertError);
       res.status(500).json({ error: insertError.message });
       return;
     }
