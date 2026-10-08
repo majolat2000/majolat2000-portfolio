@@ -4,6 +4,7 @@
     { "source": "/credentials", "destination": "/index.html" },
     { "source": "/auth", "destination": "/index.html" },
     { "source": "/dashboard", "destination": "/index.html" },
+    { "source": "/solutions", "destination": "/index.html" },
     { "source": "/storefront/:path*", "destination": "/index.html" }
   ]
 }
