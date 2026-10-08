@@ -232,6 +232,7 @@ function AccountPanel({
   session: Session;
   onSignedOut: () => void;
 }) {
+  const navigate = useNavigate();
   const [access, setAccess] = useState<AccessGrantWithProduct[]>([]);
   const [catalog, setCatalog] = useState<StoreProduct[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
@@ -484,7 +485,6 @@ function AccountPanel({
 
 
 export default function Storefront() {
-  const navigate = useNavigate();
   const { session, loading } = useSupabaseSession();
 
   return (
