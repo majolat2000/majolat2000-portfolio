@@ -267,7 +267,6 @@ function AccountPanel({
               className="h-full w-full object-cover"
             />
           </span>
-          <p className="eyebrow">Account</p>
           <CardTitle className="font-display text-3xl font-extrabold tracking-tight">
             Welcome
           </CardTitle>
