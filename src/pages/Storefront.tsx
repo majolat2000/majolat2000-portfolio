@@ -36,7 +36,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 function NotConfigured() {
   return (
@@ -303,7 +303,7 @@ function AccountPanel({
             }
             const accessList = await listMyAccess(session.user.id);
             setAccess(accessList);
-            setNotice("Payment successful! You now have access.");
+            navigate(`/storefront/product/${primaryProduct.id}`);
           } catch (e) {
             setNotice(e instanceof Error ? e.message : "Failed to verify payment");
           }
@@ -484,6 +484,7 @@ function AccountPanel({
 
 
 export default function Storefront() {
+  const navigate = useNavigate();
   const { session, loading } = useSupabaseSession();
 
   return (
