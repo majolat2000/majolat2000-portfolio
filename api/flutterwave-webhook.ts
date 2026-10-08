@@ -1,13 +1,15 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
 import { timingSafeEqual } from "node:crypto";
-import { parseTxRef } from "../src/lib/payments/flutterwave";
+import { parseTxRef } from "../src/lib/payments/txref";
 
 interface FlutterwaveEvent {
   event?: string;
+  type?: string;
   data?: {
     id?: number | string;
     tx_ref?: string;
+    reference?: string;
     status?: string;
     amount?: number;
     currency?: string;
@@ -61,22 +63,60 @@ export default async function handler(
 
   const event = (req.body ?? {}) as FlutterwaveEvent;
   const data = event.data;
+  const eventName = event.event ?? event.type;
 
   if (
-    event.event !== "charge.completed" ||
+    eventName !== "charge.completed" ||
     !data ||
-    data.status !== "successful"
+    !["successful", "succeeded"].includes(data.status ?? "")
   ) {
     res.status(200).json({ received: true, ignored: true });
     return;
   }
 
-  if (!data.tx_ref || data.id === undefined) {
+  const txRefValue = data.tx_ref ?? data.reference;
+  if (!txRefValue || data.id === undefined) {
     res.status(200).json({ received: true, ignored: true });
     return;
   }
 
-  const parsed = parseTxRef(data.tx_ref);
+  let checkTxRef = txRefValue;
+  let checkAmount = data.amount;
+  const secretKey = process.env.FLUTTERWAVE_SECRET_KEY;
+  if (secretKey) {
+    try {
+      const response = await fetch(
+        `https://api.flutterwave.com/v3/transactions/${encodeURIComponent(
+          String(data.id),
+        )}/verify`,
+        { headers: { Authorization: `Bearer ${secretKey}` } },
+      );
+      const body = (await response.json()) as {
+        message?: string;
+        data?: { status?: string; tx_ref?: string; amount?: number };
+      };
+      const verified = body.data;
+      if (!response.ok || !verified) {
+        res
+          .status(502)
+          .json({ error: "verification_failed", message: body.message });
+        return;
+      }
+      if (!["successful", "succeeded"].includes(verified.status ?? "")) {
+        res.status(200).json({ received: true, ignored: "not_successful" });
+        return;
+      }
+      if (verified.tx_ref) checkTxRef = verified.tx_ref;
+      if (typeof verified.amount === "number") checkAmount = verified.amount;
+    } catch (error) {
+      res.status(502).json({
+        error: error instanceof Error ? error.message : "verification_error",
+      });
+      return;
+    }
+  }
+
+  const parsed = parseTxRef(checkTxRef);
   if (!parsed) {
     res.status(200).json({ received: true, ignored: true });
     return;
@@ -108,8 +148,8 @@ export default async function handler(
     }
 
     if (
-      typeof data.amount === "number" &&
-      data.amount + 0.001 < product.price_kobo / 100
+      typeof checkAmount === "number" &&
+      checkAmount + 0.001 < product.price_kobo / 100
     ) {
       res.status(200).json({ received: true, ignored: "amount_mismatch" });
       return;
