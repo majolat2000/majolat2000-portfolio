@@ -80,7 +80,6 @@ export default function StorefrontAdmin() {
   const [grantDays, setGrantDays] = useState<string>("30");
   const [isLifetimeGrant, setIsLifetimeGrant] = useState(false);
   const [isLifetimeProduct, setIsLifetimeProduct] = useState(false);
-  const [addType, setAddType] = useState<ProductType>("course");
   const [editType, setEditType] = useState<ProductType>("course");
   const [editingProduct, setEditingProduct] = useState<StoreProduct | null>(null);
   const [editName, setEditName] = useState("");

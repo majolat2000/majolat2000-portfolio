@@ -43,7 +43,6 @@ import {
   LogOut,
   ShieldCheck,
   TriangleAlert,
-  Sparkles,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router";
@@ -634,16 +633,11 @@ export default function Storefront() {
           <div className="w-full max-w-4xl space-y-6 sm:space-y-8">
             {/* Storefront Hero */}
             <div className="text-center space-y-2 sm:space-y-3 max-w-2xl mx-auto">
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-3 py-1 text-xs font-medium text-muted-foreground">
-                <Sparkles className="size-3.5 text-primary" />
-                <span>Digital Products & Training</span>
-              </div>
               <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
                 Available Products
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                 Explore courses, toolkits, and digital resources designed to level up your career.
-                Anyone can view all product details freely below.
               </p>
             </div>
 
