@@ -83,6 +83,15 @@ class RootErrorBoundary extends React.Component<
   }
 }
 
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
+  return null;
+}
+
 function RouteSyncer() {
   const location = useLocation();
   useEffect(() => {
@@ -114,6 +123,7 @@ createRoot(document.getElementById("root")!).render(
         <VlyToolbar />
       </ToolbarErrorBoundary>
       <BrowserRouter>
+        <ScrollToTop />
         <RouteSyncer />
         <Suspense fallback={<RouteLoading />}>
           <Routes>
