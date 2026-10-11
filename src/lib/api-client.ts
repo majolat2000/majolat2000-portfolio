@@ -29,6 +29,14 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
+      // Do not redirect if conflict resolution is active
+      if (
+        typeof window !== "undefined" &&
+        sessionStorage.getItem("abac_conflict_pending") === "true"
+      ) {
+        return Promise.reject(error);
+      }
+
       if (supabase) {
         try {
           await supabase.auth.signOut();

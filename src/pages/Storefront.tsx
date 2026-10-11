@@ -37,19 +37,25 @@ import {
 import {
   ArrowLeft,
   CheckCircle2,
+  Clock,
   ExternalLink,
   Loader2,
   LogIn,
   LogOut,
+  ShieldAlert,
   ShieldCheck,
+  Smartphone,
   TriangleAlert,
   Wallet,
+  X,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import {
   getOrCreateDeviceSessionId,
   useSingleSession,
+  setSessionConflictPending,
+  setSessionVerified,
 } from "@/hooks/use-single-session";
 import { getStoredReferralCode } from "@/hooks/use-referral-tracker";
 import { apiClient } from "@/lib/api-client";
@@ -121,6 +127,8 @@ export function AuthPanel({
       });
 
       if (res.data?.status === "ok") {
+        setSessionConflictPending(false);
+        setSessionVerified(sessionId);
         setConflictPrompt(null);
         onSuccess?.();
       } else {
@@ -130,6 +138,19 @@ export function AuthPanel({
       setError(err.response?.data?.message || err.message || "Failed to override session.");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleCancelConflict = async () => {
+    setSessionConflictPending(false);
+    setSessionVerified(null);
+    setConflictPrompt(null);
+    if (supabase) {
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        // Ignore signout error
+      }
     }
   };
 
@@ -163,11 +184,15 @@ export function AuthPanel({
     setIsSubmitting(true);
     try {
       if (mode === "signin") {
+        // Mark conflict check pending before signing in so background touchSession won't kick user out
+        setSessionConflictPending(true);
+
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         if (signInError) {
+          setSessionConflictPending(false);
           setError(friendlyAuthError(signInError.message));
         } else {
           // Single device check
@@ -180,14 +205,21 @@ export function AuthPanel({
             });
 
             if (checkRes.data?.status === "conflict") {
+              // Active session on another device detected: keep pending so user can choose
+              setSessionConflictPending(true);
               setConflictPrompt({
                 message: checkRes.data.message || "You are currently logged in on another device.",
                 email,
               });
               return;
+            } else {
+              setSessionConflictPending(false);
+              setSessionVerified(sessionId);
             }
           } catch (sessionErr) {
             console.warn("Session validation error, proceeding:", sessionErr);
+            setSessionConflictPending(false);
+            setSessionVerified(sessionId);
           }
 
           onSuccess?.();
@@ -242,6 +274,8 @@ export function AuthPanel({
               force: true,
               deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
             });
+            setSessionConflictPending(false);
+            setSessionVerified(sessionId);
           } catch {
             // Ignore
           }
@@ -251,14 +285,15 @@ export function AuthPanel({
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+      setSessionConflictPending(false);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-md border-border/60 shadow-xl rounded-2xl">
-      <CardHeader className="items-center justify-items-center text-center pb-4">
+    <Card className="w-full max-w-md border-border/60 shadow-2xl rounded-2xl sm:rounded-3xl bg-card/95 backdrop-blur-md overflow-hidden">
+      <CardHeader className="items-center justify-items-center text-center px-4 sm:px-6 pt-5 sm:pt-6 pb-3 sm:pb-4">
         <span className="grid size-12 place-items-center overflow-hidden rounded-full ring-1 ring-border mb-1">
           <img
             src={portfolio.avatar}
@@ -266,72 +301,74 @@ export function AuthPanel({
             className="h-full w-full object-cover"
           />
         </span>
-        <CardTitle className="font-display text-xl sm:text-2xl font-extrabold tracking-tight">
+        <CardTitle className="font-display text-lg sm:text-2xl font-extrabold tracking-tight">
           {customTitle ?? "Majesty's Digital Storefront"}
         </CardTitle>
-        <CardDescription className="text-xs sm:text-sm">
+        <CardDescription className="text-xs sm:text-sm text-muted-foreground px-2">
           {customSubtitle ?? "Sign in or create an account to purchase and access products."}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-4 sm:px-6 pb-6 max-h-[75vh] overflow-y-auto">
         {showTimeoutAlert && (
-          <div
-            style={{
-              padding: "10px",
-              backgroundColor: "#ffeeba",
-              color: "#856404",
-              marginBottom: "20px",
-              borderRadius: "4px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <span className="text-xs sm:text-sm font-medium">
-              Your session expired due to inactivity, or you logged in from another device. Please log in again.
-            </span>
+          <div className="mb-4 flex items-start justify-between gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 sm:p-3.5 text-foreground text-xs sm:text-sm">
+            <div className="flex items-start gap-2">
+              <Clock className="size-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <span className="leading-snug text-muted-foreground">
+                Your session expired due to inactivity or was transferred to another device. Please sign in again.
+              </span>
+            </div>
             <button
               type="button"
               onClick={() => setShowTimeoutAlert(false)}
-              className="ml-2 font-bold hover:opacity-75 text-base leading-none text-[#856404]"
+              className="p-1 rounded-md text-muted-foreground hover:text-foreground transition-colors shrink-0"
               aria-label="Dismiss alert"
             >
-              ×
+              <X className="size-3.5" />
             </button>
           </div>
         )}
 
         {conflictPrompt && (
-          <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs sm:text-sm text-foreground space-y-3">
-            <p className="font-semibold text-amber-700 dark:text-amber-400">
-              ⚠️ {conflictPrompt.message}
-            </p>
-            <p className="text-muted-foreground text-xs leading-relaxed">
+          <div className="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-3.5 sm:p-4 text-xs sm:text-sm text-foreground shadow-sm space-y-3">
+            <div className="flex items-start gap-2.5">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                <ShieldAlert className="size-4" />
+              </span>
+              <div>
+                <h4 className="font-bold text-amber-900 dark:text-amber-200 text-xs sm:text-sm leading-tight">
+                  Active Session On Another Device
+                </h4>
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
+                  {conflictPrompt.message}
+                </p>
+              </div>
+            </div>
+            <p className="text-muted-foreground text-xs leading-relaxed sm:pl-9">
               To keep your account secure, only one active device or browser is allowed at a time.
               Would you like to force log out the former device and continue on this device?
             </p>
-            <div className="flex gap-2 pt-1">
+            <div className="flex flex-col sm:flex-row gap-2 pt-1 sm:pl-9">
               <Button
+                type="button"
                 size="sm"
-                className="flex-1 rounded-full bg-foreground text-background font-semibold text-xs"
+                className="w-full sm:flex-1 rounded-full bg-foreground text-background font-semibold text-xs py-2.5 sm:py-2 h-auto"
                 disabled={isSubmitting}
                 onClick={handleForceLogoutOtherDevice}
               >
                 {isSubmitting ? (
-                  <Loader2 className="size-3.5 animate-spin mr-1" />
-                ) : null}
+                  <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                ) : (
+                  <Smartphone className="size-3.5 mr-1.5" />
+                )}
                 Force Logout & Continue
               </Button>
               <Button
+                type="button"
                 variant="outline"
                 size="sm"
-                className="rounded-full text-xs"
-                onClick={async () => {
-                  setConflictPrompt(null);
-                  if (supabase) {
-                    await supabase.auth.signOut();
-                  }
-                }}
+                className="w-full sm:w-auto rounded-full text-xs py-2.5 sm:py-2 h-auto"
+                disabled={isSubmitting}
+                onClick={handleCancelConflict}
               >
                 Cancel
               </Button>
@@ -715,8 +752,14 @@ export default function Storefront() {
         </div>
 
         {/* Auth Dialog */}
-        <Dialog open={authModalOpen} onOpenChange={setAuthModalOpen}>
-          <DialogContent className="w-[calc(100%-2rem)] sm:max-w-md p-0 overflow-hidden rounded-2xl border-0 bg-transparent shadow-none">
+        <Dialog
+          open={authModalOpen}
+          onOpenChange={(open) => {
+            if (!open) setSessionConflictPending(false);
+            setAuthModalOpen(open);
+          }}
+        >
+          <DialogContent className="w-[calc(100%-1.5rem)] sm:max-w-md max-h-[92vh] flex items-center justify-center p-0 overflow-hidden rounded-2xl sm:rounded-3xl border-0 bg-transparent shadow-none">
             <AuthPanel
               onSuccess={() => setAuthModalOpen(false)}
               customSubtitle={authPromptReason || undefined}
@@ -970,8 +1013,14 @@ export default function Storefront() {
       </div>
 
       {/* Auth Dialog */}
-      <Dialog open={authModalOpen} onOpenChange={setAuthModalOpen}>
-        <DialogContent className="w-[calc(100%-2rem)] sm:max-w-md p-0 overflow-hidden rounded-2xl border-0 bg-transparent shadow-none">
+      <Dialog
+        open={authModalOpen}
+        onOpenChange={(open) => {
+          if (!open) setSessionConflictPending(false);
+          setAuthModalOpen(open);
+        }}
+      >
+        <DialogContent className="w-[calc(100%-1.5rem)] sm:max-w-md max-h-[92vh] flex items-center justify-center p-0 overflow-hidden rounded-2xl sm:rounded-3xl border-0 bg-transparent shadow-none">
           <AuthPanel
             onSuccess={() => setAuthModalOpen(false)}
             customSubtitle={authPromptReason || undefined}

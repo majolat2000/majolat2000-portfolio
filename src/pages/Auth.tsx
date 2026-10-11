@@ -12,9 +12,23 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useAuth } from "@/hooks/use-auth";
 import logo from "@/assets/logo.svg";
-import { ArrowRight, Loader2, Lock, Mail, UserX } from "lucide-react";
+import {
+  ArrowRight,
+  Loader2,
+  Lock,
+  Mail,
+  UserX,
+  ShieldAlert,
+  Smartphone,
+} from "lucide-react";
 import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { apiClient } from "@/lib/api-client";
+import {
+  getOrCreateDeviceSessionId,
+  setSessionConflictPending,
+  setSessionVerified,
+} from "@/hooks/use-single-session";
 
 interface AuthProps {
   redirectAfterAuth?: string;
@@ -37,6 +51,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     signIn,
     signUp,
     signInAnonymously,
+    signOut,
   } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -48,12 +63,53 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [conflictPrompt, setConflictPrompt] = useState<{
+    message: string;
+    email: string;
+  } | null>(null);
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
+    if (!authLoading && isAuthenticated && !conflictPrompt) {
       navigate(redirect);
     }
-  }, [authLoading, isAuthenticated, navigate, redirect]);
+  }, [authLoading, isAuthenticated, conflictPrompt, navigate, redirect]);
+
+  const handleForceLogoutOtherDevice = async () => {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const sessionId = getOrCreateDeviceSessionId();
+      const res = await apiClient.post("/session", {
+        sessionId,
+        force: true,
+        deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
+      });
+
+      if (res.data?.status === "ok") {
+        setSessionConflictPending(false);
+        setSessionVerified(sessionId);
+        setConflictPrompt(null);
+        navigate(redirect);
+      } else {
+        setError(res.data?.message || "Failed to switch device.");
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || "Failed to override session.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancelConflict = async () => {
+    setSessionConflictPending(false);
+    setSessionVerified(null);
+    setConflictPrompt(null);
+    try {
+      await signOut();
+    } catch {
+      // Ignore
+    }
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -64,6 +120,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
 
     setError(null);
     setNotice(null);
+    setConflictPrompt(null);
 
     if (!email.includes("@")) {
       setError("Enter a valid email address.");
@@ -81,7 +138,34 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     setIsSubmitting(true);
     try {
       if (mode === "signin") {
+        setSessionConflictPending(true);
         await signIn({ email, password });
+
+        const sessionId = getOrCreateDeviceSessionId();
+        try {
+          const checkRes = await apiClient.post("/session", {
+            sessionId,
+            force: false,
+            deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
+          });
+
+          if (checkRes.data?.status === "conflict") {
+            setSessionConflictPending(true);
+            setConflictPrompt({
+              message: checkRes.data.message || "You are currently logged in on another device.",
+              email,
+            });
+            return;
+          } else {
+            setSessionConflictPending(false);
+            setSessionVerified(sessionId);
+          }
+        } catch (sessionErr) {
+          console.warn("Session validation error, proceeding:", sessionErr);
+          setSessionConflictPending(false);
+          setSessionVerified(sessionId);
+        }
+
         navigate(redirect);
       } else {
         const { needsConfirmation } = await signUp({ email, password });
@@ -94,6 +178,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+      setSessionConflictPending(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -114,30 +199,76 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="flex-1 flex items-center justify-center">
-        <div className="flex items-center justify-center h-full flex-col">
-          <Card className="min-w-[350px] pb-0 border shadow-md">
-            <CardHeader className="text-center">
-              <div className="flex justify-center">
-                <img
-                  src={logo}
-                  alt="Logo"
-                  width={64}
-                  height={64}
-                  className="rounded-lg mb-4 mt-4 cursor-pointer"
-                  onClick={() => navigate("/")}
-                />
-              </div>
-              <CardTitle className="text-xl">Get Started</CardTitle>
-              <CardDescription>
-                {mode === "signin"
-                  ? "Sign in to your account"
-                  : "Create an account to get started"}
-              </CardDescription>
-            </CardHeader>
+    <div className="min-h-screen flex flex-col justify-center py-6 px-3 sm:px-6">
+      <div className="w-full max-w-sm sm:max-w-md mx-auto">
+        <Card className="w-full border-border/60 shadow-xl rounded-2xl sm:rounded-3xl bg-card/95 backdrop-blur-md overflow-hidden">
+          <CardHeader className="text-center px-4 sm:px-6 pt-6 pb-4">
+            <div className="flex justify-center">
+              <img
+                src={logo}
+                alt="Logo"
+                width={56}
+                height={56}
+                className="rounded-xl mb-3 cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => navigate("/")}
+              />
+            </div>
+            <CardTitle className="text-xl sm:text-2xl font-bold font-display">Get Started</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
+              {mode === "signin"
+                ? "Sign in to your account"
+                : "Create an account to get started"}
+            </CardDescription>
+          </CardHeader>
 
-            <CardContent>
+          <CardContent className="px-4 sm:px-6 pb-6">
+            {conflictPrompt && (
+              <div className="mb-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-3.5 sm:p-4 text-xs sm:text-sm text-foreground shadow-sm space-y-3">
+                <div className="flex items-start gap-2.5">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                    <ShieldAlert className="size-4" />
+                  </span>
+                  <div>
+                    <h4 className="font-bold text-amber-900 dark:text-amber-200 text-xs sm:text-sm leading-tight">
+                      Active Session On Another Device
+                    </h4>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
+                      {conflictPrompt.message}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-muted-foreground text-xs leading-relaxed sm:pl-9">
+                  To keep your account secure, only one active device or browser is allowed at a time.
+                  Would you like to force log out the former device and continue on this device?
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2 pt-1 sm:pl-9">
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="w-full sm:flex-1 rounded-full bg-foreground text-background font-semibold text-xs py-2.5 sm:py-2 h-auto"
+                    disabled={isSubmitting}
+                    onClick={handleForceLogoutOtherDevice}
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                    ) : (
+                      <Smartphone className="size-3.5 mr-1.5" />
+                    )}
+                    Force Logout & Continue
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full sm:w-auto rounded-full text-xs py-2.5 sm:py-2 h-auto"
+                    disabled={isSubmitting}
+                    onClick={handleCancelConflict}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
               <Tabs
                 value={mode}
                 onValueChange={(value) => {
@@ -278,9 +409,8 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
           </Card>
         </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
 export default function AuthPage(props: AuthProps) {
   return (
