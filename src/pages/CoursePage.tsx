@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, Navigate, Link } from "react-router";
 import { Background } from "@/components/portfolio/Background";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,71 @@ import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { listAccessFor, listProducts, type StoreProduct, type AccessGrantWithProduct } from "@/lib/store";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { portfolio } from "@/lib/portfolio";
+
+/** Load a <script> tag once and resolve when it fires `load`. */
+function loadScript(src: string, attrs?: Record<string, string>): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve();
+      return;
+    }
+    const el = document.createElement("script");
+    el.src = src;
+    el.async = true;
+    if (attrs) {
+      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    }
+    el.onload = () => resolve();
+    el.onerror = () => reject(new Error(`Failed to load ${src}`));
+    document.head.appendChild(el);
+  });
+}
+
+function WistiaPlayer() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    Promise.all([
+      loadScript("https://fast.wistia.com/player.js"),
+      loadScript("https://fast.wistia.com/embed/b0lzfkvru4.js", { type: "module" }),
+    ]).then(() => {
+      if (!cancelled) setReady(true);
+    });
+
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    if (!ready || !containerRef.current) return;
+    // If the custom element hasn't been rendered yet, inject it
+    if (!containerRef.current.querySelector("wistia-player")) {
+      const player = document.createElement("wistia-player");
+      player.setAttribute("media-id", "b0lzfkvru4");
+      player.setAttribute("seo", "false");
+      player.setAttribute("aspect", "1.7777777777777777");
+      containerRef.current.appendChild(player);
+    }
+  }, [ready]);
+
+  return (
+    <div className="w-full overflow-hidden rounded-xl sm:rounded-2xl border border-border/50 shadow-lg">
+      <div
+        ref={containerRef}
+        className="relative w-full"
+        style={{ paddingTop: "56.25%" /* 16:9 aspect ratio */ }}
+      >
+        {!ready && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted/30 backdrop-blur-sm">
+            <Loader2 className="size-8 animate-spin text-muted-foreground" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function CoursePage() {
   const { id } = useParams();
@@ -27,7 +92,7 @@ export default function CoursePage() {
       .then(([products, grants]) => {
         if (cancelled) return;
         const foundProduct = products.find(p => p.id === id || p.id.startsWith(id || ""));
-        setProduct(foundProduct ?? products[0]); // Defaulting to 1st product if ID mismatch for now
+        setProduct(foundProduct ?? products[0]);
         setAccess(grants);
       })
       .finally(() => {
@@ -87,28 +152,39 @@ export default function CoursePage() {
           </Button>
         </header>
 
-        <main className="flex flex-1 flex-col items-center justify-center px-3 sm:px-6 lg:px-8 py-8 sm:py-16">
+        <main className="flex flex-1 flex-col items-center px-3 sm:px-6 lg:px-8 py-6 sm:py-12">
           <div className="w-full max-w-4xl space-y-6">
-            <Card className="min-h-[50vh] sm:min-h-[60vh] overflow-hidden border-border/50 bg-card/50 shadow-2xl backdrop-blur-xl rounded-2xl sm:rounded-3xl">
-              <CardHeader className="border-b border-border/50 bg-muted/20 px-4 sm:px-8 py-4 sm:py-6">
-                <CardTitle className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight break-words">
-                  {product?.name || "HIDDEN SECRETS TO LAND YOUR FIRST REMOTE JOB"}
+            {/* Course Header */}
+            <div className="space-y-2">
+              <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
+                {product?.name || "Course"}
+              </h1>
+              {product?.description && (
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl">
+                  {product.description}
+                </p>
+              )}
+            </div>
+
+            {/* Video Player */}
+            <WistiaPlayer />
+
+            {/* Course Info Card */}
+            <Card className="overflow-hidden border-border/50 bg-card/50 shadow-xl backdrop-blur-xl rounded-2xl sm:rounded-3xl">
+              <CardHeader className="border-b border-border/50 bg-muted/20 px-4 sm:px-8 py-4 sm:py-5">
+                <CardTitle className="text-lg sm:text-xl font-bold">
+                  Course Materials
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col items-center justify-center space-y-5 sm:space-y-6 p-5 sm:p-8 pt-12 sm:pt-20 text-center">
-                <div className="flex size-20 items-center justify-center rounded-full bg-primary/10">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                </div>
-                <h3 className="font-display text-xl sm:text-2xl md:text-4xl font-bold text-foreground">
-                  Welcome to the Course!
-                </h3>
-                <p className="max-w-xl text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed">
-                  The video modules and materials are currently being finalized and uploaded. 
-                  Bookmark this page and check back very soon!
+              <CardContent className="space-y-4 p-5 sm:p-8">
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  Watch the video above to get started. Additional modules and
+                  materials will be added here as they become available.
                 </p>
                 {isAdmin && (
                   <p className="rounded-xl border border-dashed border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-600 dark:text-amber-400">
-                    (Admin: You can safely embed your videos and code custom content into this component: <code className="font-mono text-xs">src/pages/CoursePage.tsx</code>)
+                    Admin: To add more videos or sections, edit{" "}
+                    <code className="font-mono text-xs">src/pages/CoursePage.tsx</code>
                   </p>
                 )}
               </CardContent>
