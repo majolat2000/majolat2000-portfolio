@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { listAccessFor, listProducts, type StoreProduct, type AccessGrantWithProduct } from "@/lib/store";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, FileText, Loader2 } from "lucide-react";
 import { portfolio } from "@/lib/portfolio";
+import { COURSE_TRANSCRIPT_PARAGRAPHS } from "@/data/course-transcript";
 
 /** Load a <script> tag once and resolve when it fires `load`. */
 function loadScript(src: string, attrs?: Record<string, string>): Promise<void> {
@@ -57,7 +58,7 @@ function WistiaPlayer() {
   }, [ready]);
 
   return (
-    <div className="w-full overflow-hidden rounded-xl sm:rounded-2xl border border-border/50 shadow-lg">
+    <div className="w-full overflow-hidden rounded-xl sm:rounded-2xl border border-border/50 shadow-lg bg-black/20">
       <style>{`
         wistia-player[media-id='b0lzfkvru4']:not(:defined) { 
           background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/b0lzfkvru4/swatch'); 
@@ -66,13 +67,9 @@ function WistiaPlayer() {
           padding-top:56.25%; 
         }
       `}</style>
-      <div
-        ref={containerRef}
-        className="relative w-full"
-        style={{ paddingTop: "56.25%" /* 16:9 aspect ratio */ }}
-      >
+      <div ref={containerRef} className="relative w-full">
         {!ready && (
-          <div className="absolute inset-0 flex items-center justify-center bg-muted/30 backdrop-blur-sm">
+          <div className="aspect-video w-full flex items-center justify-center bg-muted/30 backdrop-blur-sm">
             <Loader2 className="size-8 animate-spin text-muted-foreground" />
           </div>
         )}
@@ -160,15 +157,15 @@ export default function CoursePage() {
           </Button>
         </header>
 
-        <main className="flex flex-1 flex-col items-center px-3 sm:px-6 lg:px-8 py-6 sm:py-12">
-          <div className="w-full max-w-4xl space-y-6">
+        <main className="flex flex-1 flex-col items-center px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+          <div className="w-full max-w-4xl space-y-3 sm:space-y-5">
             {/* Course Header */}
-            <div className="space-y-2">
+            <div className="space-y-1">
               <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
                 {product?.name || "Course"}
               </h1>
               {product?.description && (
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl">
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-3xl">
                   {product.description}
                 </p>
               )}
@@ -177,21 +174,25 @@ export default function CoursePage() {
             {/* Video Player */}
             <WistiaPlayer />
 
-            {/* Course Info Card */}
+            {/* Video Transcript Card */}
             <Card className="overflow-hidden border-border/50 bg-card/50 shadow-xl backdrop-blur-xl rounded-2xl sm:rounded-3xl">
-              <CardHeader className="border-b border-border/50 bg-muted/20 px-4 sm:px-8 py-4 sm:py-5">
-                <CardTitle className="text-lg sm:text-xl font-bold">
-                  Course Materials
+              <CardHeader className="border-b border-border/50 bg-muted/20 px-4 sm:px-8 py-3 sm:py-4">
+                <CardTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                  <FileText className="size-5 text-primary" />
+                  <span>Transcript of the video</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 p-5 sm:p-8">
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Watch the video above to get started. Additional modules and
-                  materials will be added here as they become available.
-                </p>
+                <div className="space-y-3 sm:space-y-4 text-foreground/90">
+                  {COURSE_TRANSCRIPT_PARAGRAPHS.map((paragraph, index) => (
+                    <p key={index} className="text-sm sm:text-base leading-relaxed text-foreground/80">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
                 {isAdmin && (
-                  <p className="rounded-xl border border-dashed border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-600 dark:text-amber-400">
-                    Admin: To add more videos or sections, edit{" "}
+                  <p className="mt-6 rounded-xl border border-dashed border-amber-500/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-600 dark:text-amber-400">
+                    Admin: You can manage this course content in{" "}
                     <code className="font-mono text-xs">src/pages/CoursePage.tsx</code>
                   </p>
                 )}
