@@ -108,8 +108,22 @@ export async function requestWithdrawal(params: {
 export async function adminUpgradeUserToAffiliate(params: {
   userId: string;
   customCode?: string;
-}): Promise<{ success: boolean; profile: AffiliateProfile }> {
-  const res = await apiClient.post("/admin/upgrade-affiliate", params);
+  action?: "upgrade" | "demote";
+}): Promise<{ success: boolean; message?: string; profile: AffiliateProfile }> {
+  const res = await apiClient.post("/admin/upgrade-affiliate", {
+    ...params,
+    action: params.action || "upgrade",
+  });
+  return res.data;
+}
+
+export async function adminDemoteAffiliateToUser(params: {
+  userId: string;
+}): Promise<{ success: boolean; message?: string; profile: AffiliateProfile }> {
+  const res = await apiClient.post("/admin/upgrade-affiliate", {
+    userId: params.userId,
+    action: "demote",
+  });
   return res.data;
 }
 

@@ -58,11 +58,16 @@ import {
   UserPlus,
   Pencil,
   Wallet,
+  UserMinus,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate } from "react-router";
 import { AuthPanel } from "./Storefront";
-import { adminUpgradeUserToAffiliate, type AffiliateProfile } from "@/lib/api-client";
+import {
+  adminUpgradeUserToAffiliate,
+  adminDemoteAffiliateToUser,
+  type AffiliateProfile,
+} from "@/lib/api-client";
 import { supabase } from "@/lib/supabase";
 
 function errorText(error: unknown): string {
@@ -96,6 +101,7 @@ export default function StorefrontAdmin() {
   const [affiliateInfo, setAffiliateInfo] = useState<AffiliateProfile | null>(null);
   const [customRefCode, setCustomRefCode] = useState("");
   const [upgradingAffiliate, setUpgradingAffiliate] = useState(false);
+  const [demotingAffiliate, setDemotingAffiliate] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -175,6 +181,34 @@ export default function StorefrontAdmin() {
       setError(msg);
     } finally {
       setUpgradingAffiliate(false);
+    }
+  };
+
+  const handleDemoteAffiliate = async () => {
+    if (!selected) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to demote ${selected.email} from Affiliate back to regular User?`
+      )
+    ) {
+      return;
+    }
+    setDemotingAffiliate(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const res = await adminDemoteAffiliateToUser({ userId: selected.id });
+      setAffiliateInfo(res.profile);
+      setMessage(`User ${selected.email} has been demoted back to regular USER.`);
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to demote user.";
+      setError(msg);
+    } finally {
+      setDemotingAffiliate(false);
     }
   };
 
@@ -613,7 +647,7 @@ export default function StorefrontAdmin() {
                               variant="outline"
                               size="sm"
                               className="w-full rounded-full border-primary/40 hover:bg-primary/10 font-semibold text-xs"
-                              disabled={upgradingAffiliate}
+                              disabled={upgradingAffiliate || demotingAffiliate}
                             >
                               {upgradingAffiliate ? (
                                 <Loader2 className="size-3.5 animate-spin mr-1.5" />
@@ -624,6 +658,23 @@ export default function StorefrontAdmin() {
                                 ? "Update Referral Code"
                                 : "Upgrade to Affiliate"}
                             </Button>
+                            {affiliateInfo?.role === "AFFILIATE" && (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={handleDemoteAffiliate}
+                                disabled={demotingAffiliate || upgradingAffiliate}
+                                className="w-full rounded-full border-destructive/40 text-destructive hover:bg-destructive/10 font-semibold text-xs gap-1.5"
+                              >
+                                {demotingAffiliate ? (
+                                  <Loader2 className="size-3.5 animate-spin mr-1" />
+                                ) : (
+                                  <UserMinus className="size-3.5 text-destructive" />
+                                )}
+                                Demote to Regular User
+                              </Button>
+                            )}
                           </form>
                         </div>
                       </div>

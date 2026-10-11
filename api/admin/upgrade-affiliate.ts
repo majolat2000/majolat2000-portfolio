@@ -46,7 +46,7 @@ export default async function handler(
     return;
   }
 
-  const { userId, customCode } = req.body ?? {};
+  const { userId, customCode, action } = req.body ?? {};
   if (!userId) {
     res.status(400).json({ error: "missing_user_id" });
     return;
@@ -56,13 +56,9 @@ export default async function handler(
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  try {
-    // Generate unique code if not provided
-    let code = customCode ? String(customCode).trim().toLowerCase() : null;
-    if (!code) {
-      code = `ref_${String(userId).slice(0, 6)}_${Math.random().toString(36).substring(2, 6)}`;
-    }
+  const isDemotion = action === "demote";
 
+  try {
     // Check existing profile
     const { data: existing, error: fetchError } = await admin
       .from("affiliate_profiles")
@@ -77,9 +73,44 @@ export default async function handler(
       return;
     }
 
+    if (isDemotion) {
+      // Demote to regular user
+      const { data: profile, error: demoteError } = await admin
+        .from("affiliate_profiles")
+        .upsert(
+          {
+            user_id: userId,
+            role: "USER",
+            referral_code: existing?.referral_code ?? null,
+            wallet_balance: existing?.wallet_balance ?? 0,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id" },
+        )
+        .select()
+        .single();
+
+      if (demoteError) {
+        res.status(400).json({ error: demoteError.message });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "User demoted to regular USER successfully.",
+        profile,
+      });
+      return;
+    }
+
+    // Otherwise upgrade to AFFILIATE
+    let code = customCode ? String(customCode).trim().toLowerCase() : null;
+    if (!code) {
+      code = `ref_${String(userId).slice(0, 6)}_${Math.random().toString(36).substring(2, 6)}`;
+    }
+
     const assignedCode = customCode ? code : (existing?.referral_code || code);
 
-    // Direct upsert using service role client (bypasses RLS issues)
     const { data: profile, error: saveError } = await admin
       .from("affiliate_profiles")
       .upsert(
@@ -100,10 +131,14 @@ export default async function handler(
       return;
     }
 
-    res.status(200).json({ success: true, profile });
+    res.status(200).json({
+      success: true,
+      message: "User upgraded to AFFILIATE successfully.",
+      profile,
+    });
   } catch (err) {
     res.status(500).json({
-      error: err instanceof Error ? err.message : "upgrade_failed",
+      error: err instanceof Error ? err.message : "operation_failed",
     });
   }
 }
