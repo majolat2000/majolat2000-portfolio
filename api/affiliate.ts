@@ -91,11 +91,45 @@ export default async function handler(
         return;
       }
 
-      // 2. Count referrals
-      const { count: referredCount } = await admin
-        .from("affiliate_profiles")
-        .select("user_id", { count: "exact", head: true })
-        .eq("referred_by_id", userId);
+      // 2. Count distinct referred members
+      let referredCount = 0;
+      try {
+        const { data: rpcCount, error: rpcErr } = await admin.rpc(
+          "get_affiliate_referral_count",
+          { p_affiliate_id: userId },
+        );
+        if (!rpcErr && typeof rpcCount === "number") {
+          referredCount = rpcCount;
+        } else {
+          // Fallback: select user_ids and deduplicate by real user email
+          const { data: referredRows } = await admin
+            .from("affiliate_profiles")
+            .select("user_id")
+            .eq("referred_by_id", userId);
+
+          if (referredRows && referredRows.length > 0) {
+            const userIds = new Set(referredRows.map((r) => r.user_id));
+            const { data: userList } = await admin.auth.admin.listUsers({
+              perPage: 1000,
+            });
+            const uniqueEmails = new Set<string>();
+            if (userList?.users) {
+              for (const u of userList.users) {
+                if (userIds.has(u.id) && u.email && !u.is_anonymous) {
+                  uniqueEmails.add(u.email.toLowerCase().trim());
+                }
+              }
+            }
+            referredCount = uniqueEmails.size > 0 ? uniqueEmails.size : userIds.size;
+          }
+        }
+      } catch {
+        const { count } = await admin
+          .from("affiliate_profiles")
+          .select("user_id", { count: "exact", head: true })
+          .eq("referred_by_id", userId);
+        referredCount = count ?? 0;
+      }
 
       // 3. Get user's withdrawals
       const { data: withdrawals } = await admin

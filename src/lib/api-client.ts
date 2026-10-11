@@ -157,3 +157,18 @@ export async function resolveBankAccount(params: {
   const res = await apiClient.post("/resolve-account", params);
   return res.data;
 }
+
+export async function adminResetUserPassword(params: {
+  userId: string;
+  newPassword?: string;
+}): Promise<{
+  success: boolean;
+  userId: string;
+  email?: string;
+  password?: string;
+  message?: string;
+}> {
+  const res = await apiClient.post("/admin/reset-password", params);
+  return res.data;
+}
+

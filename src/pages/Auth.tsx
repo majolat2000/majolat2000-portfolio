@@ -22,6 +22,8 @@ import {
   Smartphone,
   Tag,
   UserX,
+  Key,
+  X,
 } from "lucide-react";
 import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router";
@@ -71,6 +73,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     email: string;
   } | null>(null);
   const [signupRefCode, setSignupRefCode] = useState(() => getStoredReferralCode() || "");
+  const [showResetPasswordPrompt, setShowResetPasswordPrompt] = useState(false);
 
   useEffect(() => {
     const stored = getStoredReferralCode();
@@ -351,6 +354,38 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                 </TabsList>
               </Tabs>
 
+              {showResetPasswordPrompt && (
+                <div className="mb-4 rounded-2xl border border-primary/30 bg-primary/10 p-3.5 sm:p-4 text-xs sm:text-sm text-foreground space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Key className="size-4 text-primary shrink-0" />
+                      <h4 className="font-bold text-foreground text-xs sm:text-sm">Reset Password Request</h4>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowResetPasswordPrompt(false)}
+                      className="text-muted-foreground hover:text-foreground p-0.5"
+                      aria-label="Close alert"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  </div>
+                  <p className="text-muted-foreground text-xs leading-relaxed">
+                    To reset your password, please contact <strong className="text-foreground">info@majolat2000.com.ng</strong> from your registered account email. An administrator will verify and reset it for you.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs font-semibold rounded-full h-8"
+                    asChild
+                  >
+                    <a href="mailto:info@majolat2000.com.ng?subject=Password%20Reset%20Request">
+                      Contact info@majolat2000.com.ng
+                    </a>
+                  </Button>
+                </div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="auth-email">Email</Label>
@@ -370,7 +405,18 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="auth-password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="auth-password">Password</Label>
+                    {mode === "signin" && (
+                      <button
+                        type="button"
+                        onClick={() => setShowResetPasswordPrompt((prev) => !prev)}
+                        className="text-[11px] font-medium text-muted-foreground hover:text-foreground underline transition-colors"
+                      >
+                        Forgot password?
+                      </button>
+                    )}
+                  </div>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input

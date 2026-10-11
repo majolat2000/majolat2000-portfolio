@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/hooks/use-auth";
-import { LayoutDashboard, LogOut } from "lucide-react";
-import { useNavigate } from "react-router";
+import { LayoutDashboard, LogOut, ArrowLeft, ShoppingBag } from "lucide-react";
+import { Link, useNavigate } from "react-router";
+import { ChangePasswordCard } from "@/components/ChangePasswordCard";
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -14,39 +15,73 @@ export default function Dashboard() {
   };
 
   return (
-    <main className="min-h-screen bg-background px-6 py-10 text-foreground">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <main className="min-h-screen bg-background px-4 sm:px-6 py-8 sm:py-10 text-foreground">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 sm:gap-8">
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border/40 pb-5">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">
-              Authenticated workspace
-            </p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight">
-              Welcome{user?.name ? `, ${user.name}` : ""}
+            <div className="flex items-center gap-2 mb-1">
+              <Button variant="ghost" size="sm" asChild className="p-0 h-auto text-xs text-muted-foreground hover:text-foreground">
+                <Link to="/storefront">
+                  <ArrowLeft className="size-3.5 mr-1" />
+                  Back to Storefront
+                </Link>
+              </Button>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight font-display">
+              User Dashboard
             </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              Logged in as <span className="font-semibold text-foreground">{user?.email}</span>
+            </p>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="cursor-pointer gap-2 self-start"
-            onClick={handleSignOut}
-          >
-            <LogOut className="size-4" />
-            Sign out
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="rounded-full text-xs font-medium"
+            >
+              <Link to="/storefront">
+                <ShoppingBag className="size-3.5 mr-1.5" />
+                Storefront
+              </Link>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-full text-xs font-medium cursor-pointer"
+              onClick={handleSignOut}
+            >
+              <LogOut className="size-3.5 mr-1.5" />
+              Sign out
+            </Button>
+          </div>
         </header>
 
-        <Card className="border-border/70 shadow-none">
+        {/* Change Password Section */}
+        <ChangePasswordCard userEmail={user?.email} />
+
+        {/* Account Details & Status */}
+        <Card className="border-border/70 shadow-sm rounded-2xl bg-card/60 backdrop-blur-sm">
           <CardHeader>
-            <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <div className="mb-2 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
               <LayoutDashboard className="size-5" />
             </div>
-            <CardTitle>Your dashboard is ready</CardTitle>
+            <CardTitle className="text-lg">Account Workspace</CardTitle>
+            <CardDescription className="text-xs">
+              Manage your digital learning products, purchased toolkit credentials, and affiliate earnings.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="text-sm leading-6 text-muted-foreground">
-            Replace this starter content with the product&apos;s authenticated
-            experience. The route is protected and sign-in returns here by
-            default.
+          <CardContent className="text-xs sm:text-sm leading-relaxed text-muted-foreground space-y-3">
+            <p>
+              Your account grants access to all digital courses, toolkit downloads, and community resources associated with your account email.
+            </p>
+            <div className="pt-2">
+              <Button asChild size="sm" className="rounded-full text-xs font-semibold">
+                <Link to="/storefront">Explore Courses & Toolkits</Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

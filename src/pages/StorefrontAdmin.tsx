@@ -51,7 +51,10 @@ import {
 } from "@/lib/store";
 import {
   ArrowLeft,
+  Check,
   CheckCircle2,
+  Copy,
+  Key,
   Loader2,
   Search,
   ShieldCheck,
@@ -66,6 +69,7 @@ import { AuthPanel } from "./Storefront";
 import {
   adminUpgradeUserToAffiliate,
   adminDemoteAffiliateToUser,
+  adminResetUserPassword,
   type AffiliateProfile,
 } from "@/lib/api-client";
 import { supabase } from "@/lib/supabase";
@@ -102,6 +106,10 @@ export default function StorefrontAdmin() {
   const [customRefCode, setCustomRefCode] = useState("");
   const [upgradingAffiliate, setUpgradingAffiliate] = useState(false);
   const [demotingAffiliate, setDemotingAffiliate] = useState(false);
+  const [resetPasswordInput, setResetPasswordInput] = useState("");
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [resetPasswordSuccess, setResetPasswordSuccess] = useState<string | null>(null);
+  const [copiedResetPassword, setCopiedResetPassword] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -209,6 +217,35 @@ export default function StorefrontAdmin() {
       setError(msg);
     } finally {
       setDemotingAffiliate(false);
+    }
+  };
+
+  const handleAdminResetPassword = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!selected) return;
+    setResettingPassword(true);
+    setError(null);
+    setMessage(null);
+    setResetPasswordSuccess(null);
+    try {
+      const res = await adminResetUserPassword({
+        userId: selected.id,
+        newPassword: resetPasswordInput.trim() || undefined,
+      });
+      if (res.password) {
+        setResetPasswordSuccess(res.password);
+        setMessage(`Password for ${selected.email} has been updated.`);
+        setResetPasswordInput("");
+      }
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to reset user password.";
+      setError(msg);
+    } finally {
+      setResettingPassword(false);
     }
   };
 
@@ -675,6 +712,87 @@ export default function StorefrontAdmin() {
                                 Demote to Regular User
                               </Button>
                             )}
+                          </form>
+                        </div>
+
+                        {/* Admin Password Reset Section */}
+                        <div className="pt-4 border-t border-border/60 space-y-3">
+                          <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-1.5">
+                              <Key className="size-3.5 text-primary" />
+                              Reset User Password
+                            </p>
+                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                              Directly set a new password or auto-generate a secure temporary password for this user or affiliate.
+                            </p>
+                          </div>
+
+                          {resetPasswordSuccess && (
+                            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                                  <Check className="size-3.5" /> Password reset successful!
+                                </span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 px-2 text-[10px] text-emerald-700 dark:text-emerald-300"
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(resetPasswordSuccess);
+                                    setCopiedResetPassword(true);
+                                    setTimeout(() => setCopiedResetPassword(false), 2000);
+                                  }}
+                                >
+                                  {copiedResetPassword ? (
+                                    <>
+                                      <Check className="size-3 mr-1" /> Copied
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Copy className="size-3 mr-1" /> Copy Password
+                                    </>
+                                  )}
+                                </Button>
+                              </div>
+                              <div className="p-2 bg-background/80 rounded-lg font-mono text-xs font-bold text-foreground break-all border border-emerald-500/20">
+                                {resetPasswordSuccess}
+                              </div>
+                              <p className="text-[10px] text-muted-foreground">
+                                Give this new password to the user. They can log in immediately and change it in their dashboard.
+                              </p>
+                            </div>
+                          )}
+
+                          <form onSubmit={handleAdminResetPassword} className="space-y-2.5">
+                            <div className="space-y-1">
+                              <Label htmlFor="admin-new-password" className="text-xs font-medium">
+                                New Password (optional)
+                              </Label>
+                              <Input
+                                id="admin-new-password"
+                                type="text"
+                                placeholder="Leave blank to auto-generate"
+                                value={resetPasswordInput}
+                                onChange={(e) => setResetPasswordInput(e.target.value)}
+                                className="font-mono text-xs"
+                                disabled={resettingPassword}
+                              />
+                            </div>
+                            <Button
+                              type="submit"
+                              size="sm"
+                              variant="secondary"
+                              className="w-full rounded-full font-semibold text-xs py-2 h-auto"
+                              disabled={resettingPassword}
+                            >
+                              {resettingPassword ? (
+                                <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                              ) : (
+                                <Key className="size-3.5 mr-1.5" />
+                              )}
+                              {resetPasswordInput.trim() ? "Reset to Specified Password" : "Generate & Reset Password"}
+                            </Button>
                           </form>
                         </div>
                       </div>

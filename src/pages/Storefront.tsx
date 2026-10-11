@@ -41,6 +41,7 @@ import {
   Clock,
   ExternalLink,
   Loader2,
+  Key,
   LogIn,
   LogOut,
   ShieldAlert,
@@ -62,6 +63,7 @@ import {
 import { getStoredReferralCode } from "@/hooks/use-referral-tracker";
 import { apiClient, linkReferralCode } from "@/lib/api-client";
 import { AffiliateDashboardView } from "@/components/AffiliateDashboardView";
+import { ChangePasswordCard } from "@/components/ChangePasswordCard";
 
 function NotConfigured() {
   return (
@@ -117,6 +119,7 @@ export function AuthPanel({
     email: string;
   } | null>(null);
   const [signupRefCode, setSignupRefCode] = useState(() => getStoredReferralCode() || "");
+  const [showResetPasswordPrompt, setShowResetPasswordPrompt] = useState(false);
 
   useEffect(() => {
     const stored = getStoredReferralCode();
@@ -450,6 +453,38 @@ export function AuthPanel({
             </TabsTrigger>
           </TabsList>
 
+          {showResetPasswordPrompt && (
+            <div className="mb-4 rounded-2xl border border-primary/30 bg-primary/10 p-3.5 sm:p-4 text-xs sm:text-sm text-foreground space-y-2.5">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Key className="size-4 text-primary shrink-0" />
+                  <h4 className="font-bold text-foreground text-xs sm:text-sm">Password Reset Request</h4>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowResetPasswordPrompt(false)}
+                  className="text-muted-foreground hover:text-foreground p-0.5"
+                  aria-label="Close alert"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </div>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                To reset your password, please contact <strong className="text-foreground">info@majolat2000.com.ng</strong> from your registered account email. An administrator will verify and reset it for you.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full text-xs font-semibold rounded-full h-8"
+                asChild
+              >
+                <a href="mailto:info@majolat2000.com.ng?subject=Password%20Reset%20Request">
+                  Contact info@majolat2000.com.ng
+                </a>
+              </Button>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -463,7 +498,18 @@ export function AuthPanel({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                {mode === "signin" && (
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPasswordPrompt((prev) => !prev)}
+                    className="text-[11px] font-medium text-muted-foreground hover:text-foreground underline transition-colors"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
               <Input
                 id="password"
                 name="password"
@@ -579,6 +625,7 @@ export default function Storefront() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authPromptReason, setAuthPromptReason] = useState<string>("");
   const [affiliateModalOpen, setAffiliateModalOpen] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
 
   const [agreed1, setAgreed1] = useState(false);
   const [agreed2, setAgreed2] = useState(false);
@@ -886,6 +933,15 @@ export default function Storefront() {
                   <Wallet className="size-3.5 text-primary" />
                   <span>Affiliate</span>
                 </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full text-xs font-semibold gap-1.5 border-border hover:bg-muted"
+                  onClick={() => setPasswordModalOpen(true)}
+                >
+                  <Key className="size-3.5 text-muted-foreground" />
+                  <span className="hidden sm:inline">Password</span>
+                </Button>
                 {isAdmin && (
                   <Button
                     variant="default"
@@ -1125,6 +1181,13 @@ export default function Storefront() {
             </DialogDescription>
           </DialogHeader>
           <AffiliateDashboardView />
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Password Dialog */}
+      <Dialog open={passwordModalOpen} onOpenChange={setPasswordModalOpen}>
+        <DialogContent className="w-[calc(100%-1.5rem)] sm:max-w-md p-0 overflow-hidden rounded-2xl border-0 bg-transparent shadow-none">
+          <ChangePasswordCard userEmail={session?.user.email} />
         </DialogContent>
       </Dialog>
     </div>
