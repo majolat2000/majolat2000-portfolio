@@ -233,7 +233,6 @@ export default function StorefrontAdmin() {
         description: editDescription.trim(),
         priceNaira: price,
         durationDays: Math.round(days),
-        type: addType,
         type: editType,
       });
       setMessage(`Updated "${updated.name}" successfully.`);
