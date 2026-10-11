@@ -136,6 +136,7 @@ export function AffiliateDashboardView({
       setAccountName(null);
       setAccountVerificationError(
         err.response?.data?.message ||
+          err.message ||
           "Account not found or invalid account details for this bank.",
       );
     } finally {
@@ -475,21 +476,49 @@ export function AffiliateDashboardView({
                   <Label htmlFor="account_num" className="text-xs font-medium">
                     10-Digit NUBAN Account Number
                   </Label>
-                  {verifyingAccount && (
-                    <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                  {verifyingAccount ? (
+                    <span className="text-[11px] text-primary flex items-center gap-1 font-medium">
                       <Loader2 className="size-3 animate-spin text-primary" />
-                      Verifying...
+                      Checking bank...
                     </span>
-                  )}
+                  ) : null}
                 </div>
-                <Input
-                  id="account_num"
-                  placeholder="e.g. 0123456789"
-                  maxLength={10}
-                  value={accountNumber}
-                  onChange={(e) => handleAccountNumberChange(e.target.value)}
-                  className="font-mono"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    id="account_num"
+                    placeholder="e.g. 0123456789"
+                    maxLength={10}
+                    value={accountNumber}
+                    onChange={(e) => handleAccountNumberChange(e.target.value)}
+                    onBlur={() => {
+                      if (accountNumber.length === 10 && bankCode && !accountName && !verifyingAccount) {
+                        verifyAccount(accountNumber, bankCode);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && accountNumber.length === 10 && bankCode) {
+                        e.preventDefault();
+                        verifyAccount(accountNumber, bankCode);
+                      }
+                    }}
+                    className="font-mono flex-1 text-sm tracking-wider"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={accountNumber.length !== 10 || !bankCode || verifyingAccount}
+                    onClick={() => verifyAccount(accountNumber, bankCode)}
+                    className="shrink-0 text-xs gap-1.5 border-primary/40 hover:bg-primary/10 h-10 px-3 font-semibold"
+                  >
+                    {verifyingAccount ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="size-3.5 text-primary" />
+                    )}
+                    <span>Verify</span>
+                  </Button>
+                </div>
               </div>
             </div>
 

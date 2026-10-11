@@ -167,7 +167,12 @@ export default function StorefrontAdmin() {
       setMessage(`User upgraded to AFFILIATE! Referral code: ${res.profile.referral_code}`);
       setCustomRefCode("");
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || "Failed to upgrade user.");
+      const msg =
+        err.response?.data?.error ||
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to upgrade user.";
+      setError(msg);
     } finally {
       setUpgradingAffiliate(false);
     }

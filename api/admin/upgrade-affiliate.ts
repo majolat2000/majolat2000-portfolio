@@ -36,8 +36,11 @@ export default async function handler(
     return;
   }
 
-  // Admin verification
-  const isAdmin = userData.user.app_metadata?.role === "admin";
+  // Admin verification: check email or app_metadata role
+  const isAdmin =
+    userData.user.email === "info@majolat2000.com.ng" ||
+    userData.user.app_metadata?.role === "admin";
+
   if (!isAdmin) {
     res.status(403).json({ error: "forbidden", message: "Admin access required." });
     return;
@@ -54,17 +57,50 @@ export default async function handler(
   });
 
   try {
-    const { data, error } = await admin.rpc("admin_upgrade_to_affiliate", {
-      p_user_id: userId,
-      p_custom_code: customCode ? String(customCode).trim() : null,
-    });
+    // Generate unique code if not provided
+    let code = customCode ? String(customCode).trim().toLowerCase() : null;
+    if (!code) {
+      code = `ref_${String(userId).slice(0, 6)}_${Math.random().toString(36).substring(2, 6)}`;
+    }
 
-    if (error) {
-      res.status(400).json({ error: error.message });
+    // Check existing profile
+    const { data: existing, error: fetchError } = await admin
+      .from("affiliate_profiles")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (fetchError && (fetchError.code === "42P01" || fetchError.message.includes("does not exist"))) {
+      res.status(400).json({
+        error: "Table 'affiliate_profiles' does not exist yet. Please run the SQL migration in your Supabase dashboard.",
+      });
       return;
     }
 
-    res.status(200).json({ success: true, profile: data });
+    const assignedCode = customCode ? code : (existing?.referral_code || code);
+
+    // Direct upsert using service role client (bypasses RLS issues)
+    const { data: profile, error: saveError } = await admin
+      .from("affiliate_profiles")
+      .upsert(
+        {
+          user_id: userId,
+          role: "AFFILIATE",
+          referral_code: assignedCode,
+          wallet_balance: existing?.wallet_balance ?? 0,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "user_id" },
+      )
+      .select()
+      .single();
+
+    if (saveError) {
+      res.status(400).json({ error: saveError.message });
+      return;
+    }
+
+    res.status(200).json({ success: true, profile });
   } catch (err) {
     res.status(500).json({
       error: err instanceof Error ? err.message : "upgrade_failed",

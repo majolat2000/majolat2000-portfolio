@@ -12,29 +12,32 @@ export default async function handler(
 
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith("Bearer ")) {
-    res.status(401).json({ error: "missing_authorization" });
+    res.status(401).json({ success: false, message: "Missing authorization token." });
     return;
   }
 
   const token = authHeader.replace("Bearer ", "").trim();
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const anonKey = process.env.SUPABASE_ANON_KEY ?? process.env.VITE_SUPABASE_ANON_KEY;
-  const flwSecret = process.env.FLUTTERWAVE_SECRET_KEY;
+  const anonKey = process.env.SUPABASE_ANON_KEY ?? process.env.VITE_SUPABASE_ANON_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const flwSecret = (process.env.FLUTTERWAVE_SECRET_KEY ?? "").trim().replace(/^["']|["']$/g, "");
 
-  if (!supabaseUrl || !serviceKey || !flwSecret) {
-    res.status(503).json({ error: "server_not_configured" });
+  if (!flwSecret) {
+    res.status(200).json({
+      success: false,
+      message: "FLUTTERWAVE_SECRET_KEY is not configured in Vercel environment variables.",
+    });
     return;
   }
 
-  const client = createClient(supabaseUrl, anonKey ?? serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
-
-  const { data: userData, error: userError } = await client.auth.getUser(token);
-  if (userError || !userData?.user) {
-    res.status(401).json({ error: "invalid_token" });
-    return;
+  if (supabaseUrl && anonKey) {
+    const client = createClient(supabaseUrl, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const { data: userData, error: userError } = await client.auth.getUser(token);
+    if (userError || !userData?.user) {
+      res.status(401).json({ success: false, message: "Invalid or expired session token." });
+      return;
+    }
   }
 
   const { account_number, account_bank } = req.body ?? {};
@@ -42,15 +45,15 @@ export default async function handler(
   const cleanBank = String(account_bank ?? "").trim();
 
   if (!cleanAccount || cleanAccount.length !== 10) {
-    res.status(400).json({
+    res.status(200).json({
       success: false,
-      message: "Please enter a valid 10-digit NUBAN account number.",
+      message: "Please enter a complete 10-digit NUBAN account number.",
     });
     return;
   }
 
   if (!cleanBank) {
-    res.status(400).json({
+    res.status(200).json({
       success: false,
       message: "Please select a destination bank.",
     });
@@ -88,14 +91,14 @@ export default async function handler(
       return;
     }
 
-    res.status(400).json({
+    res.status(200).json({
       success: false,
       message:
         flwData.message ||
         "Account not found or invalid account details for this bank. Please check and try again.",
     });
   } catch (err) {
-    res.status(500).json({
+    res.status(200).json({
       success: false,
       message:
         err instanceof Error
