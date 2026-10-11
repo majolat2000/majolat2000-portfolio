@@ -29,11 +29,13 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      // Do not redirect if conflict resolution is active
-      if (
+      // Do not redirect if conflict resolution is active or requesting /session
+      const isConflictPending =
         typeof window !== "undefined" &&
-        sessionStorage.getItem("abac_conflict_pending") === "true"
-      ) {
+        sessionStorage.getItem("abac_conflict_pending") === "true";
+      const isSessionEndpoint = Boolean(error.config?.url?.includes("/session"));
+
+      if (isConflictPending || isSessionEndpoint) {
         return Promise.reject(error);
       }
 

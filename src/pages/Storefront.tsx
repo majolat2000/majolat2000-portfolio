@@ -130,11 +130,29 @@ export function AuthPanel({
     setError(null);
     try {
       const sessionId = getOrCreateDeviceSessionId();
-      const res = await apiClient.post("/session", {
-        sessionId,
-        force: true,
-        deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
-      });
+
+      let token = "";
+      if (supabase) {
+        const { data: sData } = await supabase.auth.getSession();
+        token = sData.session?.access_token || "";
+        if (!token) {
+          const { data: rData } = await supabase.auth.refreshSession();
+          token = rData.session?.access_token || "";
+        }
+      }
+
+      const res = await apiClient.post(
+        "/session",
+        {
+          sessionId,
+          force: true,
+          token: token || undefined,
+          deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
+        },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
 
       if (res.data?.status === "ok") {
         setSessionConflictPending(false);
@@ -197,7 +215,7 @@ export function AuthPanel({
         // Mark conflict check pending before signing in so background touchSession won't kick user out
         setSessionConflictPending(true);
 
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
@@ -208,13 +226,22 @@ export function AuthPanel({
           // Single device check
           const sessionId = getOrCreateDeviceSessionId();
           const storedRef = getStoredReferralCode();
+          const token = signInData?.session?.access_token || "";
+
           try {
-            const checkRes = await apiClient.post("/session", {
-              sessionId,
-              force: false,
-              referralCode: storedRef || undefined,
-              deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
-            });
+            const checkRes = await apiClient.post(
+              "/session",
+              {
+                sessionId,
+                force: false,
+                token: token || undefined,
+                referralCode: storedRef || undefined,
+                deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
+              },
+              {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              },
+            );
 
             if (checkRes.data?.status === "conflict") {
               // Active session on another device detected: keep pending so user can choose
@@ -289,13 +316,21 @@ export function AuthPanel({
           }
           // Register session for new user and link referral
           const sessionId = getOrCreateDeviceSessionId();
+          const token = data.session.access_token || "";
           try {
-            await apiClient.post("/session", {
-              sessionId,
-              force: true,
-              referralCode: cleanRefCode || undefined,
-              deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
-            });
+            await apiClient.post(
+              "/session",
+              {
+                sessionId,
+                force: true,
+                token: token || undefined,
+                referralCode: cleanRefCode || undefined,
+                deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
+              },
+              {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+              },
+            );
             setSessionConflictPending(false);
             setSessionVerified(sessionId);
           } catch {
@@ -314,8 +349,8 @@ export function AuthPanel({
   };
 
   return (
-    <Card className="w-full max-w-md border-border/60 shadow-2xl rounded-2xl sm:rounded-3xl bg-card/95 backdrop-blur-md overflow-hidden">
-      <CardHeader className="items-center justify-items-center text-center px-4 sm:px-6 pt-5 sm:pt-6 pb-3 sm:pb-4">
+    <Card className="w-full border-border/60 shadow-2xl rounded-2xl sm:rounded-3xl bg-card/95 backdrop-blur-md">
+      <CardHeader className="items-center justify-items-center text-center px-4 sm:px-6 pt-5 sm:pt-6 pb-2 sm:pb-3">
         <span className="grid size-12 place-items-center overflow-hidden rounded-full ring-1 ring-border mb-1">
           <img
             src={portfolio.avatar}
@@ -330,7 +365,7 @@ export function AuthPanel({
           {customSubtitle ?? "Sign in or create an account to purchase and access products."}
         </CardDescription>
       </CardHeader>
-      <CardContent className="px-4 sm:px-6 pb-6 max-h-[75vh] overflow-y-auto">
+      <CardContent className="px-4 sm:px-6 pb-6 pt-2">
         {showTimeoutAlert && (
           <div className="mb-4 flex items-start justify-between gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 sm:p-3.5 text-foreground text-xs sm:text-sm">
             <div className="flex items-start gap-2">
@@ -490,10 +525,10 @@ export function AuthPanel({
 
             <Button
               type="submit"
-              className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
+              className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90 py-3 sm:py-2.5 text-sm sm:text-base mt-2 shadow-md transition-all active:scale-[0.98] shrink-0"
               disabled={isSubmitting}
             >
-              {isSubmitting && <Loader2 className="size-4 animate-spin mr-1" />}
+              {isSubmitting && <Loader2 className="size-4 animate-spin mr-2" />}
               {mode === "signin" ? "Sign in" : "Create account"}
             </Button>
           </form>
@@ -808,7 +843,7 @@ export default function Storefront() {
             setAuthModalOpen(open);
           }}
         >
-          <DialogContent className="w-[calc(100%-1.5rem)] sm:max-w-md max-h-[92vh] flex items-center justify-center p-0 overflow-hidden rounded-2xl sm:rounded-3xl border-0 bg-transparent shadow-none">
+          <DialogContent className="w-[calc(100%-1.5rem)] sm:max-w-md max-h-[90vh] overflow-y-auto p-0 rounded-2xl sm:rounded-3xl border-0 bg-transparent shadow-2xl overscroll-contain focus:outline-none">
             <AuthPanel
               onSuccess={() => setAuthModalOpen(false)}
               customSubtitle={authPromptReason || undefined}
@@ -1069,7 +1104,7 @@ export default function Storefront() {
           setAuthModalOpen(open);
         }}
       >
-        <DialogContent className="w-[calc(100%-1.5rem)] sm:max-w-md max-h-[92vh] flex items-center justify-center p-0 overflow-hidden rounded-2xl sm:rounded-3xl border-0 bg-transparent shadow-none">
+        <DialogContent className="w-[calc(100%-1.5rem)] sm:max-w-md max-h-[90vh] overflow-y-auto p-0 rounded-2xl sm:rounded-3xl border-0 bg-transparent shadow-2xl overscroll-contain focus:outline-none">
           <AuthPanel
             onSuccess={() => setAuthModalOpen(false)}
             customSubtitle={authPromptReason || undefined}

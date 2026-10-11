@@ -5,13 +5,24 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse,
 ): Promise<void> {
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith("Bearer ")) {
-    res.status(401).json({ error: "missing_authorization" });
+  // 1. Extract token from Authorization header, x-access-token header, or request body
+  const authHeader = req.headers.authorization || (req.headers["x-access-token"] as string | undefined);
+  let token = "";
+  if (authHeader && typeof authHeader === "string") {
+    token = authHeader.replace(/^Bearer\s+/i, "").trim();
+  }
+  if (!token && req.body?.token && typeof req.body.token === "string") {
+    token = req.body.token.trim();
+  }
+
+  if (!token) {
+    res.status(401).json({
+      error: "missing_authorization",
+      message: "Authentication token is missing. Please sign in again.",
+    });
     return;
   }
 
-  const token = authHeader.replace("Bearer ", "").trim();
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const anonKey = process.env.SUPABASE_ANON_KEY ?? process.env.VITE_SUPABASE_ANON_KEY;
@@ -21,20 +32,40 @@ export default async function handler(
     return;
   }
 
-  const client = createClient(supabaseUrl, anonKey ?? serviceKey, {
+  const admin = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const { data: userData, error: userError } = await client.auth.getUser(token);
+  // Authoritatively verify user token using service role admin client first
+  let { data: userData, error: userError } = await admin.auth.getUser(token);
   if (userError || !userData?.user) {
-    res.status(401).json({ error: "invalid_token" });
+    // Fallback: try anon client if anonKey exists and is distinct
+    if (anonKey && anonKey !== serviceKey) {
+      try {
+        const client = createClient(supabaseUrl, anonKey, {
+          auth: { persistSession: false, autoRefreshToken: false },
+        });
+        const clientResult = await client.auth.getUser(token);
+        if (clientResult.data?.user) {
+          userData = clientResult.data;
+          userError = null;
+        }
+      } catch {
+        // Ignore fallback error
+      }
+    }
+  }
+
+  if (userError || !userData?.user) {
+    console.warn("Session token verification failed:", userError?.message);
+    res.status(401).json({
+      error: "invalid_token",
+      message: "Your session could not be authenticated. Please sign in again.",
+    });
     return;
   }
 
   const userId = userData.user.id;
-  const admin = createClient(supabaseUrl, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
 
   const { sessionId, force, deviceInfo } = req.body ?? {};
 

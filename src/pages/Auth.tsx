@@ -90,11 +90,32 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     setError(null);
     try {
       const sessionId = getOrCreateDeviceSessionId();
-      const res = await apiClient.post("/session", {
-        sessionId,
-        force: true,
-        deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
-      });
+
+      let token = "";
+      if (typeof window !== "undefined") {
+        const { supabase } = await import("@/lib/supabase");
+        if (supabase) {
+          const { data: sData } = await supabase.auth.getSession();
+          token = sData.session?.access_token || "";
+          if (!token) {
+            const { data: rData } = await supabase.auth.refreshSession();
+            token = rData.session?.access_token || "";
+          }
+        }
+      }
+
+      const res = await apiClient.post(
+        "/session",
+        {
+          sessionId,
+          force: true,
+          token: token || undefined,
+          deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
+        },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
 
       if (res.data?.status === "ok") {
         setSessionConflictPending(false);
@@ -154,13 +175,28 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
 
         const sessionId = getOrCreateDeviceSessionId();
         const storedRef = getStoredReferralCode();
+
+        let token = "";
+        const { supabase } = await import("@/lib/supabase");
+        if (supabase) {
+          const { data: sData } = await supabase.auth.getSession();
+          token = sData.session?.access_token || "";
+        }
+
         try {
-          const checkRes = await apiClient.post("/session", {
-            sessionId,
-            force: false,
-            referralCode: storedRef || undefined,
-            deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
-          });
+          const checkRes = await apiClient.post(
+            "/session",
+            {
+              sessionId,
+              force: false,
+              token: token || undefined,
+              referralCode: storedRef || undefined,
+              deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
+            },
+            {
+              headers: token ? { Authorization: `Bearer ${token}` } : {},
+            },
+          );
 
           if (checkRes.data?.status === "conflict") {
             setSessionConflictPending(true);
@@ -226,9 +262,9 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center py-6 px-3 sm:px-6">
+    <div className="min-h-screen flex flex-col justify-center py-8 sm:py-12 px-3 sm:px-6 overflow-y-auto">
       <div className="w-full max-w-sm sm:max-w-md mx-auto">
-        <Card className="w-full border-border/60 shadow-xl rounded-2xl sm:rounded-3xl bg-card/95 backdrop-blur-md overflow-hidden">
+        <Card className="w-full border-border/60 shadow-xl rounded-2xl sm:rounded-3xl bg-card/95 backdrop-blur-md">
           <CardHeader className="text-center px-4 sm:px-6 pt-6 pb-4">
             <div className="flex justify-center">
               <img
@@ -412,7 +448,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full rounded-full py-3 sm:py-2.5 font-semibold text-sm sm:text-base shadow-md transition-all active:scale-[0.98] mt-2 shrink-0"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
