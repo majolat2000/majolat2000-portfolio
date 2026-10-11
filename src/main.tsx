@@ -84,11 +84,18 @@ class RootErrorBoundary extends React.Component<
 }
 
 
+import { useReferralTracker } from "@/hooks/use-referral-tracker";
+
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [pathname]);
+  return null;
+}
+
+function ReferralTracker() {
+  useReferralTracker();
   return null;
 }
 
@@ -124,6 +131,7 @@ createRoot(document.getElementById("root")!).render(
       </ToolbarErrorBoundary>
       <BrowserRouter>
         <ScrollToTop />
+        <ReferralTracker />
         <RouteSyncer />
         <Suspense fallback={<RouteLoading />}>
           <Routes>

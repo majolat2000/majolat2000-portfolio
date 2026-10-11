@@ -1,0 +1,114 @@
+import axios from "axios";
+import { supabase } from "@/lib/supabase";
+
+export const apiClient = axios.create({
+  baseURL: "/api",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Request interceptor: attach Supabase auth token
+apiClient.interceptors.request.use(async (config) => {
+  if (supabase) {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch {
+      // Ignore session errors
+    }
+  }
+  return config;
+});
+
+// Response interceptor: handle 401 session expirations and timeouts
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      if (supabase) {
+        try {
+          await supabase.auth.signOut();
+        } catch {
+          // Ignore signout error
+        }
+      }
+      if (typeof window !== "undefined") {
+        const currentPath = window.location.pathname;
+        if (!currentPath.includes("reason=timeout")) {
+          window.location.href = `/storefront?reason=timeout`;
+        }
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
+export interface AffiliateProfile {
+  user_id: string;
+  role: "USER" | "AFFILIATE" | "ADMIN";
+  referral_code: string | null;
+  referred_by_id: string | null;
+  wallet_balance: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WithdrawalRecord {
+  id: string;
+  user_id: string;
+  amount: number;
+  account_bank: string;
+  account_number: string;
+  transfer_ref: string;
+  transfer_id: string | null;
+  status: "PENDING" | "SUCCESSFUL" | "FAILED";
+  failure_reason: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BankOption {
+  code: string;
+  name: string;
+}
+
+export interface AffiliateDataResponse {
+  profile: AffiliateProfile;
+  stats: {
+    referred_count: number;
+    wallet_balance: number;
+  };
+  withdrawals: WithdrawalRecord[];
+  banks: BankOption[];
+}
+
+export async function fetchAffiliateData(): Promise<AffiliateDataResponse> {
+  const res = await apiClient.get<AffiliateDataResponse>("/affiliate");
+  return res.data;
+}
+
+export async function requestWithdrawal(params: {
+  account_bank: string;
+  account_number: string;
+  amount: number;
+}): Promise<{
+  success: boolean;
+  message: string;
+  reference: string;
+  new_balance: number;
+}> {
+  const res = await apiClient.post("/withdraw", params);
+  return res.data;
+}
+
+export async function adminUpgradeUserToAffiliate(params: {
+  userId: string;
+  customCode?: string;
+}): Promise<{ success: boolean; profile: AffiliateProfile }> {
+  const res = await apiClient.post("/admin/upgrade-affiliate", params);
+  return res.data;
+}

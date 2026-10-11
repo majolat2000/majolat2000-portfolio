@@ -57,10 +57,13 @@ import {
   ShieldCheck,
   UserPlus,
   Pencil,
+  Wallet,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate } from "react-router";
 import { AuthPanel } from "./Storefront";
+import { adminUpgradeUserToAffiliate, type AffiliateProfile } from "@/lib/api-client";
+import { supabase } from "@/lib/supabase";
 
 function errorText(error: unknown): string {
   return error instanceof Error ? error.message : "Something went wrong.";
@@ -90,6 +93,9 @@ export default function StorefrontAdmin() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [affiliateInfo, setAffiliateInfo] = useState<AffiliateProfile | null>(null);
+  const [customRefCode, setCustomRefCode] = useState("");
+  const [upgradingAffiliate, setUpgradingAffiliate] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -113,7 +119,10 @@ export default function StorefrontAdmin() {
   }, [isAdmin]);
 
   useEffect(() => {
-    if (!selected) return;
+    if (!selected) {
+      setAffiliateInfo(null);
+      return;
+    }
     let cancelled = false;
     listAccessFor(selected.id)
       .then((rows) => {
@@ -122,6 +131,17 @@ export default function StorefrontAdmin() {
       .catch((err) => {
         if (!cancelled) setError(errorText(err));
       });
+
+    if (supabase) {
+      supabase
+        .from("affiliate_profiles")
+        .select("*")
+        .eq("user_id", selected.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (!cancelled) setAffiliateInfo(data);
+        });
+    }
     return () => {
       cancelled = true;
     };
@@ -132,6 +152,27 @@ export default function StorefrontAdmin() {
   );
 
   
+  const handleUpgradeAffiliate = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!selected) return;
+    setUpgradingAffiliate(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const res = await adminUpgradeUserToAffiliate({
+        userId: selected.id,
+        customCode: customRefCode.trim() || undefined,
+      });
+      setAffiliateInfo(res.profile);
+      setMessage(`User upgraded to AFFILIATE! Referral code: ${res.profile.referral_code}`);
+      setCustomRefCode("");
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || "Failed to upgrade user.");
+    } finally {
+      setUpgradingAffiliate(false);
+    }
+  };
+
   const handleRevokeAccess = async (grantId: string) => {
     if (!window.confirm("Are you sure you want to revoke this user's access?")) return;
     setBusy(true);
@@ -522,6 +563,64 @@ export default function StorefrontAdmin() {
                             Grant access
                           </Button>
                         </form>
+
+                        {/* Affiliate Management */}
+                        <div className="pt-4 border-t border-border/60 space-y-3">
+                          <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground flex items-center gap-1.5">
+                            <Wallet className="size-3.5 text-primary" />
+                            Affiliate Status
+                          </p>
+                          <div className="rounded-xl border border-border/60 bg-muted/30 p-3.5 space-y-2 text-xs">
+                            <div className="flex justify-between items-center">
+                              <span className="text-muted-foreground">Role:</span>
+                              <span className="font-semibold uppercase px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary">
+                                {affiliateInfo?.role || "USER"}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-muted-foreground">Referral Code:</span>
+                              <span className="font-mono font-semibold text-foreground">
+                                {affiliateInfo?.referral_code || "None"}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-muted-foreground">Wallet Balance:</span>
+                              <span className="font-bold text-foreground">
+                                {formatNaira((affiliateInfo?.wallet_balance || 0) * 100)}
+                              </span>
+                            </div>
+                          </div>
+
+                          <form onSubmit={handleUpgradeAffiliate} className="space-y-3 pt-1">
+                            <div className="space-y-1.5">
+                              <Label htmlFor="custom-ref-code" className="text-xs">
+                                Custom Referral Code (optional)
+                              </Label>
+                              <Input
+                                id="custom-ref-code"
+                                placeholder="e.g. promo2026 or leave blank for auto"
+                                value={customRefCode}
+                                onChange={(e) => setCustomRefCode(e.target.value)}
+                              />
+                            </div>
+                            <Button
+                              type="submit"
+                              variant="outline"
+                              size="sm"
+                              className="w-full rounded-full border-primary/40 hover:bg-primary/10 font-semibold text-xs"
+                              disabled={upgradingAffiliate}
+                            >
+                              {upgradingAffiliate ? (
+                                <Loader2 className="size-3.5 animate-spin mr-1.5" />
+                              ) : (
+                                <Wallet className="size-3.5 mr-1.5 text-primary" />
+                              )}
+                              {affiliateInfo?.role === "AFFILIATE"
+                                ? "Update Referral Code"
+                                : "Upgrade to Affiliate"}
+                            </Button>
+                          </form>
+                        </div>
                       </div>
                     )}
                   </CardContent>

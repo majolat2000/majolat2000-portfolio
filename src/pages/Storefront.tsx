@@ -43,9 +43,17 @@ import {
   LogOut,
   ShieldCheck,
   TriangleAlert,
+  Wallet,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
+import {
+  getOrCreateDeviceSessionId,
+  useSingleSession,
+} from "@/hooks/use-single-session";
+import { getStoredReferralCode } from "@/hooks/use-referral-tracker";
+import { apiClient } from "@/lib/api-client";
+import { AffiliateDashboardView } from "@/components/AffiliateDashboardView";
 
 function NotConfigured() {
   return (
@@ -81,10 +89,49 @@ export function AuthPanel({
   customTitle?: string;
   customSubtitle?: string;
 }) {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [showTimeoutAlert, setShowTimeoutAlert] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("reason") === "timeout") {
+      setShowTimeoutAlert(true);
+      searchParams.delete("reason");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [conflictPrompt, setConflictPrompt] = useState<{
+    message: string;
+    email: string;
+  } | null>(null);
+
+  const handleForceLogoutOtherDevice = async () => {
+    setIsSubmitting(true);
+    setError(null);
+    try {
+      const sessionId = getOrCreateDeviceSessionId();
+      const res = await apiClient.post("/session", {
+        sessionId,
+        force: true,
+        deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
+      });
+
+      if (res.data?.status === "ok") {
+        setConflictPrompt(null);
+        onSuccess?.();
+      } else {
+        setError(res.data?.message || "Failed to switch device.");
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || "Failed to override session.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -98,6 +145,7 @@ export function AuthPanel({
 
     setError(null);
     setNotice(null);
+    setConflictPrompt(null);
 
     if (!email.includes("@")) {
       setError("Enter a valid email address.");
@@ -122,25 +170,82 @@ export function AuthPanel({
         if (signInError) {
           setError(friendlyAuthError(signInError.message));
         } else {
+          // Single device check
+          const sessionId = getOrCreateDeviceSessionId();
+          try {
+            const checkRes = await apiClient.post("/session", {
+              sessionId,
+              force: false,
+              deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
+            });
+
+            if (checkRes.data?.status === "conflict") {
+              setConflictPrompt({
+                message: checkRes.data.message || "You are currently logged in on another device.",
+                email,
+              });
+              return;
+            }
+          } catch (sessionErr) {
+            console.warn("Session validation error, proceeding:", sessionErr);
+          }
+
           onSuccess?.();
         }
       } else {
+        const refCode = getStoredReferralCode();
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
+            data: {
+              referral_code: refCode || undefined,
+            },
             emailRedirectTo: `${window.location.origin}/storefront`,
           },
         });
         if (signUpError) {
           setError(friendlyAuthError(signUpError.message));
         } else if (!data.session) {
+          // If referral code was present and user was created
+          if (data.user && refCode) {
+            try {
+              await supabase.rpc("link_referral", {
+                p_user_id: data.user.id,
+                p_referral_code: refCode,
+              });
+            } catch (refErr) {
+              console.warn("Could not link referral:", refErr);
+            }
+          }
           setNotice(
             "Account created. Check your inbox to confirm your email, then sign in.",
           );
           form.reset();
           setMode("signin");
         } else {
+          if (data.user && refCode) {
+            try {
+              await supabase.rpc("link_referral", {
+                p_user_id: data.user.id,
+                p_referral_code: refCode,
+              });
+            } catch (refErr) {
+              console.warn("Could not link referral:", refErr);
+            }
+          }
+          // Register session for new user
+          const sessionId = getOrCreateDeviceSessionId();
+          try {
+            await apiClient.post("/session", {
+              sessionId,
+              force: true,
+              deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
+            });
+          } catch {
+            // Ignore
+          }
+
           onSuccess?.();
         }
       }
@@ -169,6 +274,71 @@ export function AuthPanel({
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {showTimeoutAlert && (
+          <div
+            style={{
+              padding: "10px",
+              backgroundColor: "#ffeeba",
+              color: "#856404",
+              marginBottom: "20px",
+              borderRadius: "4px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span className="text-xs sm:text-sm font-medium">
+              Your session expired due to inactivity, or you logged in from another device. Please log in again.
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowTimeoutAlert(false)}
+              className="ml-2 font-bold hover:opacity-75 text-base leading-none text-[#856404]"
+              aria-label="Dismiss alert"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
+        {conflictPrompt && (
+          <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs sm:text-sm text-foreground space-y-3">
+            <p className="font-semibold text-amber-700 dark:text-amber-400">
+              ⚠️ {conflictPrompt.message}
+            </p>
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              To keep your account secure, only one active device or browser is allowed at a time.
+              Would you like to force log out the former device and continue on this device?
+            </p>
+            <div className="flex gap-2 pt-1">
+              <Button
+                size="sm"
+                className="flex-1 rounded-full bg-foreground text-background font-semibold text-xs"
+                disabled={isSubmitting}
+                onClick={handleForceLogoutOtherDevice}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="size-3.5 animate-spin mr-1" />
+                ) : null}
+                Force Logout & Continue
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full text-xs"
+                onClick={async () => {
+                  setConflictPrompt(null);
+                  if (supabase) {
+                    await supabase.auth.signOut();
+                  }
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
         <Tabs
           value={mode}
           onValueChange={(value) => {
@@ -274,6 +444,9 @@ export default function Storefront() {
   const navigate = useNavigate();
   const { session, loading } = useSupabaseSession();
 
+  // Enforce single-device session and 24h sliding inactivity timeout
+  useSingleSession(session?.user?.id);
+
   const [catalog, setCatalog] = useState<StoreProduct[]>([]);
   const [access, setAccess] = useState<AccessGrantWithProduct[]>([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
@@ -284,6 +457,7 @@ export default function Storefront() {
   const [selectedProduct, setSelectedProduct] = useState<StoreProduct | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authPromptReason, setAuthPromptReason] = useState<string>("");
+  const [affiliateModalOpen, setAffiliateModalOpen] = useState(false);
 
   const [agreed1, setAgreed1] = useState(false);
   const [agreed2, setAgreed2] = useState(false);
@@ -576,6 +750,15 @@ export default function Storefront() {
           <div className="flex items-center gap-2 sm:gap-3">
             {session ? (
               <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full text-xs font-semibold gap-1.5 border-primary/40 hover:bg-primary/10"
+                  onClick={() => setAffiliateModalOpen(true)}
+                >
+                  <Wallet className="size-3.5 text-primary" />
+                  <span>Affiliate</span>
+                </Button>
                 {isAdmin && (
                   <Button
                     variant="default"
@@ -793,6 +976,22 @@ export default function Storefront() {
             onSuccess={() => setAuthModalOpen(false)}
             customSubtitle={authPromptReason || undefined}
           />
+        </DialogContent>
+      </Dialog>
+
+      {/* Affiliate Portal Dialog */}
+      <Dialog open={affiliateModalOpen} onOpenChange={setAffiliateModalOpen}>
+        <DialogContent className="w-[calc(100%-1.5rem)] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-2xl border-border/80 bg-background/95 backdrop-blur-md shadow-2xl">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-xl sm:text-2xl font-bold font-display flex items-center gap-2">
+              <Wallet className="size-5 text-primary" />
+              Affiliate Partner Portal
+            </DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
+              Track your earnings, generate custom referral links, and initiate instant bank payouts.
+            </DialogDescription>
+          </DialogHeader>
+          <AffiliateDashboardView />
         </DialogContent>
       </Dialog>
     </div>

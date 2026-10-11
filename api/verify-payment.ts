@@ -1,4 +1,4 @@
-﻿import type { VercelRequest, VercelResponse } from "@vercel/node";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
 
 function parseTxRef(txRef: string): { productId: string; userId: string } | null {
@@ -128,6 +128,18 @@ export default async function handler(
       console.error("Insert error:", insertError);
       res.status(500).json({ error: insertError.message });
       return;
+    }
+
+    // 5. Credit affiliate commission if buyer was referred
+    try {
+      const orderAmountNaira = product.price_kobo / 100;
+      await admin.rpc("credit_affiliate_commission", {
+        p_buyer_id: parsed.userId,
+        p_order_amount: orderAmountNaira,
+        p_source: "verify_payment",
+      });
+    } catch (commissionError) {
+      console.error("Failed to credit affiliate commission:", commissionError);
     }
 
     res.status(200).json({ success: true });

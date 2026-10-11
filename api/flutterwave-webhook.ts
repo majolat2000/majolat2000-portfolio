@@ -22,6 +22,7 @@ interface FlutterwaveEvent {
     status?: string;
     amount?: number;
     currency?: string;
+    complete_message?: string;
   };
 }
 
@@ -74,6 +75,67 @@ export default async function handler(
   const data = event.data;
   const eventName = event.event ?? event.type;
 
+  const admin = createClient(supabaseUrl, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  // 1. HANDLE TRANSFER EVENTS (Affiliate Payouts: transfer.completed)
+  if (eventName === "transfer.completed") {
+    if (!data) {
+      res.status(200).json({ received: true, ignored: true });
+      return;
+    }
+
+    const transferRef = data.reference;
+    const transferStatus = (data.status ?? "").toUpperCase();
+
+    if (!transferRef) {
+      res.status(200).json({ received: true, ignored: "no_reference" });
+      return;
+    }
+
+    try {
+      if (transferStatus === "FAILED") {
+        // Automatic refund on failed bank transfer
+        const failureReason = data.complete_message || "Transfer failed via webhook notification";
+        await admin.rpc("refund_failed_withdrawal", {
+          p_transfer_ref: transferRef,
+          p_reason: failureReason,
+        });
+
+        res.status(200).json({
+          received: true,
+          action: "refunded_failed_transfer",
+          reference: transferRef,
+        });
+        return;
+      }
+
+      if (transferStatus === "SUCCESSFUL") {
+        await admin.rpc("mark_withdrawal_successful", {
+          p_transfer_ref: transferRef,
+          p_transfer_id: data.id ? String(data.id) : null,
+        });
+
+        res.status(200).json({
+          received: true,
+          action: "marked_withdrawal_successful",
+          reference: transferRef,
+        });
+        return;
+      }
+
+      res.status(200).json({ received: true, status: transferStatus });
+      return;
+    } catch (err) {
+      res.status(500).json({
+        error: err instanceof Error ? err.message : "transfer_webhook_error",
+      });
+      return;
+    }
+  }
+
+  // 2. HANDLE PAYMENT EVENTS (charge.completed)
   if (
     eventName !== "charge.completed" ||
     !data ||
@@ -135,10 +197,6 @@ export default async function handler(
     res.status(200).json({ received: true, ignored: true });
     return;
   }
-
-  const admin = createClient(supabaseUrl, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
 
   try {
     const { data: product, error: productError } = await admin
@@ -205,6 +263,19 @@ export default async function handler(
     if (insertError) {
       res.status(500).json({ error: insertError.message });
       return;
+    }
+
+    // 3. COMMISSION LOGIC:
+    // If the buyer was referred by an affiliate, credit 30% of sale to the affiliate's wallet
+    try {
+      const orderAmountNaira = product.price_kobo / 100;
+      await admin.rpc("credit_affiliate_commission", {
+        p_buyer_id: parsed.userId,
+        p_order_amount: orderAmountNaira,
+        p_source: "flutterwave_webhook",
+      });
+    } catch (commissionError) {
+      console.error("Failed to credit affiliate commission:", commissionError);
     }
 
     res.status(200).json({ received: true, granted: product.name });
