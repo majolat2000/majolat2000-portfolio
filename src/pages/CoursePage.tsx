@@ -58,6 +58,14 @@ function WistiaPlayer() {
 
   return (
     <div className="w-full overflow-hidden rounded-xl sm:rounded-2xl border border-border/50 shadow-lg">
+      <style>{`
+        wistia-player[media-id='b0lzfkvru4']:not(:defined) { 
+          background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/b0lzfkvru4/swatch'); 
+          display: block; 
+          filter: blur(5px); 
+          padding-top:56.25%; 
+        }
+      `}</style>
       <div
         ref={containerRef}
         className="relative w-full"
