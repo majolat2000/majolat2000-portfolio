@@ -112,3 +112,16 @@ export async function adminUpgradeUserToAffiliate(params: {
   const res = await apiClient.post("/admin/upgrade-affiliate", params);
   return res.data;
 }
+
+export async function resolveBankAccount(params: {
+  account_number: string;
+  account_bank: string;
+}): Promise<{
+  success: boolean;
+  account_name?: string;
+  account_number?: string;
+  message?: string;
+}> {
+  const res = await apiClient.post("/resolve-account", params);
+  return res.data;
+}

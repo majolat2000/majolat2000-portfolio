@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   fetchAffiliateData,
   requestWithdrawal,
+  resolveBankAccount,
   type AffiliateDataResponse,
   type BankOption,
 } from "@/lib/api-client";
@@ -11,13 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Copy,
   Check,
   Wallet,
@@ -26,6 +20,11 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
+  Search,
+  ChevronDown,
+  Building2,
+  UserCheck,
+  X,
 } from "lucide-react";
 
 export function AffiliateDashboardView({
@@ -38,9 +37,20 @@ export function AffiliateDashboardView({
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  // Withdrawal form state
+  // Bank selection & search state
   const [bankCode, setBankCode] = useState("");
+  const [bankSearch, setBankSearch] = useState("");
+  const [bankDropdownOpen, setBankDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Account details & verification state
   const [accountNumber, setAccountNumber] = useState("");
+  const [verifyingAccount, setVerifyingAccount] = useState(false);
+  const [accountName, setAccountName] = useState<string | null>(null);
+  const [accountVerificationError, setAccountVerificationError] = useState<string | null>(null);
+  const verificationTimerRef = useRef<any>(null);
+
+  // Withdrawal form state
   const [amount, setAmount] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
   const [withdrawMessage, setWithdrawMessage] = useState<string | null>(null);
@@ -66,6 +76,107 @@ export function AffiliateDashboardView({
     loadData();
   }, []);
 
+  // Close bank dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setBankDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Sorted and filtered banks (Alphabetically A to Z)
+  const sortedBanks = useMemo(() => {
+    if (!data?.banks) return [];
+    return [...data.banks].sort((a, b) =>
+      a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
+    );
+  }, [data?.banks]);
+
+  const filteredBanks = useMemo(() => {
+    if (!bankSearch.trim()) return sortedBanks;
+    const query = bankSearch.toLowerCase().trim();
+    return sortedBanks.filter((b) => b.name.toLowerCase().includes(query));
+  }, [sortedBanks, bankSearch]);
+
+  const selectedBankObj = useMemo(() => {
+    return sortedBanks.find((b) => b.code === bankCode) || null;
+  }, [sortedBanks, bankCode]);
+
+  // Account verification handler
+  const verifyAccount = async (acctNum: string, bCode: string) => {
+    if (acctNum.length !== 10 || !bCode) {
+      setAccountName(null);
+      setAccountVerificationError(null);
+      return;
+    }
+
+    setVerifyingAccount(true);
+    setAccountName(null);
+    setAccountVerificationError(null);
+
+    try {
+      const res = await resolveBankAccount({
+        account_number: acctNum,
+        account_bank: bCode,
+      });
+
+      if (res.success && res.account_name) {
+        setAccountName(res.account_name);
+        setAccountVerificationError(null);
+      } else {
+        setAccountName(null);
+        setAccountVerificationError(
+          res.message || "Account not found or invalid account details for this bank.",
+        );
+      }
+    } catch (err: any) {
+      setAccountName(null);
+      setAccountVerificationError(
+        err.response?.data?.message ||
+          "Account not found or invalid account details for this bank.",
+      );
+    } finally {
+      setVerifyingAccount(false);
+    }
+  };
+
+  const handleAccountNumberChange = (val: string) => {
+    const cleaned = val.replace(/\D/g, "").slice(0, 10);
+    setAccountNumber(cleaned);
+    setAccountName(null);
+    setAccountVerificationError(null);
+
+    if (verificationTimerRef.current) {
+      clearTimeout(verificationTimerRef.current);
+    }
+
+    if (cleaned.length === 10 && bankCode) {
+      verificationTimerRef.current = setTimeout(() => {
+        verifyAccount(cleaned, bankCode);
+      }, 350);
+    }
+  };
+
+  const handleSelectBank = (code: string) => {
+    setBankCode(code);
+    setBankDropdownOpen(false);
+    setBankSearch("");
+    setAccountName(null);
+    setAccountVerificationError(null);
+
+    if (accountNumber.length === 10) {
+      if (verificationTimerRef.current) {
+        clearTimeout(verificationTimerRef.current);
+      }
+      verificationTimerRef.current = setTimeout(() => {
+        verifyAccount(accountNumber, code);
+      }, 300);
+    }
+  };
+
   const referralCode = data?.profile?.referral_code;
   const referralLink = referralCode
     ? `${window.location.origin}/?ref=${referralCode}`
@@ -85,11 +196,15 @@ export function AffiliateDashboardView({
 
     const numAmount = Number(amount);
     if (!bankCode) {
-      setWithdrawError("Please select your bank.");
+      setWithdrawError("Please select your destination bank.");
       return;
     }
-    if (!accountNumber || accountNumber.length < 10) {
-      setWithdrawError("Please enter a valid 10-digit account number.");
+    if (!accountNumber || accountNumber.length !== 10) {
+      setWithdrawError("Please enter a valid 10-digit NUBAN account number.");
+      return;
+    }
+    if (!accountName) {
+      setWithdrawError("Please wait for your account to be verified before withdrawing.");
       return;
     }
     if (isNaN(numAmount) || numAmount <= 0) {
@@ -109,7 +224,10 @@ export function AffiliateDashboardView({
         amount: numAmount,
       });
 
-      setWithdrawMessage(res.message || "Withdrawal initiated successfully!");
+      setWithdrawMessage(
+        res.message ||
+          `Withdrawal of ${formatNaira(numAmount * 100)} initiated successfully to ${accountName}!`,
+      );
       setAmount("");
       // Reload stats and transactions
       loadData();
@@ -250,14 +368,14 @@ export function AffiliateDashboardView({
       </Card>
 
       {/* Payout / Withdrawal Section */}
-      <Card className="border-border/60">
+      <Card className="border-border/60 shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
             <ArrowUpRight className="size-5 text-primary" />
             Instant Bank Withdrawal
           </CardTitle>
           <CardDescription className="text-xs">
-            Withdraw funds directly into your Nigerian bank account. Funds are deducted securely and transferred instantly.
+            Select your bank, enter your 10-digit account number, and verify the account name before initiating withdrawal.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -276,43 +394,140 @@ export function AffiliateDashboardView({
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="bank" className="text-xs">Destination Bank</Label>
-                <Select value={bankCode} onValueChange={setBankCode}>
-                  <SelectTrigger id="bank">
-                    <SelectValue placeholder="Select Bank" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    {data?.banks?.map((b: BankOption) => (
-                      <SelectItem key={b.code} value={b.code}>
-                        {b.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Destination Bank with Search (A to Z) */}
+              <div className="space-y-1.5" ref={dropdownRef}>
+                <Label htmlFor="bank-selector" className="text-xs font-medium">
+                  Destination Bank (A to Z)
+                </Label>
+                <div className="relative">
+                  <button
+                    type="button"
+                    id="bank-selector"
+                    onClick={() => setBankDropdownOpen(!bankDropdownOpen)}
+                    className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-xs sm:text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <span className="truncate flex items-center gap-2">
+                      <Building2 className="size-3.5 text-muted-foreground shrink-0" />
+                      {selectedBankObj ? selectedBankObj.name : "Select Destination Bank"}
+                    </span>
+                    <ChevronDown className="size-4 shrink-0 text-muted-foreground opacity-50" />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {bankDropdownOpen && (
+                    <div className="absolute left-0 top-full z-50 mt-1 max-h-72 w-full min-w-[280px] overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-xl">
+                      {/* Search Input */}
+                      <div className="p-2 border-b border-border/60 bg-muted/30 sticky top-0 z-10 flex items-center gap-2">
+                        <Search className="size-3.5 text-muted-foreground shrink-0" />
+                        <input
+                          type="text"
+                          placeholder="Search bank (e.g. OPay, GTBank, Kuda)..."
+                          value={bankSearch}
+                          onChange={(e) => setBankSearch(e.target.value)}
+                          autoFocus
+                          className="w-full bg-transparent text-xs placeholder:text-muted-foreground focus:outline-none"
+                        />
+                        {bankSearch && (
+                          <button
+                            type="button"
+                            onClick={() => setBankSearch("")}
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="size-3.5" />
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Bank List */}
+                      <div className="max-h-56 overflow-y-auto p-1 divide-y divide-border/20">
+                        {filteredBanks.length === 0 ? (
+                          <div className="p-3 text-center text-xs text-muted-foreground">
+                            No banks found matching "{bankSearch}"
+                          </div>
+                        ) : (
+                          filteredBanks.map((b) => (
+                            <button
+                              key={b.code}
+                              type="button"
+                              onClick={() => handleSelectBank(b.code)}
+                              className={`w-full text-left px-3 py-2 text-xs rounded-sm transition-colors flex items-center justify-between ${
+                                b.code === bankCode
+                                  ? "bg-primary text-primary-foreground font-semibold"
+                                  : "hover:bg-muted text-foreground"
+                              }`}
+                            >
+                              <span className="truncate">{b.name}</span>
+                              {b.code === bankCode && (
+                                <Check className="size-3.5 shrink-0 ml-2" />
+                              )}
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
+              {/* 10-Digit NUBAN Account Number */}
               <div className="space-y-1.5">
-                <Label htmlFor="account_num" className="text-xs">10-Digit NUBAN Account Number</Label>
+                <div className="flex justify-between items-center">
+                  <Label htmlFor="account_num" className="text-xs font-medium">
+                    10-Digit NUBAN Account Number
+                  </Label>
+                  {verifyingAccount && (
+                    <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                      <Loader2 className="size-3 animate-spin text-primary" />
+                      Verifying...
+                    </span>
+                  )}
+                </div>
                 <Input
                   id="account_num"
-                  placeholder="0123456789"
+                  placeholder="e.g. 0123456789"
                   maxLength={10}
                   value={accountNumber}
-                  onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) => handleAccountNumberChange(e.target.value)}
+                  className="font-mono"
                 />
               </div>
             </div>
 
+            {/* Account Verification Feedback */}
+            {accountName && (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs flex items-center gap-2.5 text-emerald-700 dark:text-emerald-400">
+                <UserCheck className="size-5 shrink-0 text-emerald-500" />
+                <div className="min-w-0 flex-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600/80 block">
+                    Verified Account Name
+                  </span>
+                  <span className="font-bold text-sm tracking-wide text-foreground block truncate">
+                    {accountName}
+                  </span>
+                </div>
+                <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
+              </div>
+            )}
+
+            {accountVerificationError && (
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-xs flex items-center gap-2 text-destructive">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{accountVerificationError}</span>
+              </div>
+            )}
+
+            {/* Amount Field */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <Label htmlFor="payout_amount" className="text-xs">Amount (NGN ₦)</Label>
+                <Label htmlFor="payout_amount" className="text-xs font-medium">
+                  Amount (NGN ₦)
+                </Label>
                 <button
                   type="button"
                   onClick={() => setAmount(String(data?.stats?.wallet_balance ?? 0))}
-                  className="text-[11px] text-primary hover:underline"
+                  className="text-[11px] text-primary hover:underline font-medium"
                 >
-                  Max: {formatNaira((data?.stats?.wallet_balance ?? 0) * 100)}
+                  Max Available: {formatNaira((data?.stats?.wallet_balance ?? 0) * 100)}
                 </button>
               </div>
               <Input
@@ -326,10 +541,16 @@ export function AffiliateDashboardView({
               />
             </div>
 
+            {/* Submit Button */}
             <Button
               type="submit"
-              disabled={withdrawing || (data?.stats?.wallet_balance ?? 0) <= 0}
-              className="w-full font-semibold gap-2"
+              disabled={
+                withdrawing ||
+                verifyingAccount ||
+                !accountName ||
+                (data?.stats?.wallet_balance ?? 0) <= 0
+              }
+              className="w-full font-semibold gap-2 py-5 text-sm"
             >
               {withdrawing ? (
                 <>
@@ -339,7 +560,11 @@ export function AffiliateDashboardView({
               ) : (
                 <>
                   <ArrowUpRight className="size-4" />
-                  <span>Withdraw Funds</span>
+                  <span>
+                    {accountName
+                      ? `Withdraw to ${accountName.split(" ")[0]}`
+                      : "Withdraw Funds"}
+                  </span>
                 </>
               )}
             </Button>
