@@ -115,12 +115,20 @@ export default async function handler(
             const uniqueEmails = new Set<string>();
             if (userList?.users) {
               for (const u of userList.users) {
-                if (userIds.has(u.id) && u.email && !u.is_anonymous) {
+                const registeredWithRef = u.user_metadata?.referral_code;
+                if (
+                  userIds.has(u.id) &&
+                  u.email &&
+                  !u.is_anonymous &&
+                  registeredWithRef &&
+                  typeof registeredWithRef === "string" &&
+                  registeredWithRef.trim()
+                ) {
                   uniqueEmails.add(u.email.toLowerCase().trim());
                 }
               }
             }
-            referredCount = uniqueEmails.size > 0 ? uniqueEmails.size : userIds.size;
+            referredCount = uniqueEmails.size;
           }
         }
       } catch {

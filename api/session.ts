@@ -75,16 +75,18 @@ export default async function handler(
   }
 
   if (req.method === "POST") {
-    // Auto-link referral if present in user metadata or body and not yet linked
-    const refCode = (req.body?.referralCode || userData.user.user_metadata?.referral_code) as string | undefined;
-    if (refCode && typeof refCode === "string" && refCode.trim()) {
-      try {
-        await admin.rpc("link_referral", {
-          p_user_id: userId,
-          p_referral_code: refCode.trim(),
-        });
-      } catch (err) {
-        console.warn("Auto-link referral in session:", err);
+    // Auto-link referral ONLY during new account registration, NEVER on regular sign-in
+    if (req.body?.isRegistration) {
+      const refCode = (req.body?.referralCode || userData.user.user_metadata?.referral_code) as string | undefined;
+      if (refCode && typeof refCode === "string" && refCode.trim()) {
+        try {
+          await admin.rpc("link_referral", {
+            p_user_id: userId,
+            p_referral_code: refCode.trim(),
+          });
+        } catch (err) {
+          console.warn("Auto-link referral in session:", err);
+        }
       }
     }
 

@@ -238,7 +238,6 @@ export function AuthPanel({
                 sessionId,
                 force: false,
                 token: token || undefined,
-                referralCode: storedRef || undefined,
                 deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
               },
               {
@@ -328,6 +327,7 @@ export function AuthPanel({
                 force: true,
                 token: token || undefined,
                 referralCode: cleanRefCode || undefined,
+                isRegistration: true,
                 deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
               },
               {

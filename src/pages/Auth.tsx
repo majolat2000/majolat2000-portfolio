@@ -193,7 +193,6 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
               sessionId,
               force: false,
               token: token || undefined,
-              referralCode: storedRef || undefined,
               deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
             },
             {
