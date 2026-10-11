@@ -8,6 +8,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,13 +34,16 @@ import {
   supabase,
   supabaseConfigured,
 } from "@/lib/supabase";
-import type { Session } from "@supabase/supabase-js";
 import {
   ArrowLeft,
+  CheckCircle2,
+  ExternalLink,
   Loader2,
+  LogIn,
   LogOut,
   ShieldCheck,
   TriangleAlert,
+  Sparkles,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router";
@@ -63,7 +73,15 @@ function NotConfigured() {
   );
 }
 
-export function AuthPanel() {
+export function AuthPanel({
+  onSuccess,
+  customTitle,
+  customSubtitle,
+}: {
+  onSuccess?: () => void;
+  customTitle?: string;
+  customSubtitle?: string;
+}) {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,11 +116,14 @@ export function AuthPanel() {
     setIsSubmitting(true);
     try {
       if (mode === "signin") {
-        const { error: signInError } = await supabase.auth.signInWithPassword(
-          { email, password },
-        );
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
         if (signInError) {
           setError(friendlyAuthError(signInError.message));
+        } else {
+          onSuccess?.();
         }
       } else {
         const { data, error: signUpError } = await supabase.auth.signUp({
@@ -120,6 +141,8 @@ export function AuthPanel() {
           );
           form.reset();
           setMode("signin");
+        } else {
+          onSuccess?.();
         }
       }
     } catch (err) {
@@ -130,20 +153,20 @@ export function AuthPanel() {
   };
 
   return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="items-center justify-items-center text-center">
-        <span className="grid size-12 place-items-center overflow-hidden rounded-full ring-1 ring-border">
+    <Card className="w-full max-w-md border-border/60 shadow-xl rounded-2xl">
+      <CardHeader className="items-center justify-items-center text-center pb-4">
+        <span className="grid size-12 place-items-center overflow-hidden rounded-full ring-1 ring-border mb-1">
           <img
             src={portfolio.avatar}
             alt={portfolio.name}
             className="h-full w-full object-cover"
           />
         </span>
-        <CardTitle className="font-display text-2xl font-extrabold tracking-tight">
-          Majesty&apos;s Digital Storefront
+        <CardTitle className="font-display text-xl sm:text-2xl font-extrabold tracking-tight">
+          {customTitle ?? "Majesty's Digital Storefront"}
         </CardTitle>
-        <CardDescription>
-          Sign in or create an account to explore.
+        <CardDescription className="text-xs sm:text-sm">
+          {customSubtitle ?? "Sign in or create an account to purchase and access products."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -215,7 +238,7 @@ export function AuthPanel() {
               className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
               disabled={isSubmitting}
             >
-              {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+              {isSubmitting && <Loader2 className="size-4 animate-spin mr-1" />}
               {mode === "signin" ? "Sign in" : "Create account"}
             </Button>
           </form>
@@ -225,100 +248,160 @@ export function AuthPanel() {
   );
 }
 
-function AccountPanel({
-  session,
-  onSignedOut,
-}: {
-  session: Session;
-  onSignedOut: () => void;
-}) {
+function ProductTypeBadge({ type }: { type?: string }) {
+  const norm = (type ?? "course").toLowerCase();
+  if (norm === "toolkit") {
+    return (
+      <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">
+        Toolkit
+      </span>
+    );
+  }
+  if (norm === "product") {
+    return (
+      <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400 border border-amber-500/30 uppercase tracking-wider">
+        Product
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[11px] font-semibold text-blue-600 dark:text-blue-400 border border-blue-500/30 uppercase tracking-wider">
+      Course
+    </span>
+  );
+}
+
+export default function Storefront() {
   const navigate = useNavigate();
-  const [access, setAccess] = useState<AccessGrantWithProduct[]>([]);
+  const { session, loading } = useSupabaseSession();
+
   const [catalog, setCatalog] = useState<StoreProduct[]>([]);
+  const [access, setAccess] = useState<AccessGrantWithProduct[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const isAdmin = session.user.email === "info@majolat2000.com.ng";
 
   const [view, setView] = useState<"storefront" | "preview">("storefront");
+  const [selectedProduct, setSelectedProduct] = useState<StoreProduct | null>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authPromptReason, setAuthPromptReason] = useState<string>("");
+
   const [agreed1, setAgreed1] = useState(false);
   const [agreed2, setAgreed2] = useState(false);
 
+  const isAdmin = session?.user.email === "info@majolat2000.com.ng" || session?.user.app_metadata?.role === "admin";
+
+  // Load products and, if authenticated, access grants
   useEffect(() => {
     let cancelled = false;
-    Promise.all([listMyAccess(session.user.id), listProducts()])
-      .then(([nextAccess, nextCatalog]) => {
+
+    const promises: [Promise<StoreProduct[]>, Promise<AccessGrantWithProduct[]>] = [
+      listProducts(),
+      session ? listMyAccess(session.user.id) : Promise.resolve([]),
+    ];
+
+    Promise.all(promises)
+      .then(([nextCatalog, nextAccess]) => {
         if (cancelled) return;
-        setAccess(nextAccess);
         setCatalog(nextCatalog);
+        setAccess(nextAccess);
+        if (!selectedProduct && nextCatalog.length > 0) {
+          setSelectedProduct(nextCatalog[0]);
+        }
       })
       .catch((err) => {
         if (!cancelled) {
-          setNotice(
-            err instanceof Error ? err.message : "Could not load the store.",
-          );
+          console.warn("[Storefront] Error loading data:", err);
+          setNotice(err instanceof Error ? err.message : "Could not load products.");
         }
+      })
+      .finally(() => {
+        if (!cancelled) setCatalogLoading(false);
       });
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [session]);
 
   const activeByProduct = new Map(access.map((grant) => [grant.product_id, grant]));
-  const primaryProduct = catalog[0];
-  const hasAccess = primaryProduct ? activeByProduct.has(primaryProduct.id) : false;
 
   const handleSignOut = async () => {
     if (!supabase) return;
     setIsSigningOut(true);
     await supabase.auth.signOut();
     setIsSigningOut(false);
-    onSignedOut();
+    setAccess([]);
   };
 
-  const handleBuy = async () => {
-    if (!primaryProduct) return;
+  const handleOpenAuth = (reason?: string) => {
+    setAuthPromptReason(reason ?? "Sign in or create an account to continue.");
+    setAuthModalOpen(true);
+  };
+
+  const handleBuy = async (targetProduct: StoreProduct) => {
+    if (!session) {
+      handleOpenAuth("Please sign in or create an account to purchase this product.");
+      return;
+    }
+
     setNotice(null);
     try {
-      await startCheckout({
-        productId: primaryProduct.id,
-        userId: session.user.id,
-        email: session.user.email ?? "",
-        amountKobo: primaryProduct.price_kobo,
-        productName: primaryProduct.name,
-        durationDays: primaryProduct.duration_days,
-      }, async (result) => {
-        console.log("[Storefront] Checkout result:", JSON.stringify(result));
-        const isSuccess = ["successful", "completed", "succeeded"].includes(result.status?.toLowerCase?.() ?? "");
-        if (isSuccess && result.transactionId) {
-          try {
-            setNotice("Verifying payment...");
-            const res = await fetch("/api/verify-payment", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                transactionId: result.transactionId,
-                txRef: result.txRef,
-              }),
-            });
-            const responseText = await res.text();
-            console.log("[Storefront] Verify response:", res.status, responseText);
-            if (!res.ok) {
-              throw new Error("Verification failed: " + responseText);
+      await startCheckout(
+        {
+          productId: targetProduct.id,
+          userId: session.user.id,
+          email: session.user.email ?? "",
+          amountKobo: targetProduct.price_kobo,
+          productName: targetProduct.name,
+          durationDays: targetProduct.duration_days,
+        },
+        async (result) => {
+          console.log("[Storefront] Checkout result:", JSON.stringify(result));
+          const isSuccess = ["successful", "completed", "succeeded"].includes(
+            result.status?.toLowerCase?.() ?? "",
+          );
+          if (isSuccess && result.transactionId) {
+            try {
+              setNotice("Verifying payment...");
+              const res = await fetch("/api/verify-payment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  transactionId: result.transactionId,
+                  txRef: result.txRef,
+                }),
+              });
+              const responseText = await res.text();
+              console.log("[Storefront] Verify response:", res.status, responseText);
+              if (!res.ok) {
+                throw new Error("Verification failed: " + responseText);
+              }
+              const accessList = await listMyAccess(session.user.id);
+              setAccess(accessList);
+              navigate(`/storefront/product/${targetProduct.id}`);
+            } catch (e) {
+              console.error("[Storefront] Verify error:", e);
+              setNotice(e instanceof Error ? e.message : "Failed to verify payment");
+              alert("Error: " + (e instanceof Error ? e.message : "Failed to verify"));
             }
-            const accessList = await listMyAccess(session.user.id);
-            setAccess(accessList);
-            navigate(`/storefront/product/${primaryProduct.id}`);
-          } catch (e) {
-            console.error("[Storefront] Verify error:", e);
-            setNotice(e instanceof Error ? e.message : "Failed to verify payment");
-            alert("Error: " + (e instanceof Error ? e.message : "Failed to verify"));
+          } else {
+            console.warn("[Storefront] Payment not completed:", result);
+            setNotice(
+              "Payment was not completed. Status: " +
+                result.status +
+                ", TX ID: " +
+                result.transactionId,
+            );
+            alert(
+              "Payment callback received but status=" +
+                result.status +
+                " transactionId=" +
+                result.transactionId,
+            );
           }
-        } else {
-          console.warn("[Storefront] Payment not successful or no transactionId:", result);
-          setNotice("Payment was not completed. Status: " + result.status + ", TX ID: " + result.transactionId);
-          alert("Payment callback received but status=" + result.status + " transactionId=" + result.transactionId);
-        }
-      });
+        },
+      );
     } catch (err) {
       setNotice(
         err instanceof Error ? err.message : "Checkout could not start.",
@@ -326,194 +409,157 @@ function AccountPanel({
     }
   };
 
-  const created = session.user.created_at
-    ? new Date(session.user.created_at).toLocaleDateString()
-    : null;
+  // Preview Mode for a selected product
+  if (view === "preview" && selectedProduct) {
+    const hasAccess = activeByProduct.has(selectedProduct.id);
 
-  if (view === "preview") {
     return (
-      <div className="w-full max-w-2xl space-y-4 sm:space-y-6">
-        <Button variant="ghost" onClick={() => setView("storefront")} className="mb-2 sm:mb-4 text-xs sm:text-sm font-medium rounded-full">
-          <ArrowLeft className="mr-2 size-4" /> Back to Dashboard
-        </Button>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold leading-tight">
-              {primaryProduct?.name ?? "HIDDEN SECRETS TO LAND YOUR FIRST REMOTE JOB: The Exact Strategy I Used to Get Hired"}
-            </CardTitle>
-            <div className="flex items-center gap-2 pt-1 text-sm text-muted-foreground font-medium">
-              <span>{primaryProduct?.duration_days && primaryProduct.duration_days >= 3650 ? "Lifetime Access" : `${primaryProduct?.duration_days ?? 30} Days Access`}</span>
-              <span>•</span>
-              <span>{primaryProduct ? formatNaira(primaryProduct.price_kobo) : ""}</span>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4 text-muted-foreground">
-              {primaryProduct?.description ? (
-                <p className="whitespace-pre-line leading-relaxed">{primaryProduct.description}</p>
-              ) : (
-                <>
-                  <p>
-                    Landing my first remote job felt impossible until I stopped playing by the standard rules. When you're competing against a global talent pool, sending out 100 identical resumes a day is a recipe for burnout. I had to completely engineer a new approach to get noticed.
-                  </p>
-                  <p>
-                    In this video course, I break down the exact strategy that finally got me hired. From optimizing my online presence to running targeted outreach that hiring managers actually respond to, this is the completely transparent breakdown of what works right now. If you're ready to ditch the daily commute and land a role that gives you your time back, this is your starting line.
-                  </p>
-                </>
-              )}
-            </div>
-
-            <div className="space-y-3 sm:space-y-4 rounded-xl sm:rounded-2xl border border-border bg-muted/20 p-4 sm:p-5">
-              <h4 className="font-semibold">Before purchasing, please agree to the following terms:</h4>
-              <div className="flex items-start gap-3">
-                <input 
-                  type="checkbox" 
-                  id="term1" 
-                  checked={agreed1} 
-                  onChange={(e) => setAgreed1(e.target.checked)} 
-                  className="mt-0.5 size-4.5 rounded border-border text-foreground focus:ring-foreground cursor-pointer shrink-0"
+      <div className="relative min-h-screen text-foreground">
+        <Background />
+        <div className="relative z-10 flex min-h-screen flex-col">
+          <header className="flex items-center justify-between px-4 py-3 sm:px-8 sm:py-4 border-b border-border/40 backdrop-blur-md bg-background/50 sticky top-0 z-20">
+            <Link to="/" className="group flex items-center gap-3">
+              <span className="grid size-10 place-items-center overflow-hidden rounded-full ring-1 ring-border transition-transform duration-300 group-hover:scale-105">
+                <img
+                  src={portfolio.avatar}
+                  alt={portfolio.name}
+                  className="h-full w-full object-cover"
                 />
-                <label htmlFor="term1" className="text-xs sm:text-sm leading-snug cursor-pointer select-none">I understand this is a digital product and all sales are final.</label>
-              </div>
-              <div className="flex items-start gap-3">
-                <input 
-                  type="checkbox" 
-                  id="term2" 
-                  checked={agreed2} 
-                  onChange={(e) => setAgreed2(e.target.checked)} 
-                  className="mt-0.5 size-4.5 rounded border-border text-foreground focus:ring-foreground cursor-pointer shrink-0"
-                />
-                <label htmlFor="term2" className="text-xs sm:text-sm leading-snug cursor-pointer select-none">I agree that this material is for personal use only and cannot be resold or distributed.</label>
-              </div>
-            </div>
-
+              </span>
+              <span className="font-display text-[15px] font-semibold text-foreground">
+                {portfolio.brand}
+              </span>
+            </Link>
             <Button
-              className="w-full rounded-full bg-foreground py-6 text-lg font-bold text-background hover:bg-foreground/90"
-              disabled={!agreed1 || !agreed2 || !primaryProduct}
-              onClick={handleBuy}
+              variant="ghost"
+              onClick={() => setView("storefront")}
+              className="rounded-full text-muted-foreground hover:text-foreground text-xs sm:text-sm font-medium"
             >
-              Buy Course for {primaryProduct ? formatNaira(primaryProduct.price_kobo) : "..."}
+              <ArrowLeft className="size-4 mr-1" />
+              Back to Storefront
             </Button>
-            {notice && (
-              <p className="text-center text-sm text-red-500">{notice}</p>
-            )}
-          </CardContent>
-        </Card>
+          </header>
+
+          <main className="flex flex-1 items-center justify-center px-3 sm:px-6 py-6 sm:py-12 pb-16">
+            <div className="w-full max-w-2xl space-y-4 sm:space-y-6">
+              <Card className="rounded-2xl sm:rounded-3xl border-border/60 shadow-xl overflow-hidden">
+                <CardHeader>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <ProductTypeBadge type={selectedProduct.type} />
+                    <span className="text-xs sm:text-sm font-semibold text-muted-foreground">
+                      {selectedProduct.duration_days >= 3650
+                        ? "Lifetime Access"
+                        : `${selectedProduct.duration_days} Days Access`}
+                    </span>
+                  </div>
+                  <CardTitle className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight">
+                    {selectedProduct.name}
+                  </CardTitle>
+                  <div className="pt-1 text-base sm:text-lg font-bold text-foreground">
+                    {formatNaira(selectedProduct.price_kobo)}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4 text-sm sm:text-base text-muted-foreground leading-relaxed">
+                    {selectedProduct.description ? (
+                      <p className="whitespace-pre-line">{selectedProduct.description}</p>
+                    ) : (
+                      <p>
+                        Comprehensive digital training and resources to help you achieve your career goals.
+                      </p>
+                    )}
+                  </div>
+
+                  {!hasAccess && (
+                    <div className="space-y-3 rounded-2xl border border-border/80 bg-muted/20 p-4 sm:p-5">
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          id="agree1"
+                          checked={agreed1}
+                          onChange={(e) => setAgreed1(e.target.checked)}
+                          className="mt-1 size-4 rounded border-border text-foreground focus:ring-foreground"
+                        />
+                        <label htmlFor="agree1" className="text-xs sm:text-sm text-muted-foreground leading-snug cursor-pointer">
+                          I understand this is a digital purchase. Once access is granted, it is permanently linked to my account and cannot be refunded.
+                        </label>
+                      </div>
+
+                      <div className="flex items-start gap-3">
+                        <input
+                          type="checkbox"
+                          id="agree2"
+                          checked={agreed2}
+                          onChange={(e) => setAgreed2(e.target.checked)}
+                          className="mt-1 size-4 rounded border-border text-foreground focus:ring-foreground"
+                        />
+                        <label htmlFor="agree2" className="text-xs sm:text-sm text-muted-foreground leading-snug cursor-pointer">
+                          I confirm that my account email is correct and that I will use this account to access the materials.
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
+                  {notice && (
+                    <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs sm:text-sm text-amber-600 dark:text-amber-400">
+                      {notice}
+                    </p>
+                  )}
+                </CardContent>
+
+                <CardFooter className="flex flex-col gap-3">
+                  {hasAccess ? (
+                    <Button
+                      className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90 py-5 text-sm sm:text-base"
+                      asChild
+                    >
+                      <Link to={`/storefront/product/${selectedProduct.id}`}>
+                        <CheckCircle2 className="size-4 mr-2" />
+                        You have access — Open Course
+                      </Link>
+                    </Button>
+                  ) : session ? (
+                    <Button
+                      className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90 py-5 text-sm sm:text-base"
+                      disabled={!agreed1 || !agreed2}
+                      onClick={() => handleBuy(selectedProduct)}
+                    >
+                      Pay & Get Access ({formatNaira(selectedProduct.price_kobo)})
+                    </Button>
+                  ) : (
+                    <Button
+                      className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90 py-5 text-sm sm:text-base"
+                      onClick={() => handleOpenAuth("Please sign in or create an account to purchase this product.")}
+                    >
+                      <LogIn className="size-4 mr-2" />
+                      Sign in to Purchase ({formatNaira(selectedProduct.price_kobo)})
+                    </Button>
+                  )}
+                </CardFooter>
+              </Card>
+            </div>
+          </main>
+        </div>
+
+        {/* Auth Dialog */}
+        <Dialog open={authModalOpen} onOpenChange={setAuthModalOpen}>
+          <DialogContent className="w-[calc(100%-2rem)] sm:max-w-md p-0 overflow-hidden rounded-2xl border-0 bg-transparent shadow-none">
+            <AuthPanel
+              onSuccess={() => setAuthModalOpen(false)}
+              customSubtitle={authPromptReason || undefined}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
 
-  return (
-    <div className="w-full max-w-lg space-y-6">
-      <Card>
-        <CardHeader className="items-center justify-items-center text-center">
-          <span className="grid size-14 place-items-center overflow-hidden rounded-full ring-1 ring-border">
-            <img
-              src={portfolio.avatar}
-              alt={portfolio.name}
-              className="h-full w-full object-cover"
-            />
-          </span>
-          <CardTitle className="font-display text-3xl font-extrabold tracking-tight">
-            Dashboard
-          </CardTitle>
-          <CardDescription>{session.user.email}</CardDescription>
-        </CardHeader>
-        {created && (
-          <CardContent className="text-sm text-muted-foreground">
-            <div className="flex items-center justify-between rounded-2xl border border-border bg-muted/40 px-4 py-3">
-              <span>Member since</span>
-              <span className="font-medium text-foreground">{created}</span>
-            </div>
-          </CardContent>
-        )}
-        <CardFooter className="flex flex-col sm:flex-row gap-2.5 w-full">
-          {isAdmin && (
-            <Button
-              variant="default"
-              className="flex-1 rounded-full font-semibold bg-foreground text-background"
-              asChild
-            >
-              <Link to="/storefront/admin">
-                Admin Panel
-              </Link>
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            className="flex-1 rounded-full font-semibold"
-            onClick={handleSignOut}
-            disabled={isSigningOut}
-          >
-            {isSigningOut ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <LogOut className="size-4" />
-            )}
-            Sign out
-          </Button>
-        </CardFooter>
-      </Card>
-
-      <Card>
-        <CardContent className="px-6 py-5">
-          <p className="eyebrow mb-4">Available Products</p>
-          {!primaryProduct ? (
-            <div className="rounded-xl border border-dashed border-border p-6 text-center text-muted-foreground">
-              <p className="text-sm">Course coming soon...</p>
-              {isAdmin && (
-                <p className="mt-2 text-xs">
-                  (Admin: Please add the course product in the Admin panel for it to show up here.)
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="overflow-hidden rounded-2xl border border-border bg-muted/10 transition-all hover:border-border/80">
-              <div className="p-4 sm:p-5">
-                <h3 className="mb-2 font-display text-base sm:text-lg font-bold leading-snug">
-                  {primaryProduct.name}
-                </h3>
-                <div className="mb-4 flex items-center justify-between text-sm text-muted-foreground">
-                  <span className="truncate pr-2">{primaryProduct.description || "Video Course"}</span>
-                  <span className="shrink-0 font-medium text-foreground">
-                    {primaryProduct.duration_days >= 3650 ? "Lifetime access" : `${primaryProduct.duration_days} days`}
-                  </span>
-                </div>
-                {hasAccess ? (
-                  <Button 
-                    className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90"
-                    asChild
-                  >
-                    <Link to={`/storefront/product/${primaryProduct.id}`}>
-                      View Course
-                    </Link>
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    className="w-full rounded-full font-semibold"
-                    onClick={() => setView("preview")}
-                  >
-                    View Details
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-
-export default function Storefront() {
-  const { session, loading } = useSupabaseSession();
-
+  // Storefront Catalog View
   return (
     <div className="relative min-h-screen text-foreground">
       <Background />
       <div className="relative z-10 flex min-h-screen flex-col">
+        {/* Navigation Header */}
         <header className="flex items-center justify-between px-4 py-3 sm:px-8 sm:py-4 border-b border-border/40 backdrop-blur-md bg-background/50 sticky top-0 z-20">
           <Link to="/" className="group flex items-center gap-3">
             <span className="grid size-10 place-items-center overflow-hidden rounded-full ring-1 ring-border transition-transform duration-300 group-hover:scale-105">
@@ -527,33 +573,234 @@ export default function Storefront() {
               {portfolio.brand}
             </span>
           </Link>
-          <Button
-            variant="ghost"
-            asChild
-            className="rounded-full text-muted-foreground hover:text-foreground"
-          >
-            <Link to="/">
-              <ArrowLeft className="size-4" />
-              Back to portfolio
-            </Link>
-          </Button>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            {session ? (
+              <>
+                {isAdmin && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="rounded-full text-xs font-semibold bg-foreground text-background"
+                    asChild
+                  >
+                    <Link to="/storefront/admin">
+                      Admin Panel
+                    </Link>
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full text-xs font-medium"
+                  onClick={handleSignOut}
+                  disabled={isSigningOut}
+                >
+                  {isSigningOut ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <LogOut className="size-3.5 mr-1" />
+                  )}
+                  Sign out
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                className="rounded-full text-xs font-semibold bg-foreground text-background"
+                onClick={() => handleOpenAuth("Sign in to your account or create one.")}
+              >
+                <LogIn className="size-3.5 mr-1.5" />
+                Sign in
+              </Button>
+            )}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="rounded-full text-muted-foreground hover:text-foreground text-xs"
+            >
+              <Link to="/">
+                <ArrowLeft className="size-3.5 sm:mr-1" />
+                <span className="hidden sm:inline">Portfolio</span>
+              </Link>
+            </Button>
+          </div>
         </header>
 
-        <main className="flex flex-1 items-center justify-center px-3 sm:px-6 py-6 sm:py-12 pb-16">
-          {loading ? (
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Loader2 className="size-4 animate-spin" />
-              Loading...
+        <main className="flex flex-1 flex-col items-center px-3 sm:px-6 lg:px-8 py-6 sm:py-12 pb-16">
+          <div className="w-full max-w-4xl space-y-6 sm:space-y-8">
+            {/* Storefront Hero */}
+            <div className="text-center space-y-2 sm:space-y-3 max-w-2xl mx-auto">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-3 py-1 text-xs font-medium text-muted-foreground">
+                <Sparkles className="size-3.5 text-primary" />
+                <span>Digital Products & Training</span>
+              </div>
+              <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
+                Available Products
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                Explore courses, toolkits, and digital resources designed to level up your career.
+                Anyone can view all product details freely below.
+              </p>
             </div>
-          ) : !supabaseConfigured ? (
-            <NotConfigured />
-          ) : session ? (
-            <AccountPanel session={session} onSignedOut={() => {}} />
-          ) : (
-            <AuthPanel />
-          )}
+
+            {/* User Access Card (if logged in and has access grants) */}
+            {session && access.length > 0 && (
+              <Card className="rounded-2xl sm:rounded-3xl border-border/80 bg-card/60 shadow-lg backdrop-blur-md overflow-hidden">
+                <CardHeader className="border-b border-border/40 bg-muted/20 px-4 sm:px-6 py-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-base sm:text-lg font-bold flex items-center gap-2">
+                        <ShieldCheck className="size-5 text-emerald-500" />
+                        Your Purchased Products
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        Active access granted to your account ({session.user.email})
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {access.map((grant) => {
+                      const prod = grant.product;
+                      if (!prod) return null;
+                      return (
+                        <div
+                          key={grant.id}
+                          className="flex flex-col justify-between rounded-xl border border-border/60 bg-muted/30 p-4 transition-colors hover:border-border"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-2 mb-1.5">
+                              <ProductTypeBadge type={prod.type} />
+                              <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                Active Access
+                              </span>
+                            </div>
+                            <h4 className="font-bold text-sm sm:text-base text-foreground mb-1 line-clamp-1">
+                              {prod.name}
+                            </h4>
+                            <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
+                              {prod.description || "Digital course and resources."}
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            className="w-full rounded-full bg-foreground text-background font-semibold hover:bg-foreground/90 text-xs"
+                            asChild
+                          >
+                            <Link to={`/storefront/product/${prod.id}`}>
+                              Open Course
+                              <ExternalLink className="size-3.5 ml-1.5" />
+                            </Link>
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Products Catalog Grid */}
+            {catalogLoading || loading ? (
+              <div className="flex items-center justify-center py-16 text-muted-foreground gap-2">
+                <Loader2 className="size-5 animate-spin" />
+                <span>Loading storefront products...</span>
+              </div>
+            ) : catalog.length === 0 ? (
+              <Card className="rounded-2xl sm:rounded-3xl border-border/60 p-8 text-center text-muted-foreground">
+                <p className="text-base font-medium">No products available at the moment.</p>
+                {isAdmin && (
+                  <p className="mt-2 text-xs">
+                    (Admin: You can add new courses, toolkits, or products in the{" "}
+                    <Link to="/storefront/admin" className="underline font-semibold text-foreground">
+                      Admin Panel
+                    </Link>
+                    .)
+                  </p>
+                )}
+              </Card>
+            ) : (
+              <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
+                {catalog.map((product) => {
+                  const hasAccess = activeByProduct.has(product.id);
+                  const isLifetime = product.duration_days >= 3650;
+
+                  return (
+                    <Card
+                      key={product.id}
+                      className="flex flex-col justify-between overflow-hidden rounded-2xl sm:rounded-3xl border-border/60 bg-card/50 shadow-md backdrop-blur-sm transition-all hover:border-border hover:shadow-xl"
+                    >
+                      <CardHeader className="p-5 sm:p-6 pb-3">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <ProductTypeBadge type={product.type} />
+                          <span className="text-xs font-semibold text-muted-foreground">
+                            {isLifetime ? "Lifetime access" : `${product.duration_days} days access`}
+                          </span>
+                        </div>
+                        <CardTitle className="text-lg sm:text-xl font-bold leading-snug">
+                          {product.name}
+                        </CardTitle>
+                      </CardHeader>
+
+                      <CardContent className="p-5 sm:p-6 pt-0 space-y-3">
+                        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                          {product.description || "Video course modules, practical frameworks, and resources."}
+                        </p>
+                        <div className="pt-2 flex items-baseline justify-between border-t border-border/40">
+                          <span className="text-xs text-muted-foreground font-medium">Price</span>
+                          <span className="text-base sm:text-lg font-bold text-foreground">
+                            {formatNaira(product.price_kobo)}
+                          </span>
+                        </div>
+                      </CardContent>
+
+                      <CardFooter className="p-5 sm:p-6 pt-0">
+                        {hasAccess ? (
+                          <Button
+                            className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90 text-xs sm:text-sm"
+                            asChild
+                          >
+                            <Link to={`/storefront/product/${product.id}`}>
+                              Open Course
+                              <ExternalLink className="size-3.5 ml-1.5" />
+                            </Link>
+                          </Button>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            className="w-full rounded-full font-semibold text-xs sm:text-sm border-border hover:bg-muted"
+                            onClick={() => {
+                              setSelectedProduct(product);
+                              setView("preview");
+                            }}
+                          >
+                            View Details
+                          </Button>
+                        )}
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </main>
       </div>
+
+      {/* Auth Dialog */}
+      <Dialog open={authModalOpen} onOpenChange={setAuthModalOpen}>
+        <DialogContent className="w-[calc(100%-2rem)] sm:max-w-md p-0 overflow-hidden rounded-2xl border-0 bg-transparent shadow-none">
+          <AuthPanel
+            onSuccess={() => setAuthModalOpen(false)}
+            customSubtitle={authPromptReason || undefined}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

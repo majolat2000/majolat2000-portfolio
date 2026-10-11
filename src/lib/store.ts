@@ -1,5 +1,7 @@
 import { supabase } from "@/lib/supabase";
 
+export type ProductType = "course" | "toolkit" | "product";
+
 export interface StoreProduct {
   id: string;
   slug: string;
@@ -7,6 +9,7 @@ export interface StoreProduct {
   description: string | null;
   price_kobo: number;
   duration_days: number;
+  type?: ProductType;
   active: boolean;
   created_at: string;
 }
@@ -39,6 +42,7 @@ export interface NewProductInput {
   description: string;
   priceNaira: number;
   durationDays: number;
+  type?: ProductType;
 }
 
 export interface UpdateProductInput {
@@ -47,6 +51,7 @@ export interface UpdateProductInput {
   description: string;
   priceNaira: number;
   durationDays: number;
+  type?: ProductType;
 }
 
 function unwrap<T>(data: T, error: { message: string } | null): T {
@@ -116,17 +121,32 @@ export async function adminAddProduct(
       .trim()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "") || `product-${Date.now()}`;
+  
+  const payload: Record<string, unknown> = {
+    slug,
+    name: input.name.trim(),
+    description: input.description.trim() || null,
+    price_kobo: Math.round(input.priceNaira * 100),
+    duration_days: input.durationDays,
+    type: input.type || "course",
+  };
+
   const { data, error } = await supabase
     .from("products")
-    .insert({
-      slug,
-      name: input.name.trim(),
-      description: input.description.trim() || null,
-      price_kobo: Math.round(input.priceNaira * 100),
-      duration_days: input.durationDays,
-    })
+    .insert(payload)
     .select("*")
     .single();
+
+  if (error && error.message?.toLowerCase().includes("type")) {
+    delete payload.type;
+    const retry = await supabase
+      .from("products")
+      .insert(payload)
+      .select("*")
+      .single();
+    return unwrap(retry.data as StoreProduct, retry.error);
+  }
+
   return unwrap(data as StoreProduct, error);
 }
 
@@ -146,17 +166,33 @@ export async function adminUpdateProduct(
   input: UpdateProductInput,
 ): Promise<StoreProduct> {
   if (!supabase) throw new Error("Storefront is not configured.");
+  
+  const payload: Record<string, unknown> = {
+    name: input.name.trim(),
+    description: input.description.trim() || null,
+    price_kobo: Math.round(input.priceNaira * 100),
+    duration_days: input.durationDays,
+    type: input.type || "course",
+  };
+
   const { data, error } = await supabase
     .from("products")
-    .update({
-      name: input.name.trim(),
-      description: input.description.trim() || null,
-      price_kobo: Math.round(input.priceNaira * 100),
-      duration_days: input.durationDays,
-    })
+    .update(payload)
     .eq("id", input.id)
     .select("*")
     .single();
+
+  if (error && error.message?.toLowerCase().includes("type")) {
+    delete payload.type;
+    const retry = await supabase
+      .from("products")
+      .update(payload)
+      .eq("id", input.id)
+      .select("*")
+      .single();
+    return unwrap(retry.data as StoreProduct, retry.error);
+  }
+
   return unwrap(data as StoreProduct, error);
 }
 
@@ -177,4 +213,3 @@ export async function adminRevokeAccess(grantId: string): Promise<void> {
     .eq("id", grantId);
   if (error) throw new Error(error.message);
 }
-
