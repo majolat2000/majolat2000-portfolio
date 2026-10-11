@@ -11,6 +11,7 @@ export interface AuthUser {
 export interface AuthCredentials {
   email: string;
   password: string;
+  referralCode?: string;
 }
 
 function mapUser(user: User): AuthUser {
@@ -58,14 +59,32 @@ export function useAuth() {
   }, []);
 
   const signUp = useCallback(
-    async ({ email, password }: AuthCredentials) => {
+    async ({ email, password, referralCode }: AuthCredentials) => {
       if (!supabase) throw new Error("Sign-up is not configured yet.");
+      const cleanRef = referralCode?.trim().toLowerCase();
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/auth` },
+        options: {
+          data: {
+            referral_code: cleanRef || undefined,
+          },
+          emailRedirectTo: `${window.location.origin}/storefront`,
+        },
       });
       if (error) throw toError(error);
+
+      if (data.user && cleanRef) {
+        try {
+          await supabase.rpc("link_referral", {
+            p_user_id: data.user.id,
+            p_referral_code: cleanRef,
+          });
+        } catch (refErr) {
+          console.warn("Could not link referral:", refErr);
+        }
+      }
+
       return { needsConfirmation: !data.session };
     },
     [],

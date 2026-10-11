@@ -180,7 +180,7 @@ export function AffiliateDashboardView({
 
   const referralCode = data?.profile?.referral_code;
   const referralLink = referralCode
-    ? `${window.location.origin}/?ref=${referralCode}`
+    ? `${window.location.origin}/storefront?ref=${referralCode}`
     : null;
 
   const handleCopyLink = () => {

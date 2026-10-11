@@ -36,6 +36,7 @@ import {
 } from "@/lib/supabase";
 import {
   ArrowLeft,
+  Check,
   CheckCircle2,
   Clock,
   ExternalLink,
@@ -45,6 +46,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   Smartphone,
+  Tag,
   TriangleAlert,
   Wallet,
   X,
@@ -58,7 +60,7 @@ import {
   setSessionVerified,
 } from "@/hooks/use-single-session";
 import { getStoredReferralCode } from "@/hooks/use-referral-tracker";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, linkReferralCode } from "@/lib/api-client";
 import { AffiliateDashboardView } from "@/components/AffiliateDashboardView";
 
 function NotConfigured() {
@@ -114,6 +116,14 @@ export function AuthPanel({
     message: string;
     email: string;
   } | null>(null);
+  const [signupRefCode, setSignupRefCode] = useState(() => getStoredReferralCode() || "");
+
+  useEffect(() => {
+    const stored = getStoredReferralCode();
+    if (stored && !signupRefCode) {
+      setSignupRefCode(stored);
+    }
+  }, [signupRefCode]);
 
   const handleForceLogoutOtherDevice = async () => {
     setIsSubmitting(true);
@@ -197,10 +207,12 @@ export function AuthPanel({
         } else {
           // Single device check
           const sessionId = getOrCreateDeviceSessionId();
+          const storedRef = getStoredReferralCode();
           try {
             const checkRes = await apiClient.post("/session", {
               sessionId,
               force: false,
+              referralCode: storedRef || undefined,
               deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
             });
 
@@ -225,13 +237,22 @@ export function AuthPanel({
           onSuccess?.();
         }
       } else {
-        const refCode = getStoredReferralCode();
+        const formRefCode =
+          String(formData.get("referralCode") ?? "").trim() ||
+          signupRefCode.trim() ||
+          getStoredReferralCode() ||
+          "";
+        const cleanRefCode = formRefCode ? formRefCode.toLowerCase() : null;
+        if (cleanRefCode) {
+          localStorage.setItem("affiliate_ref", cleanRefCode);
+        }
+
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: {
-              referral_code: refCode || undefined,
+              referral_code: cleanRefCode || undefined,
             },
             emailRedirectTo: `${window.location.origin}/storefront`,
           },
@@ -240,11 +261,11 @@ export function AuthPanel({
           setError(friendlyAuthError(signUpError.message));
         } else if (!data.session) {
           // If referral code was present and user was created
-          if (data.user && refCode) {
+          if (data.user && cleanRefCode) {
             try {
               await supabase.rpc("link_referral", {
                 p_user_id: data.user.id,
-                p_referral_code: refCode,
+                p_referral_code: cleanRefCode,
               });
             } catch (refErr) {
               console.warn("Could not link referral:", refErr);
@@ -256,22 +277,23 @@ export function AuthPanel({
           form.reset();
           setMode("signin");
         } else {
-          if (data.user && refCode) {
+          if (data.user && cleanRefCode) {
             try {
               await supabase.rpc("link_referral", {
                 p_user_id: data.user.id,
-                p_referral_code: refCode,
+                p_referral_code: cleanRefCode,
               });
             } catch (refErr) {
               console.warn("Could not link referral:", refErr);
             }
           }
-          // Register session for new user
+          // Register session for new user and link referral
           const sessionId = getOrCreateDeviceSessionId();
           try {
             await apiClient.post("/session", {
               sessionId,
               force: true,
+              referralCode: cleanRefCode || undefined,
               deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
             });
             setSessionConflictPending(false);
@@ -419,17 +441,44 @@ export function AuthPanel({
               />
             </div>
             {mode === "signup" && (
-              <div className="space-y-2">
-                <Label htmlFor="confirm">Confirm password</Label>
-                <Input
-                  id="confirm"
-                  name="confirm"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm">Confirm password</Label>
+                  <Input
+                    id="confirm"
+                    name="confirm"
+                    type="password"
+                    autoComplete="new-password"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5 pt-0.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="referralCode" className="flex items-center gap-1.5 text-xs font-medium">
+                      <Tag className="size-3.5 text-primary" />
+                      Referral Code (Optional)
+                    </Label>
+                    {signupRefCode && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
+                        <Check className="size-3" /> Link Applied
+                      </span>
+                    )}
+                  </div>
+                  <Input
+                    id="referralCode"
+                    name="referralCode"
+                    type="text"
+                    placeholder="e.g. promo123 or leave blank"
+                    value={signupRefCode}
+                    onChange={(e) => setSignupRefCode(e.target.value)}
+                    className="font-mono text-xs sm:text-sm"
+                  />
+                  <p className="text-[11px] text-muted-foreground leading-tight">
+                    Invited by an affiliate partner? Enter their code here to support them.
+                  </p>
+                </div>
+              </>
             )}
 
             {error && (

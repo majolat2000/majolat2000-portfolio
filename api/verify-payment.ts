@@ -132,6 +132,20 @@ export default async function handler(
 
     // 5. Credit affiliate commission if buyer was referred
     try {
+      // Ensure buyer is linked to affiliate if they have a referral code in metadata
+      const { data: authUserData } = await admin.auth.admin.getUserById(parsed.userId);
+      const metaRef = authUserData?.user?.user_metadata?.referral_code;
+      if (metaRef && typeof metaRef === "string" && metaRef.trim()) {
+        try {
+          await admin.rpc("link_referral", {
+            p_user_id: parsed.userId,
+            p_referral_code: metaRef.trim(),
+          });
+        } catch (linkErr) {
+          console.warn("Pre-payment link_referral error:", linkErr);
+        }
+      }
+
       const orderAmountNaira = product.price_kobo / 100;
       await admin.rpc("credit_affiliate_commission", {
         p_buyer_id: parsed.userId,

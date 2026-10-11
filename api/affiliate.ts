@@ -161,5 +161,33 @@ export default async function handler(
     return;
   }
 
+  if (req.method === "POST") {
+    try {
+      const { referralCode } = req.body ?? {};
+      const code = String(referralCode ?? "").trim();
+      if (!code) {
+        res.status(400).json({ error: "missing_referral_code" });
+        return;
+      }
+
+      const { data: linked, error: linkErr } = await admin.rpc("link_referral", {
+        p_user_id: userId,
+        p_referral_code: code,
+      });
+
+      if (linkErr) {
+        res.status(500).json({ error: linkErr.message });
+        return;
+      }
+
+      res.status(200).json({ success: true, linked: Boolean(linked) });
+    } catch (err) {
+      res.status(500).json({
+        error: err instanceof Error ? err.message : "link_referral_failed",
+      });
+    }
+    return;
+  }
+
   res.status(405).json({ error: "method_not_allowed" });
 }

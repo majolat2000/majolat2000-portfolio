@@ -268,6 +268,19 @@ export default async function handler(
     // 3. COMMISSION LOGIC:
     // If the buyer was referred by an affiliate, credit 30% of sale to the affiliate's wallet
     try {
+      const { data: authUserData } = await admin.auth.admin.getUserById(parsed.userId);
+      const metaRef = authUserData?.user?.user_metadata?.referral_code;
+      if (metaRef && typeof metaRef === "string" && metaRef.trim()) {
+        try {
+          await admin.rpc("link_referral", {
+            p_user_id: parsed.userId,
+            p_referral_code: metaRef.trim(),
+          });
+        } catch (linkErr) {
+          console.warn("Pre-commission link_referral error:", linkErr);
+        }
+      }
+
       const orderAmountNaira = product.price_kobo / 100;
       await admin.rpc("credit_affiliate_commission", {
         p_buyer_id: parsed.userId,

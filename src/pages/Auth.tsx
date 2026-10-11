@@ -14,12 +14,14 @@ import { useAuth } from "@/hooks/use-auth";
 import logo from "@/assets/logo.svg";
 import {
   ArrowRight,
+  Check,
   Loader2,
   Lock,
   Mail,
-  UserX,
   ShieldAlert,
   Smartphone,
+  Tag,
+  UserX,
 } from "lucide-react";
 import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router";
@@ -29,6 +31,7 @@ import {
   setSessionConflictPending,
   setSessionVerified,
 } from "@/hooks/use-single-session";
+import { getStoredReferralCode } from "@/hooks/use-referral-tracker";
 
 interface AuthProps {
   redirectAfterAuth?: string;
@@ -67,6 +70,14 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     message: string;
     email: string;
   } | null>(null);
+  const [signupRefCode, setSignupRefCode] = useState(() => getStoredReferralCode() || "");
+
+  useEffect(() => {
+    const stored = getStoredReferralCode();
+    if (stored && !signupRefCode) {
+      setSignupRefCode(stored);
+    }
+  }, [signupRefCode]);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated && !conflictPrompt) {
@@ -142,10 +153,12 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
         await signIn({ email, password });
 
         const sessionId = getOrCreateDeviceSessionId();
+        const storedRef = getStoredReferralCode();
         try {
           const checkRes = await apiClient.post("/session", {
             sessionId,
             force: false,
+            referralCode: storedRef || undefined,
             deviceInfo: typeof navigator !== "undefined" ? navigator.userAgent : null,
           });
 
@@ -168,7 +181,21 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
 
         navigate(redirect);
       } else {
-        const { needsConfirmation } = await signUp({ email, password });
+        const formRefCode =
+          String(formData.get("referralCode") ?? "").trim() ||
+          signupRefCode.trim() ||
+          getStoredReferralCode() ||
+          "";
+        const cleanRefCode = formRefCode ? formRefCode.toLowerCase() : undefined;
+        if (cleanRefCode) {
+          localStorage.setItem("affiliate_ref", cleanRefCode);
+        }
+
+        const { needsConfirmation } = await signUp({
+          email,
+          password,
+          referralCode: cleanRefCode,
+        });
         if (needsConfirmation) {
           setNotice(
             "Account created. Check your inbox to confirm your email, then sign in.",
@@ -326,22 +353,54 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                 </div>
 
                 {mode === "signup" && (
-                  <div className="space-y-2">
-                    <Label htmlFor="auth-confirm">Confirm password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="auth-confirm"
-                        name="confirm"
-                        type="password"
-                        autoComplete="new-password"
-                        placeholder="••••••••"
-                        className="pl-9"
-                        disabled={isSubmitting}
-                        required
-                      />
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="auth-confirm">Confirm password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="auth-confirm"
+                          name="confirm"
+                          type="password"
+                          autoComplete="new-password"
+                          placeholder="••••••••"
+                          className="pl-9"
+                          disabled={isSubmitting}
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
+
+                    <div className="space-y-1.5 pt-0.5">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="auth-referralCode" className="flex items-center gap-1.5 text-xs font-medium">
+                          <Tag className="size-3.5 text-primary" />
+                          Referral Code (Optional)
+                        </Label>
+                        {signupRefCode && (
+                          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-0.5">
+                            <Check className="size-3" /> Link Applied
+                          </span>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <Tag className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="auth-referralCode"
+                          name="referralCode"
+                          type="text"
+                          placeholder="e.g. promo123 or leave blank"
+                          value={signupRefCode}
+                          onChange={(e) => setSignupRefCode(e.target.value)}
+                          className="pl-9 font-mono text-xs sm:text-sm"
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-tight">
+                        Invited by an affiliate? Enter their referral code here to link your account.
+                      </p>
+                    </div>
+                  </>
                 )}
 
                 {error && <p className="text-sm text-red-500">{error}</p>}

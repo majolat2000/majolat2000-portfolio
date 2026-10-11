@@ -99,6 +99,14 @@ export async function fetchAffiliateData(): Promise<AffiliateDataResponse> {
   return res.data;
 }
 
+export async function linkReferralCode(referralCode: string): Promise<{ success: boolean; linked: boolean }> {
+  const res = await apiClient.post<{ success: boolean; linked: boolean }>("/affiliate", {
+    action: "link_referral",
+    referralCode,
+  });
+  return res.data;
+}
+
 export async function requestWithdrawal(params: {
   account_bank: string;
   account_number: string;
