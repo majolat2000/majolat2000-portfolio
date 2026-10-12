@@ -4,7 +4,7 @@ import crypto from "crypto";
 
 const EMAILBUMP_API_KEY =
   process.env.EMAILBUMP_API_KEY ||
-  "ebk_8c2094a600934c3d8a807c4bf4d4e7c7adf18765e8534ad3b5390d4fe4481db1";
+  "ebk_255b52471f08404cb7a06c8dd2171156b1f27de6380f4a9cb6578a72fa762af5";
 const EMAILBUMP_FROM_EMAIL = process.env.EMAILBUMP_FROM_EMAIL || "info@majolat2000.com.ng";
 
 export default async function handler(
@@ -142,7 +142,7 @@ export default async function handler(
 
         // Send EmailBump Security Alert
         try {
-          await fetch("https://api.emailbump.com/v1/send", {
+          await fetch("https://emailbump.com/api/v1/emails", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${EMAILBUMP_API_KEY}`,

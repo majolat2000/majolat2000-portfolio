@@ -21,7 +21,7 @@ function checkRateLimit(key: string, limit = 3, windowMs = 15 * 60 * 1000): bool
 
 const EMAILBUMP_API_KEY =
   process.env.EMAILBUMP_API_KEY ||
-  "ebk_8c2094a600934c3d8a807c4bf4d4e7c7adf18765e8534ad3b5390d4fe4481db1";
+  "ebk_255b52471f08404cb7a06c8dd2171156b1f27de6380f4a9cb6578a72fa762af5";
 const EMAILBUMP_FROM_EMAIL = process.env.EMAILBUMP_FROM_EMAIL || "info@majolat2000.com.ng";
 
 export default async function handler(
@@ -94,7 +94,7 @@ export default async function handler(
     // Account enumeration prevention: Return success message even if email doesn't exist
     if (!matchedUser) {
       res.json({
-        message: "If an account exists with this email, a 6-digit reset code has been sent.",
+        message: "If an account exists with this email, a 6-digit reset code has been sent. Please also check your spam/junk folder.",
       });
       return;
     }
@@ -156,7 +156,6 @@ export default async function handler(
             <p style="font-size: 13px; color: #6b7280;">If you did not request this password reset, please ignore this email or review your account security immediately.</p>
           </div>
         `,
-        text: `Your password reset code is ${rawOtp}. It expires in 15 minutes. If you did not request this, ignore this email.`
       };
 
       const flwRes = await fetch("https://emailbump.com/api/v1/emails", {
@@ -179,7 +178,7 @@ export default async function handler(
     }
 
     res.json({
-      message: "If an account exists with this email, a 6-digit reset code has been sent.",
+      message: "If an account exists with this email, a 6-digit reset code has been sent. Please also check your spam/junk folder.",
     });
   } catch (err: any) {
     console.error("Forgot password handler error:", err);
