@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { portfolio } from "@/lib/portfolio";
+import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
 import { startCheckout } from "@/lib/payments/flutterwave";
 import {
   formatDate,
@@ -453,39 +454,18 @@ export function AuthPanel({
             </TabsTrigger>
           </TabsList>
 
-          {showResetPasswordPrompt && (
-            <div className="mb-4 rounded-2xl border border-primary/30 bg-primary/10 p-3.5 sm:p-4 text-xs sm:text-sm text-foreground space-y-2.5">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <Key className="size-4 text-primary shrink-0" />
-                  <h4 className="font-bold text-foreground text-xs sm:text-sm">Password Reset Request</h4>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowResetPasswordPrompt(false)}
-                  className="text-muted-foreground hover:text-foreground p-0.5"
-                  aria-label="Close alert"
-                >
-                  <X className="size-3.5" />
-                </button>
-              </div>
-              <p className="text-muted-foreground text-xs leading-relaxed">
-                To reset your password, please contact <strong className="text-foreground">info@majolat2000.com.ng</strong> from your registered account email. An administrator will verify and reset it for you.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full text-xs font-semibold rounded-full h-8"
-                asChild
-              >
-                <a href="mailto:info@majolat2000.com.ng?subject=Password%20Reset%20Request">
-                  Contact info@majolat2000.com.ng
-                </a>
-              </Button>
+          {showResetPasswordPrompt ? (
+            <div className="mb-4 rounded-2xl border border-primary/20 bg-card p-4 text-xs sm:text-sm text-foreground shadow-sm">
+              <ForgotPasswordModal
+                onCancel={() => setShowResetPasswordPrompt(false)}
+                onSuccess={() => {
+                  setShowResetPasswordPrompt(false);
+                  setNotice("Password successfully updated. You can now sign in.");
+                }}
+              />
             </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -569,15 +549,16 @@ export function AuthPanel({
               <p className="text-sm font-medium text-foreground">{notice}</p>
             )}
 
-            <Button
-              type="submit"
-              className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90 py-3 sm:py-2.5 text-sm sm:text-base mt-2 shadow-md transition-all active:scale-[0.98] shrink-0"
-              disabled={isSubmitting}
-            >
-              {isSubmitting && <Loader2 className="size-4 animate-spin mr-2" />}
-              {mode === "signin" ? "Sign in" : "Create account"}
-            </Button>
-          </form>
+              <Button
+                type="submit"
+                className="w-full rounded-full bg-foreground font-semibold text-background hover:bg-foreground/90 py-3 sm:py-2.5 text-sm sm:text-base mt-2 shadow-md transition-all active:scale-[0.98] shrink-0"
+                disabled={isSubmitting}
+              >
+                {isSubmitting && <Loader2 className="size-4 animate-spin mr-2" />}
+                {mode === "signin" ? "Sign in" : "Create account"}
+              </Button>
+            </form>
+          )}
         </Tabs>
       </CardContent>
     </Card>
