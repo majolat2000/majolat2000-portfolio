@@ -156,9 +156,10 @@ export default async function handler(
             <p style="font-size: 13px; color: #6b7280;">If you did not request this password reset, please ignore this email or review your account security immediately.</p>
           </div>
         `,
+        text: `Your password reset code is ${rawOtp}. It expires in 15 minutes. If you did not request this, ignore this email.`
       };
 
-      const flwRes = await fetch("https://api.emailbump.com/v1/send", {
+      const flwRes = await fetch("https://emailbump.com/api/v1/emails", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${EMAILBUMP_API_KEY}`,
@@ -167,9 +168,11 @@ export default async function handler(
         body: JSON.stringify(emailPayload),
       });
 
+      const responseBody = await flwRes.text();
       if (!flwRes.ok) {
-        const errorText = await flwRes.text();
-        console.warn("EmailBump API response status:", flwRes.status, errorText);
+        console.warn("EmailBump API response status:", flwRes.status, responseBody);
+      } else {
+        console.log("EmailBump OTP email sent successfully, status:", flwRes.status, responseBody);
       }
     } catch (emailErr: any) {
       console.error("EmailBump API request failed:", emailErr?.message);
