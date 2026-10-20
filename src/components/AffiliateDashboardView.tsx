@@ -306,7 +306,7 @@ export function AffiliateDashboardView({
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            Instant payouts via Flutterwave Transfers API. 30% commission per referral.
+            30% commission per referral. Withdrawals are manually reviewed and paid.
           </CardContent>
         </Card>
 

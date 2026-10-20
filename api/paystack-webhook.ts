@@ -5,9 +5,20 @@ import crypto from "crypto";
 function parseTxRef(
   txRef: string,
 ): { productId: string; userId: string } | null {
-  const parts = txRef.split(":");
-  if (parts.length !== 3 || parts[0] !== "sf") return null;
-  const [, productId, userId] = parts;
+  // New format: sf-<uuid>-<uuid>-<timestamp>  (hyphens only, no colons)
+  // Legacy format: sf:<uuid>:<uuid>            (colons)
+  if (txRef.startsWith("sf:")) {
+    const parts = txRef.split(":");
+    if (parts.length !== 3) return null;
+    const [, productId, userId] = parts;
+    if (!productId || !userId) return null;
+    return { productId, userId };
+  }
+  if (!txRef.startsWith("sf-")) return null;
+  const rest = txRef.slice(3);
+  if (rest.length < 74) return null;
+  const productId = rest.slice(0, 36);
+  const userId = rest.slice(37, 73);
   if (!productId || !userId) return null;
   return { productId, userId };
 }
