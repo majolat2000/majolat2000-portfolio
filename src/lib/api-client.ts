@@ -72,10 +72,12 @@ export interface WithdrawalRecord {
   user_id: string;
   amount: number;
   account_bank: string;
+  bank_name?: string | null;
   account_number: string;
+  account_name?: string | null;
   transfer_ref: string;
   transfer_id: string | null;
-  status: "PENDING" | "SUCCESSFUL" | "FAILED";
+  status: "PENDING" | "APPROVED" | "SUCCESSFUL" | "FAILED" | "REJECTED";
   failure_reason: string | null;
   created_at: string;
   updated_at: string;
@@ -111,15 +113,46 @@ export async function linkReferralCode(referralCode: string): Promise<{ success:
 
 export async function requestWithdrawal(params: {
   account_bank: string;
+  bank_name?: string;
   account_number: string;
+  account_name?: string;
   amount: number;
 }): Promise<{
   success: boolean;
   message: string;
   reference: string;
   new_balance: number;
+  status: string;
 }> {
   const res = await apiClient.post("/withdraw", params);
+  return res.data;
+}
+
+export interface AdminWithdrawalItem extends WithdrawalRecord {
+  user_email?: string;
+}
+
+export async function adminListWithdrawals(): Promise<{
+  success: boolean;
+  withdrawals: AdminWithdrawalItem[];
+}> {
+  const res = await apiClient.get<{
+    success: boolean;
+    withdrawals: AdminWithdrawalItem[];
+  }>("/admin/withdrawals");
+  return res.data;
+}
+
+export async function adminUpdateWithdrawalStatus(params: {
+  withdrawalId: string;
+  action: "approve" | "reject";
+  reason?: string;
+}): Promise<{
+  success: boolean;
+  message: string;
+  status: string;
+}> {
+  const res = await apiClient.post("/admin/withdrawals", params);
   return res.data;
 }
 

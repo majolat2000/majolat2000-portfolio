@@ -20,9 +20,8 @@ export default async function handler(
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const anonKey = process.env.SUPABASE_ANON_KEY ?? process.env.VITE_SUPABASE_ANON_KEY;
-  const flwSecret = process.env.FLUTTERWAVE_SECRET_KEY;
 
-  if (!supabaseUrl || !serviceKey || !flwSecret) {
+  if (!supabaseUrl || !serviceKey) {
     res.status(503).json({ error: "server_not_configured" });
     return;
   }
@@ -38,7 +37,7 @@ export default async function handler(
   }
 
   const userId = userData.user.id;
-  const { account_bank, account_number, amount } = req.body ?? {};
+  const { account_bank, account_number, account_name, bank_name, amount } = req.body ?? {};
 
   const numAmount = Number(amount);
   if (!account_bank || !account_number || isNaN(numAmount) || numAmount <= 0) {
@@ -53,12 +52,12 @@ export default async function handler(
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // Unique transfer reference to prevent duplicate payout attempts
+  // Unique reference for tracking this withdrawal request
   const transferRef = `wth_${Date.now()}_${userId.slice(0, 8)}_${Math.random().toString(36).substring(2, 7)}`;
 
   try {
     // 1. SECURE PRE-DEDUCTION:
-    // Deduct the amount FIRST atomically via row-level locked RPC to eliminate race conditions / double spending.
+    // Deduct the requested amount atomically via row-level locked RPC so the user cannot double-spend.
     const { data: newBalance, error: deductError } = await admin.rpc(
       "deduct_wallet_balance_for_withdrawal",
       {
@@ -79,18 +78,35 @@ export default async function handler(
       return;
     }
 
-    // 2. Insert PENDING record in withdrawals table
-    const { error: insertError } = await admin.from("withdrawals").insert({
+    // 2. Insert PENDING manual withdrawal request
+    const insertPayload: Record<string, any> = {
       user_id: userId,
       amount: numAmount,
       account_bank: String(account_bank).trim(),
       account_number: String(account_number).trim(),
       transfer_ref: transferRef,
       status: "PENDING",
-    });
+    };
+
+    if (account_name && typeof account_name === "string") {
+      insertPayload.account_name = account_name.trim();
+    }
+    if (bank_name && typeof bank_name === "string") {
+      insertPayload.bank_name = bank_name.trim();
+    }
+
+    let { error: insertError } = await admin.from("withdrawals").insert(insertPayload);
+
+    // Gracefully handle if account_name or bank_name columns are pending migration
+    if (insertError && (insertError.message.includes("account_name") || insertError.message.includes("bank_name"))) {
+      delete insertPayload.account_name;
+      delete insertPayload.bank_name;
+      const retry = await admin.from("withdrawals").insert(insertPayload);
+      insertError = retry.error;
+    }
 
     if (insertError) {
-      // Refund wallet balance immediately if record cannot be created
+      // Refund wallet balance immediately if insertion fails
       await admin.rpc("refund_failed_withdrawal", {
         p_transfer_ref: transferRef,
         p_reason: "Failed to record withdrawal transaction",
@@ -99,88 +115,16 @@ export default async function handler(
       return;
     }
 
-    // 3. Initiate Transfer via Flutterwave v3 Transfers API
-    const flwResponse = await fetch("https://api.flutterwave.com/v3/transfers", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${flwSecret}`,
-      },
-      body: JSON.stringify({
-        account_bank: String(account_bank).trim(),
-        account_number: String(account_number).trim(),
-        amount: numAmount,
-        narration: "Affiliate Payout",
-        currency: "NGN",
-        reference: transferRef,
-        debit_currency: "NGN",
-      }),
-    });
-
-    const flwResult = (await flwResponse.json()) as {
-      status?: string;
-      message?: string;
-      data?: {
-        id?: number;
-        status?: string;
-        reference?: string;
-        complete_message?: string;
-      };
-    };
-
-    if (!flwResponse.ok || flwResult.status !== "success" || !flwResult.data) {
-      // Transfer initiation rejected by Flutterwave — refund wallet balance immediately
-      const reason = flwResult.message || "Flutterwave transfer initiation rejected";
-      await admin.rpc("refund_failed_withdrawal", {
-        p_transfer_ref: transferRef,
-        p_reason: reason,
-      });
-
-      res.status(400).json({
-        error: "transfer_failed",
-        message: reason,
-        refunded: true,
-      });
-      return;
-    }
-
-    const transferData = flwResult.data;
-    const transferId = transferData.id ? String(transferData.id) : null;
-
-    if (transferData.status === "FAILED") {
-      // Immediate failure
-      await admin.rpc("refund_failed_withdrawal", {
-        p_transfer_ref: transferRef,
-        p_reason: transferData.complete_message || "Transfer failed at destination bank",
-      });
-
-      res.status(400).json({
-        error: "transfer_failed",
-        message: transferData.complete_message || "Transfer was declined by the bank.",
-        refunded: true,
-      });
-      return;
-    }
-
-    // Update withdrawal record with Flutterwave transfer ID
-    await admin
-      .from("withdrawals")
-      .update({
-        transfer_id: transferId,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("transfer_ref", transferRef);
-
+    // 3. Return pending status (Admin will manually transfer and approve)
     res.status(200).json({
       success: true,
-      message: "Withdrawal initiated successfully.",
+      message:
+        "Withdrawal request submitted successfully! An administrator will verify your bank details, send the payment manually, and approve the request.",
       reference: transferRef,
-      transfer_id: transferId,
       new_balance: newBalance,
-      status: transferData.status ?? "PENDING",
+      status: "PENDING",
     });
   } catch (error) {
-    // Attempt automatic refund on unexpected failure
     try {
       await admin.rpc("refund_failed_withdrawal", {
         p_transfer_ref: transferRef,

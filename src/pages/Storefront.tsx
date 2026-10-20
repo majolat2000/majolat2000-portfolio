@@ -21,7 +21,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSupabaseSession } from "@/hooks/use-supabase-session";
 import { portfolio } from "@/lib/portfolio";
 import { ForgotPasswordModal } from "@/components/ForgotPasswordModal";
-import { startCheckout } from "@/lib/payments/flutterwave";
+import { startCheckout } from "@/lib/payments/paystack";
 import {
   formatDate,
   formatNaira,
@@ -680,18 +680,19 @@ export default function Storefront() {
         },
         async (result) => {
           console.log("[Storefront] Checkout result:", JSON.stringify(result));
-          const isSuccess = ["successful", "completed", "succeeded"].includes(
+          const isSuccess = ["successful", "completed", "succeeded", "success"].includes(
             result.status?.toLowerCase?.() ?? "",
           );
-          if (isSuccess && result.transactionId) {
+          if (isSuccess && (result.reference || result.transactionId)) {
             try {
               setNotice("Verifying payment...");
               const res = await fetch("/api/verify-payment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  transactionId: result.transactionId,
-                  txRef: result.txRef,
+                  reference: result.reference || result.txRef,
+                  transactionId: result.transactionId ?? result.reference,
+                  txRef: result.txRef || result.reference,
                 }),
               });
               const responseText = await res.text();
@@ -712,14 +713,8 @@ export default function Storefront() {
             setNotice(
               "Payment was not completed. Status: " +
                 result.status +
-                ", TX ID: " +
-                result.transactionId,
-            );
-            alert(
-              "Payment callback received but status=" +
-                result.status +
-                " transactionId=" +
-                result.transactionId,
+                ", Ref: " +
+                (result.reference || result.transactionId),
             );
           }
         },

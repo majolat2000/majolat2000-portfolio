@@ -221,13 +221,15 @@ export function AffiliateDashboardView({
       setWithdrawing(true);
       const res = await requestWithdrawal({
         account_bank: bankCode,
+        bank_name: selectedBankObj?.name,
         account_number: accountNumber.trim(),
+        account_name: accountName,
         amount: numAmount,
       });
 
       setWithdrawMessage(
         res.message ||
-          `Withdrawal of ${formatNaira(numAmount * 100)} initiated successfully to ${accountName}!`,
+          `Withdrawal request of ${formatNaira(numAmount * 100)} submitted successfully to ${accountName}! An administrator will review and pay your account manually.`,
       );
       setAmount("");
       // Reload stats and transactions
@@ -373,10 +375,10 @@ export function AffiliateDashboardView({
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
             <ArrowUpRight className="size-5 text-primary" />
-            Instant Bank Withdrawal
+            Bank Withdrawal Request
           </CardTitle>
           <CardDescription className="text-xs">
-            Select your bank, enter your 10-digit account number, and verify the account name before initiating withdrawal.
+            Select your bank, enter your 10-digit account number, and verify the account name. An administrator will review your request, transfer the funds manually, and approve the payout.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -584,15 +586,15 @@ export function AffiliateDashboardView({
               {withdrawing ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  <span>Processing Payout...</span>
+                  <span>Submitting Request...</span>
                 </>
               ) : (
                 <>
                   <ArrowUpRight className="size-4" />
                   <span>
                     {accountName
-                      ? `Withdraw to ${accountName.split(" ")[0]}`
-                      : "Withdraw Funds"}
+                      ? `Request Payout to ${accountName.split(" ")[0]}`
+                      : "Request Withdrawal"}
                   </span>
                 </>
               )}
@@ -606,7 +608,7 @@ export function AffiliateDashboardView({
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold">Withdrawal History</CardTitle>
           <CardDescription className="text-xs">
-            Past payout transactions and bank settlement records.
+            Past payout requests, manual settlements, and approval statuses.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -623,6 +625,8 @@ export function AffiliateDashboardView({
                       {formatNaira(w.amount * 100)}
                     </div>
                     <div className="text-[11px] text-muted-foreground">
+                      {w.account_name ? `${w.account_name} • ` : ""}
+                      {w.bank_name ? `${w.bank_name} • ` : ""}
                       {w.account_number} • {formatDate(w.created_at)}
                     </div>
                     {w.failure_reason && (
@@ -634,14 +638,14 @@ export function AffiliateDashboardView({
                   <div>
                     <span
                       className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
-                        w.status === "SUCCESSFUL"
+                        w.status === "APPROVED" || w.status === "SUCCESSFUL"
                           ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                          : w.status === "FAILED"
+                          : w.status === "FAILED" || w.status === "REJECTED"
                           ? "bg-destructive/10 text-destructive border border-destructive/20"
                           : "bg-amber-500/10 text-amber-600 border border-amber-500/20"
                       }`}
                     >
-                      {w.status}
+                      {w.status === "SUCCESSFUL" ? "APPROVED" : w.status === "PENDING" ? "PENDING APPROVAL" : w.status}
                     </span>
                   </div>
                 </div>

@@ -18,28 +18,23 @@ export default async function handler(
     return;
   }
 
-  const { transactionId, txRef } = req.body;
-  if (!transactionId || !txRef) {
-    res.status(400).json({ error: "missing_parameters" });
+  const { reference, transactionId, txRef } = req.body ?? {};
+  const queryRef = reference || txRef || transactionId;
+
+  if (!queryRef) {
+    res.status(400).json({ error: "missing_parameters", message: "reference or transactionId is required" });
     return;
   }
 
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
-  console.log("Verify payment started for TX:", transactionId);
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const secretKey = process.env.FLUTTERWAVE_SECRET_KEY;
+  const paystackSecret =
+    process.env.PAYSTACK_SECRET_KEY ||
+    "";
+  const flwSecret = process.env.FLUTTERWAVE_SECRET_KEY;
 
-  if (!supabaseUrl || !serviceKey || !secretKey) {
-    return res.status(503).json({ error: "server_not_configured", details: { hasUrl: !!supabaseUrl, hasService: !!serviceKey, hasSecret: !!secretKey } });
-    console.error("Missing config:", { hasUrl: !!supabaseUrl, hasService: !!serviceKey, hasSecret: !!secretKey });
+  if (!supabaseUrl || !serviceKey) {
     res.status(503).json({ error: "server_not_configured" });
-    return;
-  }
-
-  const parsed = parseTxRef(txRef);
-  if (!parsed) {
-    console.error("Invalid tx ref:", txRef);
-    res.status(400).json({ error: "invalid_tx_ref" });
     return;
   }
 
@@ -48,27 +43,80 @@ export default async function handler(
   });
 
   try {
-    // 1. Verify with Flutterwave
-    const response = await fetch(
-      `https://api.flutterwave.com/v3/transactions/${encodeURIComponent(String(transactionId))}/verify`,
-      { headers: { Authorization: `Bearer ${secretKey}` } }
-    );
-    const body = (await response.json()) as any;
-    
-    if (!response.ok || !body.data) {
-      console.error("FLW Verify failed:", response.status, body);
-      res.status(400).json({ error: "verification_failed", message: body.message });
+    let verifiedRef: string | null = null;
+    let verifiedAmountKobo: number | null = null;
+    let paymentSource = "paystack";
+
+    // 1. Try Paystack Verification first
+    if (paystackSecret) {
+      try {
+        const psRes = await fetch(
+          `https://api.paystack.co/transaction/verify/${encodeURIComponent(String(queryRef))}`,
+          {
+            headers: {
+              Authorization: `Bearer ${paystackSecret}`,
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (psRes.ok) {
+          const psBody = (await psRes.json()) as {
+            status?: boolean;
+            data?: {
+              status?: string;
+              reference?: string;
+              amount?: number; // In kobo
+            };
+          };
+
+          if (psBody.status && psBody.data?.status === "success") {
+            verifiedRef = psBody.data.reference || String(queryRef);
+            verifiedAmountKobo = psBody.data.amount ?? null;
+            paymentSource = "paystack";
+          }
+        }
+      } catch (psErr) {
+        console.warn("[Verify] Paystack error:", psErr);
+      }
+    }
+
+    // 2. Fallback to Flutterwave if not found on Paystack and FLW secret exists
+    if (!verifiedRef && flwSecret) {
+      try {
+        const flwRes = await fetch(
+          `https://api.flutterwave.com/v3/transactions/${encodeURIComponent(String(queryRef))}/verify`,
+          { headers: { Authorization: `Bearer ${flwSecret}` } },
+        );
+        if (flwRes.ok) {
+          const flwBody = (await flwRes.json()) as {
+            data?: { status?: string; tx_ref?: string; amount?: number };
+          };
+          if (["successful", "succeeded"].includes(flwBody.data?.status ?? "")) {
+            verifiedRef = flwBody.data?.tx_ref || String(queryRef);
+            verifiedAmountKobo = flwBody.data?.amount ? Math.round(flwBody.data.amount * 100) : null;
+            paymentSource = "flutterwave";
+          }
+        }
+      } catch (flwErr) {
+        console.warn("[Verify] FLW fallback error:", flwErr);
+      }
+    }
+
+    if (!verifiedRef) {
+      res.status(400).json({ error: "verification_failed", message: "Transaction could not be verified with payment provider." });
       return;
     }
 
-    const verified = body.data;
-    if (!["successful", "succeeded"].includes(verified.status ?? "")) {
-      console.error("FLW status not successful:", verified.status);
-      res.status(400).json({ error: "payment_not_successful" });
+    // 3. Parse target product and user from txRef
+    const parsed = parseTxRef(verifiedRef);
+    if (!parsed) {
+      console.error("Invalid tx ref:", verifiedRef);
+      res.status(400).json({ error: "invalid_tx_ref" });
       return;
     }
 
-    // 2. Verify amount
+    // 4. Validate product
     const { data: product, error: productError } = await admin
       .from("products")
       .select("id, name, price_kobo, duration_days")
@@ -81,17 +129,24 @@ export default async function handler(
       return;
     }
 
-    if (verified.amount + 0.001 < product.price_kobo / 100) {
-      console.error("Amount mismatch:", verified.amount, product.price_kobo / 100);
-      res.status(400).json({ error: "amount_mismatch", expected: product.price_kobo / 100, received: verified.amount });
+    if (
+      typeof verifiedAmountKobo === "number" &&
+      verifiedAmountKobo < product.price_kobo
+    ) {
+      console.error("Amount mismatch:", verifiedAmountKobo, product.price_kobo);
+      res.status(400).json({
+        error: "amount_mismatch",
+        expected_kobo: product.price_kobo,
+        received_kobo: verifiedAmountKobo,
+      });
       return;
     }
 
-    // 3. Check if already granted
+    // 5. Check if already granted
     const { data: existing } = await admin
       .from("product_access")
       .select("id")
-      .eq("payment_reference", String(transactionId))
+      .eq("payment_reference", String(queryRef))
       .maybeSingle();
 
     if (existing) {
@@ -99,7 +154,7 @@ export default async function handler(
       return;
     }
 
-    // 4. Grant access
+    // 6. Grant access
     const { data: current } = await admin
       .from("product_access")
       .select("expires_at")
@@ -118,8 +173,8 @@ export default async function handler(
     const { error: insertError } = await admin.from("product_access").insert({
       user_id: parsed.userId,
       product_id: product.id,
-      source: "flutterwave",
-      payment_reference: String(transactionId),
+      source: paymentSource,
+      payment_reference: String(queryRef),
       starts_at: new Date().toISOString(),
       expires_at: expiresAt.toISOString(),
     });
@@ -130,9 +185,8 @@ export default async function handler(
       return;
     }
 
-    // 5. Credit affiliate commission if buyer was referred
+    // 7. Credit affiliate commission if buyer was referred
     try {
-      // Ensure buyer is linked to affiliate if they have a referral code in metadata
       const { data: authUserData } = await admin.auth.admin.getUserById(parsed.userId);
       const metaRef = authUserData?.user?.user_metadata?.referral_code;
       if (metaRef && typeof metaRef === "string" && metaRef.trim()) {
@@ -156,8 +210,10 @@ export default async function handler(
       console.error("Failed to credit affiliate commission:", commissionError);
     }
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, granted: product.name });
   } catch (error) {
-    res.status(500).json({ error: error instanceof Error ? error.message : "verification_error" });
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "verification_error",
+    });
   }
 }

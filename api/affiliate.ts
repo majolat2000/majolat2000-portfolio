@@ -147,7 +147,7 @@ export default async function handler(
         .order("created_at", { ascending: false })
         .limit(20);
 
-      // 4. Fetch bank list from Flutterwave and merge with curated banks
+      // 4. Fetch bank list from Paystack and merge with curated banks
       const bankMap = new Map<string, { code: string; name: string }>();
 
       // Seed with curated popular banks
@@ -155,20 +155,25 @@ export default async function handler(
         bankMap.set(b.code, { code: b.code, name: b.name });
       }
 
-      const flwSecret = process.env.FLUTTERWAVE_SECRET_KEY;
-      if (flwSecret) {
+      const paystackSecret =
+        process.env.PAYSTACK_SECRET_KEY ||
+        "";
+
+      if (paystackSecret) {
         try {
-          const flwBanks = await fetch("https://api.flutterwave.com/v3/banks/NG", {
-            headers: { Authorization: `Bearer ${flwSecret}` },
+          const psBanks = await fetch("https://api.paystack.co/bank?country=nigeria&perPage=100", {
+            headers: {
+              Authorization: `Bearer ${paystackSecret}`,
+              "Content-Type": "application/json",
+            },
           });
-          if (flwBanks.ok) {
-            const banksData = (await flwBanks.json()) as {
+          if (psBanks.ok) {
+            const banksData = (await psBanks.json()) as {
               data?: Array<{ code: string; name: string }>;
             };
             if (Array.isArray(banksData.data)) {
               for (const b of banksData.data) {
                 if (b.code && b.name) {
-                  // If not already in curated map, add it
                   if (!bankMap.has(b.code)) {
                     bankMap.set(b.code, { code: b.code, name: b.name.trim() });
                   }

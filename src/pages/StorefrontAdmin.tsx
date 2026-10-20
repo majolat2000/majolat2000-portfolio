@@ -62,6 +62,10 @@ import {
   Pencil,
   Wallet,
   UserMinus,
+  Building2,
+  RefreshCw,
+  AlertCircle,
+  XCircle,
 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, Navigate } from "react-router";
@@ -70,7 +74,10 @@ import {
   adminUpgradeUserToAffiliate,
   adminDemoteAffiliateToUser,
   adminResetUserPassword,
+  adminListWithdrawals,
+  adminUpdateWithdrawalStatus,
   type AffiliateProfile,
+  type AdminWithdrawalItem,
 } from "@/lib/api-client";
 import { supabase } from "@/lib/supabase";
 
@@ -111,15 +118,68 @@ export default function StorefrontAdmin() {
   const [resetPasswordSuccess, setResetPasswordSuccess] = useState<string | null>(null);
   const [copiedResetPassword, setCopiedResetPassword] = useState(false);
 
+  // Withdrawals management state
+  const [withdrawals, setWithdrawals] = useState<AdminWithdrawalItem[]>([]);
+  const [withdrawalsLoading, setWithdrawalsLoading] = useState(false);
+  const [withdrawalsFilter, setWithdrawalsFilter] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED">("ALL");
+  const [withdrawalSearch, setWithdrawalSearch] = useState("");
+  const [processingWithdrawalId, setProcessingWithdrawalId] = useState<string | null>(null);
+  const [actionModal, setActionModal] = useState<{
+    item: AdminWithdrawalItem;
+    action: "approve" | "reject";
+  } | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
+
+  const loadWithdrawals = async () => {
+    try {
+      setWithdrawalsLoading(true);
+      const res = await adminListWithdrawals();
+      if (res.success && Array.isArray(res.withdrawals)) {
+        setWithdrawals(res.withdrawals);
+      }
+    } catch (err) {
+      console.error("Failed to load withdrawals:", err);
+    } finally {
+      setWithdrawalsLoading(false);
+    }
+  };
+
+  const handleConfirmWithdrawalAction = async () => {
+    if (!actionModal) return;
+    const { item, action } = actionModal;
+    try {
+      setProcessingWithdrawalId(item.id);
+      setError(null);
+      setMessage(null);
+      const res = await adminUpdateWithdrawalStatus({
+        withdrawalId: item.id,
+        action,
+        reason: action === "reject" ? rejectReason : undefined,
+      });
+      setMessage(res.message);
+      setActionModal(null);
+      setRejectReason("");
+      await loadWithdrawals();
+    } catch (err) {
+      setError(errorText(err));
+    } finally {
+      setProcessingWithdrawalId(null);
+    }
+  };
+
   useEffect(() => {
     if (!isAdmin) return;
     let cancelled = false;
-    Promise.all([adminListUsers(), listProducts()])
-      .then(([nextUsers, nextProducts]) => {
+    Promise.all([adminListUsers(), listProducts(), adminListWithdrawals()])
+      .then(([nextUsers, nextProducts, withdrawalsRes]) => {
         if (cancelled) return;
         setUsers(nextUsers);
         setProducts(nextProducts);
         setGrantProductId(nextProducts[0]?.id ?? "");
+        if (withdrawalsRes?.success && Array.isArray(withdrawalsRes.withdrawals)) {
+          setWithdrawals(withdrawalsRes.withdrawals);
+        }
       })
       .catch((err) => {
         if (!cancelled) setError(errorText(err));
@@ -164,6 +224,30 @@ export default function StorefrontAdmin() {
   const filteredUsers = users.filter((user) =>
     user.email.toLowerCase().includes(query.trim().toLowerCase()),
   );
+
+  const pendingWithdrawalsCount = withdrawals.filter(
+    (w) => w.status === "PENDING",
+  ).length;
+
+  const filteredWithdrawals = withdrawals.filter((w) => {
+    const normStatus =
+      w.status === "SUCCESSFUL"
+        ? "APPROVED"
+        : w.status === "FAILED"
+        ? "REJECTED"
+        : w.status;
+    if (withdrawalsFilter !== "ALL" && normStatus !== withdrawalsFilter) {
+      return false;
+    }
+    if (!withdrawalSearch.trim()) return true;
+    const q = withdrawalSearch.toLowerCase().trim();
+    return Boolean(
+      (w.user_email && w.user_email.toLowerCase().includes(q)) ||
+      (w.account_number && w.account_number.includes(q)) ||
+      (w.account_name && w.account_name.toLowerCase().includes(q)) ||
+      (w.bank_name && w.bank_name.toLowerCase().includes(q))
+    );
+  });
 
   
   const handleUpgradeAffiliate = async (e: FormEvent) => {
@@ -470,9 +554,17 @@ export default function StorefrontAdmin() {
           )}
 
           <Tabs defaultValue="users" className="mt-6">
-            <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:inline-flex">
+            <TabsList className="w-full sm:w-auto grid grid-cols-3 sm:inline-flex">
               <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="products">Products</TabsTrigger>
+              <TabsTrigger value="withdrawals" className="relative gap-1.5" onClick={() => loadWithdrawals()}>
+                <span>Withdrawals</span>
+                {pendingWithdrawalsCount > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-500 text-white font-bold leading-none animate-pulse">
+                    {pendingWithdrawalsCount}
+                  </span>
+                )}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="users">
@@ -965,7 +1057,395 @@ export default function StorefrontAdmin() {
                 </Card>
               </div>
             </TabsContent>
+            <TabsContent value="withdrawals" className="space-y-6">
+              {/* Summary Stats */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Card className="border-border/60 bg-amber-500/5">
+                  <CardHeader className="pb-2">
+                    <CardDescription className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+                      Pending Review
+                    </CardDescription>
+                    <CardTitle className="text-xl sm:text-2xl font-bold">
+                      {pendingWithdrawalsCount} Requests
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-muted-foreground font-medium">
+                      Total:{" "}
+                      <span className="font-bold text-foreground">
+                        {formatNaira(
+                          withdrawals
+                            .filter((w) => w.status === "PENDING")
+                            .reduce((acc, curr) => acc + curr.amount, 0) * 100,
+                        )}
+                      </span>
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/60 bg-emerald-500/5">
+                  <CardHeader className="pb-2">
+                    <CardDescription className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      Approved &amp; Paid
+                    </CardDescription>
+                    <CardTitle className="text-xl sm:text-2xl font-bold">
+                      {
+                        withdrawals.filter(
+                          (w) => w.status === "APPROVED" || w.status === "SUCCESSFUL",
+                        ).length
+                      }{" "}
+                      Payouts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-muted-foreground font-medium">
+                      Total:{" "}
+                      <span className="font-bold text-foreground">
+                        {formatNaira(
+                          withdrawals
+                            .filter(
+                              (w) => w.status === "APPROVED" || w.status === "SUCCESSFUL",
+                            )
+                            .reduce((acc, curr) => acc + curr.amount, 0) * 100,
+                        )}
+                      </span>
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-border/60">
+                  <CardHeader className="pb-2">
+                    <CardDescription className="text-xs font-semibold text-muted-foreground">
+                      Rejected &amp; Refunded
+                    </CardDescription>
+                    <CardTitle className="text-xl sm:text-2xl font-bold">
+                      {
+                        withdrawals.filter(
+                          (w) => w.status === "REJECTED" || w.status === "FAILED",
+                        ).length
+                      }{" "}
+                      Requests
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-xs text-muted-foreground">
+                      Wallet balances automatically restored.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Filter and Search Bar */}
+              <Card className="border-border/60">
+                <CardHeader className="pb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <CardTitle className="text-base font-semibold">
+                      Affiliate Withdrawal Requests
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Verify beneficiary bank details, transfer funds manually, and confirm approval.
+                    </CardDescription>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => loadWithdrawals()}
+                    disabled={withdrawalsLoading}
+                    className="gap-1.5 text-xs h-8"
+                  >
+                    <RefreshCw className={`size-3.5 ${withdrawalsLoading ? "animate-spin" : ""}`} />
+                    <span>Refresh</span>
+                  </Button>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+                    <div className="relative flex-1 max-w-sm">
+                      <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
+                      <Input
+                        value={withdrawalSearch}
+                        onChange={(e) => setWithdrawalSearch(e.target.value)}
+                        placeholder="Search by email, name, account #..."
+                        className="pl-9 h-9 text-xs"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+                      {(["ALL", "PENDING", "APPROVED", "REJECTED"] as const).map((tab) => (
+                        <button
+                          key={tab}
+                          type="button"
+                          onClick={() => setWithdrawalsFilter(tab)}
+                          className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors ${
+                            withdrawalsFilter === tab
+                              ? "bg-foreground text-background"
+                              : "bg-muted/50 text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          {tab === "ALL" ? "All Requests" : tab}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* List / Table */}
+                  {withdrawalsLoading && withdrawals.length === 0 ? (
+                    <div className="flex items-center justify-center py-12 text-muted-foreground gap-2">
+                      <Loader2 className="size-5 animate-spin" />
+                      <span className="text-sm">Loading withdrawal requests...</span>
+                    </div>
+                  ) : filteredWithdrawals.length === 0 ? (
+                    <div className="text-center py-12 border border-dashed rounded-xl text-muted-foreground space-y-1">
+                      <p className="text-sm font-semibold text-foreground">No withdrawal requests found</p>
+                      <p className="text-xs">
+                        {withdrawals.length === 0
+                          ? "No affiliate has requested a withdrawal yet."
+                          : "No requests match your search or filter."}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-border/60 -my-2">
+                      {filteredWithdrawals.map((w) => {
+                        const isPending = w.status === "PENDING";
+                        const isApproved = w.status === "APPROVED" || w.status === "SUCCESSFUL";
+                        const isRejected = w.status === "REJECTED" || w.status === "FAILED";
+
+                        return (
+                          <div
+                            key={w.id}
+                            className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                          >
+                            <div className="space-y-1.5 flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-bold text-base text-foreground">
+                                  {formatNaira(w.amount * 100)}
+                                </span>
+                                <span
+                                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                    isApproved
+                                      ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                                      : isRejected
+                                      ? "bg-destructive/10 text-destructive border border-destructive/20"
+                                      : "bg-amber-500/10 text-amber-600 border border-amber-500/20 animate-pulse"
+                                  }`}
+                                >
+                                  {isApproved ? "APPROVED" : isPending ? "PENDING REVIEW" : "REJECTED"}
+                                </span>
+                              </div>
+
+                              <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1">
+                                <span className="text-foreground font-medium">
+                                  Affiliate: {w.user_email || w.user_id}
+                                </span>
+                                <span>•</span>
+                                <span>Requested: {formatDate(w.created_at)}</span>
+                              </div>
+
+                              {/* Bank and Beneficiary details card */}
+                              <div className="mt-2 p-2.5 rounded-xl bg-muted/40 border border-border/50 text-xs grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                <div>
+                                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block font-semibold">
+                                    Bank Name
+                                  </span>
+                                  <span className="font-medium text-foreground truncate block">
+                                    {w.bank_name || `Bank Code: ${w.account_bank}`}
+                                  </span>
+                                </div>
+
+                                <div>
+                                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block font-semibold">
+                                    Account Number
+                                  </span>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-mono font-semibold text-foreground">
+                                      {w.account_number}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(w.account_number);
+                                        setCopiedAccount(w.id);
+                                        setTimeout(() => setCopiedAccount(null), 2000);
+                                      }}
+                                      className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted"
+                                      title="Copy Account Number"
+                                    >
+                                      {copiedAccount === w.id ? (
+                                        <Check className="size-3 text-emerald-500" />
+                                      ) : (
+                                        <Copy className="size-3" />
+                                      )}
+                                    </button>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block font-semibold">
+                                    Verified Account Name
+                                  </span>
+                                  <span className="font-semibold text-foreground truncate block text-emerald-600 dark:text-emerald-400">
+                                    {w.account_name || "Account name not provided"}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {w.failure_reason && (
+                                <p className="text-xs text-destructive mt-1 font-medium">
+                                  Rejection Reason: {w.failure_reason} (Refunded)
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="shrink-0 flex items-center gap-2 pt-2 md:pt-0">
+                              {isPending ? (
+                                <>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    disabled={processingWithdrawalId === w.id}
+                                    onClick={() => setActionModal({ item: w, action: "approve" })}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 px-3 gap-1.5 shadow-sm"
+                                  >
+                                    <CheckCircle2 className="size-3.5" />
+                                    <span>Confirm Paid &amp; Approve</span>
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={processingWithdrawalId === w.id}
+                                    onClick={() => {
+                                      setRejectReason("");
+                                      setActionModal({ item: w, action: "reject" });
+                                    }}
+                                    className="text-xs h-9 px-3 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                                  >
+                                    <XCircle className="size-3.5 mr-1" />
+                                    <span>Reject</span>
+                                  </Button>
+                                </>
+                              ) : isApproved ? (
+                                <div className="text-xs font-semibold text-emerald-600 flex items-center gap-1.5">
+                                  <CheckCircle2 className="size-4" />
+                                  <span>Paid &amp; Approved</span>
+                                </div>
+                              ) : (
+                                <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                                  <XCircle className="size-4" />
+                                  <span>Refunded</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
+
+          {/* Withdrawal Action Modal (Approve or Reject) */}
+          <Dialog
+            open={!!actionModal}
+            onOpenChange={(open) => {
+              if (!open) setActionModal(null);
+            }}
+          >
+            <DialogContent className="w-[calc(100%-2rem)] sm:max-w-md p-4 sm:p-6 rounded-2xl">
+              {actionModal && (
+                <>
+                  <DialogHeader>
+                    <DialogTitle>
+                      {actionModal.action === "approve"
+                        ? "Confirm Manual Bank Transfer"
+                        : "Reject Withdrawal Request"}
+                    </DialogTitle>
+                    <DialogDescription>
+                      {actionModal.action === "approve"
+                        ? "Ensure you have transferred the funds to this account before confirming."
+                        : "The requested amount will be immediately refunded back to the affiliate's wallet."}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="space-y-3 py-2 text-xs">
+                    <div className="p-3.5 rounded-xl bg-muted/50 border border-border/60 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Amount to Pay:</span>
+                        <span className="font-bold text-sm text-foreground">
+                          {formatNaira(actionModal.item.amount * 100)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Destination Bank:</span>
+                        <span className="font-semibold text-foreground">
+                          {actionModal.item.bank_name || actionModal.item.account_bank}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Account Number:</span>
+                        <span className="font-mono font-bold text-foreground">
+                          {actionModal.item.account_number}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Account Name:</span>
+                        <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                          {actionModal.item.account_name || "Not provided"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Affiliate Email:</span>
+                        <span className="text-foreground">{actionModal.item.user_email}</span>
+                      </div>
+                    </div>
+
+                    {actionModal.action === "reject" && (
+                      <div className="space-y-1.5 pt-1">
+                        <Label htmlFor="reject-reason">Reason for rejection (Optional):</Label>
+                        <Input
+                          id="reject-reason"
+                          value={rejectReason}
+                          onChange={(e) => setRejectReason(e.target.value)}
+                          placeholder="e.g. Invalid account details, please check and retry"
+                          className="text-xs"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <DialogFooter className="gap-2 sm:gap-0 pt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setActionModal(null)}
+                      disabled={!!processingWithdrawalId}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleConfirmWithdrawalAction}
+                      disabled={!!processingWithdrawalId}
+                      className={
+                        actionModal.action === "approve"
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                          : "bg-destructive hover:bg-destructive/90 text-destructive-foreground font-semibold"
+                      }
+                    >
+                      {processingWithdrawalId ? (
+                        <Loader2 className="size-4 animate-spin mr-1" />
+                      ) : null}
+                      {actionModal.action === "approve"
+                        ? "Yes, I have paid — Approve"
+                        : "Reject & Refund"}
+                    </Button>
+                  </DialogFooter>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
           <Dialog
             open={!!editingProduct}
             onOpenChange={(open) => {

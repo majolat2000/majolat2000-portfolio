@@ -19,15 +19,11 @@ export default async function handler(
   const token = authHeader.replace("Bearer ", "").trim();
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY ?? process.env.VITE_SUPABASE_ANON_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const flwSecret = (process.env.FLUTTERWAVE_SECRET_KEY ?? "").trim().replace(/^["']|["']$/g, "");
-
-  if (!flwSecret) {
-    res.status(200).json({
-      success: false,
-      message: "FLUTTERWAVE_SECRET_KEY is not configured in Vercel environment variables.",
-    });
-    return;
-  }
+  const paystackSecret = (
+    process.env.PAYSTACK_SECRET_KEY ||
+    ""
+  ).trim();
+  const flwSecret = (process.env.FLUTTERWAVE_SECRET_KEY ?? "").trim();
 
   if (supabaseUrl && anonKey) {
     const client = createClient(supabaseUrl, anonKey, {
@@ -61,41 +57,90 @@ export default async function handler(
   }
 
   try {
-    const flwResponse = await fetch("https://api.flutterwave.com/v3/accounts/resolve", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${flwSecret}`,
-      },
-      body: JSON.stringify({
-        account_number: cleanAccount,
-        account_bank: cleanBank,
-      }),
-    });
+    // 1. Resolve using Paystack Bank Resolve API
+    if (paystackSecret) {
+      const psRes = await fetch(
+        `https://api.paystack.co/bank/resolve?account_number=${encodeURIComponent(
+          cleanAccount,
+        )}&bank_code=${encodeURIComponent(cleanBank)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${paystackSecret}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
-    const flwData = (await flwResponse.json()) as {
-      status?: string;
-      message?: string;
-      data?: {
-        account_number?: string;
-        account_name?: string;
+      const psData = (await psRes.json()) as {
+        status?: boolean;
+        message?: string;
+        data?: {
+          account_number?: string;
+          account_name?: string;
+        };
       };
-    };
 
-    if (flwResponse.ok && flwData.status === "success" && flwData.data?.account_name) {
+      if (psRes.ok && psData.status && psData.data?.account_name) {
+        res.status(200).json({
+          success: true,
+          account_name: psData.data.account_name,
+          account_number: psData.data.account_number || cleanAccount,
+        });
+        return;
+      }
+
+      // If Paystack specifically returned an error message, let's keep it
+      if (!psRes.ok && psData.message && !flwSecret) {
+        res.status(200).json({
+          success: false,
+          message: psData.message,
+        });
+        return;
+      }
+    }
+
+    // 2. Fallback to Flutterwave if configured
+    if (flwSecret) {
+      const flwResponse = await fetch("https://api.flutterwave.com/v3/accounts/resolve", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${flwSecret}`,
+        },
+        body: JSON.stringify({
+          account_number: cleanAccount,
+          account_bank: cleanBank,
+        }),
+      });
+
+      const flwData = (await flwResponse.json()) as {
+        status?: string;
+        message?: string;
+        data?: {
+          account_number?: string;
+          account_name?: string;
+        };
+      };
+
+      if (flwResponse.ok && flwData.status === "success" && flwData.data?.account_name) {
+        res.status(200).json({
+          success: true,
+          account_name: flwData.data.account_name,
+          account_number: flwData.data.account_number,
+        });
+        return;
+      }
+
       res.status(200).json({
-        success: true,
-        account_name: flwData.data.account_name,
-        account_number: flwData.data.account_number,
+        success: false,
+        message: flwData.message || "Account not found or invalid account details for this bank. Please check and try again.",
       });
       return;
     }
 
     res.status(200).json({
       success: false,
-      message:
-        flwData.message ||
-        "Account not found or invalid account details for this bank. Please check and try again.",
+      message: "Account not found or invalid account details for this bank. Please check and try again.",
     });
   } catch (err) {
     res.status(200).json({
